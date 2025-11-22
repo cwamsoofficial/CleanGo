@@ -8,12 +8,55 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Leaf } from "lucide-react";
+import { Loader2, Leaf, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
+
+type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
+
+const calculatePasswordStrength = (password: string): PasswordStrength => {
+  let strength = 0;
+  
+  if (password.length >= 8) strength++;
+  if (password.length >= 12) strength++;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+  if (/\d/.test(password)) strength++;
+  if (/[^a-zA-Z0-9]/.test(password)) strength++;
+  
+  if (strength <= 2) return "weak";
+  if (strength === 3) return "medium";
+  if (strength === 4) return "strong";
+  return "very-strong";
+};
+
+const getPasswordStrengthColor = (strength: PasswordStrength) => {
+  switch (strength) {
+    case "weak": return "text-destructive";
+    case "medium": return "text-yellow-500";
+    case "strong": return "text-blue-500";
+    case "very-strong": return "text-primary";
+  }
+};
+
+const getPasswordStrengthIcon = (strength: PasswordStrength) => {
+  switch (strength) {
+    case "weak": return ShieldAlert;
+    case "medium": return Shield;
+    case "strong": return ShieldCheck;
+    case "very-strong": return ShieldCheck;
+  }
+};
 
 const Auth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("weak");
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setPasswordStrength(calculatePasswordStrength(newPassword));
+  };
 
   useEffect(() => {
     // Check if user is already logged in
@@ -36,6 +79,12 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (passwordStrength === "weak") {
+      toast.error("Password is too weak. Please create a stronger password.");
+      return;
+    }
+    
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -245,9 +294,25 @@ const Auth = () => {
                       name="password"
                       type="password"
                       placeholder="••••••••"
-                      minLength={6}
+                      minLength={8}
                       required
+                      value={password}
+                      onChange={handlePasswordChange}
                     />
+                    {password && (
+                      <div className="flex items-center gap-2 text-sm">
+                        {(() => {
+                          const Icon = getPasswordStrengthIcon(passwordStrength);
+                          return <Icon className={`w-4 h-4 ${getPasswordStrengthColor(passwordStrength)}`} />;
+                        })()}
+                        <span className={getPasswordStrengthColor(passwordStrength)}>
+                          Password strength: <span className="font-semibold capitalize">{passwordStrength.replace("-", " ")}</span>
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Use 8+ characters with uppercase, lowercase, numbers, and symbols
+                    </p>
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? (

@@ -32,24 +32,27 @@ const ReportIssue = () => {
 
       // Upload image if provided
       if (imageFile) {
-        const fileExt = imageFile.name.split(".").pop();
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-        const filePath = `issue-reports/${fileName}`;
+        try {
+          const fileExt = imageFile.name.split(".").pop();
+          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+          const filePath = `issue-reports/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from("issue-images")
-          .upload(filePath, imageFile);
+          const { error: uploadError } = await supabase.storage
+            .from("issue-images")
+            .upload(filePath, imageFile);
 
-        if (uploadError) throw uploadError;
-
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("issue-images").getPublicUrl(filePath);
-
-        imageUrl = publicUrl;
+          if (!uploadError) {
+            const {
+              data: { publicUrl },
+            } = supabase.storage.from("issue-images").getPublicUrl(filePath);
+            imageUrl = publicUrl;
+          }
+        } catch (uploadError) {
+          console.log("Image upload skipped:", uploadError);
+        }
       }
 
-      // Create issue report
+      // Insert issue report
       const { error } = await supabase.from("issue_reports").insert({
         reporter_id: user.id,
         title,
@@ -61,31 +64,18 @@ const ReportIssue = () => {
 
       if (error) throw error;
 
-      // Award points for reporting
-      const { data: currentRewards } = await supabase
-        .from("rewards")
-        .select("points, total_earned")
-        .eq("user_id", user.id)
-        .single();
+      // Award points securely using RPC
+      const { error: rewardError } = await supabase.rpc("award_points", {
+        _user_id: user.id,
+        _points: 3,
+        _description: "Reported waste management issue",
+      });
 
-      if (currentRewards) {
-        await supabase
-          .from("rewards")
-          .update({
-            points: currentRewards.points + 3,
-            total_earned: currentRewards.total_earned + 3,
-          })
-          .eq("user_id", user.id);
-
-        await supabase.from("reward_transactions").insert({
-          user_id: user.id,
-          points: 3,
-          type: "earned",
-          description: "Reported waste management issue",
-        });
+      if (rewardError) {
+        console.log("Reward RPC error:", rewardError);
       }
 
-      toast.success("Issue reported successfully! You earned +3 points");
+      toast.success("Issue reported successfully!");
       (e.target as HTMLFormElement).reset();
       setImageFile(null);
     } catch (error: any) {

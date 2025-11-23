@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Leaf, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Loader2, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
+import logo from "@/assets/cwamso-logo.png";
 
 type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
 
@@ -171,8 +172,8 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4">
-            <Leaf className="w-8 h-8 text-primary-foreground" />
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src={logo} alt="CWaMSo Logo" className="h-20 w-auto" />
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">CWaMSo</h1>
           <p className="text-muted-foreground">Community Waste Management Software</p>

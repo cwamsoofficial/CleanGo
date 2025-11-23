@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import Pickups from "./pages/Pickups";
 import ReportIssue from "./pages/ReportIssue";
 import Rewards from "./pages/Rewards";
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/admin" element={<AdminDashboard />} />
           <Route path="/dashboard/pickups" element={<Pickups />} />
           <Route path="/dashboard/report-issue" element={<ReportIssue />} />
           <Route path="/dashboard/rewards" element={<Rewards />} />

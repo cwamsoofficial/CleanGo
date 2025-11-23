@@ -36,8 +36,9 @@ import {
   Users,
   Settings,
   LogOut,
-  Leaf,
+  Shield,
 } from "lucide-react";
+import logo from "@/assets/cwamso-logo.png";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -105,6 +106,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
       ],
       admin: [
+        { icon: Shield, label: "Admin Dashboard", path: "/dashboard/admin" },
         { icon: Package, label: "All Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "All Issues", path: "/dashboard/issues" },
         { icon: Users, label: "Users", path: "/dashboard/users" },
@@ -126,9 +128,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <Sidebar>
           <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-sidebar-primary rounded-xl">
-                <Leaf className="w-5 h-5 text-sidebar-primary-foreground" />
-              </div>
+              <img src={logo} alt="CWaMSo Logo" className="h-10 w-auto" />
               <div>
                 <h2 className="font-semibold text-sidebar-foreground">CWaMSo</h2>
                 <p className="text-xs text-sidebar-foreground/70 capitalize">{role} Portal</p>

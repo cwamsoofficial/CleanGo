@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Leaf, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Loader2, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
+import logo from "@/assets/cwamso-logo.png";
 
 type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
 
@@ -51,6 +52,7 @@ const Auth = () => {
   const [resetSent, setResetSent] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("weak");
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value;
@@ -71,6 +73,8 @@ const Auth = () => {
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
         navigate("/dashboard");
+      } else if (event === "PASSWORD_RECOVERY") {
+        setIsPasswordRecovery(true);
       }
     });
 
@@ -167,12 +171,101 @@ const Auth = () => {
     }
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (passwordStrength === "weak") {
+      toast.error("Password is too weak. Please create a stronger password.");
+      return;
+    }
+    
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const newPassword = formData.get("password") as string;
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+
+      toast.success("Password updated successfully!");
+      setIsPasswordRecovery(false);
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // If in password recovery mode, show update password form
+  if (isPasswordRecovery) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center mb-4">
+              <img src={logo} alt="CWaMSo Logo" className="h-20 w-auto" />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">CWaMSo</h1>
+            <p className="text-muted-foreground">Community Waste Management Software</p>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Update Your Password</CardTitle>
+              <CardDescription>Enter your new password below</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleUpdatePassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    value={password}
+                    onChange={handlePasswordChange}
+                  />
+                  <div className="flex items-center gap-2 text-sm">
+                    {(() => {
+                      const Icon = getPasswordStrengthIcon(passwordStrength);
+                      return <Icon className={`w-4 h-4 ${getPasswordStrengthColor(passwordStrength)}`} />;
+                    })()}
+                    <span className={getPasswordStrengthColor(passwordStrength)}>
+                      Password strength: {passwordStrength}
+                    </span>
+                  </div>
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Password"
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4">
-            <Leaf className="w-8 h-8 text-primary-foreground" />
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src={logo} alt="CWaMSo Logo" className="h-20 w-auto" />
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">CWaMSo</h1>
           <p className="text-muted-foreground">Community Waste Management Software</p>

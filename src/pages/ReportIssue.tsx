@@ -30,7 +30,7 @@ const ReportIssue = () => {
 
       let imageUrl = null;
 
-      // Upload image if provided
+      // Upload image if provided (skip if storage not configured)
       if (imageFile) {
         try {
           const fileExt = imageFile.name.split(".").pop();

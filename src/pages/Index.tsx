@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Leaf, Recycle, Users, TrendingUp, Shield, Clock } from "lucide-react";
+import { Recycle, Users, TrendingUp, Shield, Clock, Leaf } from "lucide-react";
+import logo from "@/assets/cwamso-logo.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -21,8 +22,8 @@ const Index = () => {
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-secondary/5">
         <div className="container mx-auto px-4 py-24">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-3xl mb-6 shadow-lg">
-              <Leaf className="w-10 h-10 text-primary-foreground" />
+            <div className="inline-flex items-center justify-center mb-6">
+              <img src={logo} alt="CWaMSo Logo" className="h-32 w-auto" />
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
               Community Waste
@@ -118,10 +119,7 @@ const Index = () => {
       <footer className="bg-card border-t border-border py-8">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg">
-              <Leaf className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-semibold">CWaMSo</span>
+            <img src={logo} alt="CWaMSo Logo" className="h-8 w-auto" />
           </div>
           <p className="text-muted-foreground">
             © 2024 CWaMSo. All rights reserved. Building sustainable communities together.

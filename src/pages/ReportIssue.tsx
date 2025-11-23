@@ -30,23 +30,26 @@ const ReportIssue = () => {
 
       let imageUrl = null;
 
-      // Upload image if provided
+      // Upload image if provided (skip if storage not configured)
       if (imageFile) {
-        const fileExt = imageFile.name.split(".").pop();
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-        const filePath = `issue-reports/${fileName}`;
+        try {
+          const fileExt = imageFile.name.split(".").pop();
+          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+          const filePath = `issue-reports/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from("issue-images")
-          .upload(filePath, imageFile);
+          const { error: uploadError } = await supabase.storage
+            .from("issue-images")
+            .upload(filePath, imageFile);
 
-        if (uploadError) throw uploadError;
-
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("issue-images").getPublicUrl(filePath);
-
-        imageUrl = publicUrl;
+          if (!uploadError) {
+            const {
+              data: { publicUrl },
+            } = supabase.storage.from("issue-images").getPublicUrl(filePath);
+            imageUrl = publicUrl;
+          }
+        } catch (uploadError) {
+          console.log("Image upload skipped:", uploadError);
+        }
       }
 
       // Create issue report
@@ -61,31 +64,35 @@ const ReportIssue = () => {
 
       if (error) throw error;
 
-      // Award points for reporting
-      const { data: currentRewards } = await supabase
-        .from("rewards")
-        .select("points, total_earned")
-        .eq("user_id", user.id)
-        .single();
-
-      if (currentRewards) {
-        await supabase
+      // Award points for reporting (skip if rewards system not configured)
+      try {
+        const { data: currentRewards } = await supabase
           .from("rewards")
-          .update({
-            points: currentRewards.points + 3,
-            total_earned: currentRewards.total_earned + 3,
-          })
-          .eq("user_id", user.id);
+          .select("points, total_earned")
+          .eq("user_id", user.id)
+          .single();
 
-        await supabase.from("reward_transactions").insert({
-          user_id: user.id,
-          points: 3,
-          type: "earned",
-          description: "Reported waste management issue",
-        });
+        if (currentRewards) {
+          await supabase
+            .from("rewards")
+            .update({
+              points: currentRewards.points + 3,
+              total_earned: currentRewards.total_earned + 3,
+            })
+            .eq("user_id", user.id);
+
+          await supabase.from("reward_transactions").insert({
+            user_id: user.id,
+            points: 3,
+            type: "earned",
+            description: "Reported waste management issue",
+          });
+        }
+      } catch (rewardError) {
+        console.log("Rewards update skipped:", rewardError);
       }
 
-      toast.success("Issue reported successfully! You earned +3 points");
+      toast.success("Issue reported successfully!");
       (e.target as HTMLFormElement).reset();
       setImageFile(null);
     } catch (error: any) {

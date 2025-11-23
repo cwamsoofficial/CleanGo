@@ -52,7 +52,7 @@ const Rewards = () => {
 
       setRewards(rewardsData);
       setTransactions(transactionsData || []);
-    } catch (error: any) {
+    } catch {
       toast.error("Failed to load rewards data");
     } finally {
       setLoading(false);
@@ -71,24 +71,17 @@ const Rewards = () => {
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      await supabase
-        .from("rewards")
-        .update({
-          points: rewards.points - points,
-          total_redeemed: rewards.total_redeemed + points,
-        })
-        .eq("user_id", user.id);
-
-      await supabase.from("reward_transactions").insert({
-        user_id: user.id,
-        points: -points,
-        type: "redeemed",
-        description,
+      const { error } = await supabase.rpc("redeem_points", {
+        _user_id: user.id,
+        _points: points,
+        _description: description,
       });
+
+      if (error) throw error;
 
       toast.success(`Redeemed ${points} points for ${description}`);
       fetchRewardsData();
-    } catch (error: any) {
+    } catch {
       toast.error("Failed to redeem points");
     }
   };
@@ -152,56 +145,29 @@ const Rewards = () => {
             <CardDescription>Redeem your points for these exclusive rewards</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-              <div>
-                <h3 className="font-semibold">$5 Airtime Credit</h3>
-                <p className="text-sm text-muted-foreground">Mobile airtime top-up</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary">50 points</Badge>
-                <Button
-                  size="sm"
-                  onClick={() => handleRedeem(50, "$5 Airtime Credit")}
-                  disabled={!rewards || rewards.points < 50}
-                >
-                  Redeem
-                </Button>
-              </div>
-            </div>
+            <RewardItem
+              title="$5 Airtime Credit"
+              description="Mobile airtime top-up"
+              cost={50}
+              userPoints={rewards?.points || 0}
+              onRedeem={() => handleRedeem(50, "$5 Airtime Credit")}
+            />
 
-            <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-              <div>
-                <h3 className="font-semibold">$10 Airtime Credit</h3>
-                <p className="text-sm text-muted-foreground">Mobile airtime top-up</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary">90 points</Badge>
-                <Button
-                  size="sm"
-                  onClick={() => handleRedeem(90, "$10 Airtime Credit")}
-                  disabled={!rewards || rewards.points < 90}
-                >
-                  Redeem
-                </Button>
-              </div>
-            </div>
+            <RewardItem
+              title="$10 Airtime Credit"
+              description="Mobile airtime top-up"
+              cost={90}
+              userPoints={rewards?.points || 0}
+              onRedeem={() => handleRedeem(90, "$10 Airtime Credit")}
+            />
 
-            <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-              <div>
-                <h3 className="font-semibold">Community Hero Badge</h3>
-                <p className="text-sm text-muted-foreground">Special recognition in the community</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary">100 points</Badge>
-                <Button
-                  size="sm"
-                  onClick={() => handleRedeem(100, "Community Hero Badge")}
-                  disabled={!rewards || rewards.points < 100}
-                >
-                  Redeem
-                </Button>
-              </div>
-            </div>
+            <RewardItem
+              title="Community Hero Badge"
+              description="Special recognition in the community"
+              cost={100}
+              userPoints={rewards?.points || 0}
+              onRedeem={() => handleRedeem(100, "Community Hero Badge")}
+            />
           </CardContent>
         </Card>
 
@@ -244,5 +210,32 @@ const Rewards = () => {
     </DashboardLayout>
   );
 };
+
+const RewardItem = ({
+  title,
+  description,
+  cost,
+  userPoints,
+  onRedeem,
+}: {
+  title: string;
+  description: string;
+  cost: number;
+  userPoints: number;
+  onRedeem: () => void;
+}) => (
+  <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+    <div>
+      <h3 className="font-semibold">{title}</h3>
+      <p className="text-sm text-muted-foreground">{description}</p>
+    </div>
+    <div className="flex items-center gap-3">
+      <Badge variant="secondary">{cost} points</Badge>
+      <Button size="sm" onClick={onRedeem} disabled={userPoints < cost}>
+        Redeem
+      </Button>
+    </div>
+  </div>
+);
 
 export default Rewards;

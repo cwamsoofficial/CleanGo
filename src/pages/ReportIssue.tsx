@@ -52,7 +52,7 @@ const ReportIssue = () => {
         }
       }
 
-      // Create issue report
+      // Insert issue report
       const { error } = await supabase.from("issue_reports").insert({
         reporter_id: user.id,
         title,
@@ -64,32 +64,15 @@ const ReportIssue = () => {
 
       if (error) throw error;
 
-      // Award points for reporting (skip if rewards system not configured)
-      try {
-        const { data: currentRewards } = await supabase
-          .from("rewards")
-          .select("points, total_earned")
-          .eq("user_id", user.id)
-          .single();
+      // Award points securely using RPC
+      const { error: rewardError } = await supabase.rpc("award_points", {
+        _user_id: user.id,
+        _points: 3,
+        _description: "Reported waste management issue",
+      });
 
-        if (currentRewards) {
-          await supabase
-            .from("rewards")
-            .update({
-              points: currentRewards.points + 3,
-              total_earned: currentRewards.total_earned + 3,
-            })
-            .eq("user_id", user.id);
-
-          await supabase.from("reward_transactions").insert({
-            user_id: user.id,
-            points: 3,
-            type: "earned",
-            description: "Reported waste management issue",
-          });
-        }
-      } catch (rewardError) {
-        console.log("Rewards update skipped:", rewardError);
+      if (rewardError) {
+        console.log("Reward RPC error:", rewardError);
       }
 
       toast.success("Issue reported successfully!");

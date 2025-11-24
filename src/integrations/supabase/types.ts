@@ -96,6 +96,7 @@ export type Database = {
           id: string
           name: string
           phone: string | null
+          referral_code: string | null
           updated_at: string
         }
         Insert: {
@@ -104,6 +105,7 @@ export type Database = {
           id: string
           name: string
           phone?: string | null
+          referral_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -112,6 +114,7 @@ export type Database = {
           id?: string
           name?: string
           phone?: string | null
+          referral_code?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -170,6 +173,42 @@ export type Database = {
           total_redeemed?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_referrals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          points_awarded: number | null
+          referral_code: string
+          referred_user_id: string
+          referrer_id: string
+          status: Database["public"]["Enums"]["referral_status"]
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          points_awarded?: number | null
+          referral_code: string
+          referred_user_id: string
+          referrer_id: string
+          status?: Database["public"]["Enums"]["referral_status"]
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          points_awarded?: number | null
+          referral_code?: string
+          referred_user_id?: string
+          referrer_id?: string
+          status?: Database["public"]["Enums"]["referral_status"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -301,6 +340,7 @@ export type Database = {
         | "collected"
         | "failed"
         | "delayed"
+      referral_status: "pending" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -437,6 +477,7 @@ export const Constants = {
         "failed",
         "delayed",
       ],
+      referral_status: ["pending", "completed"],
     },
   },
 } as const

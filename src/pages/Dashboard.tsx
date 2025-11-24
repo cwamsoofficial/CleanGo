@@ -207,7 +207,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline" 
                   className="w-full gap-2"
-                  onClick={() => navigate("/pickups")}
+                  onClick={() => navigate("/dashboard/pickups")}
                 >
                   <Package className="w-4 h-4" />
                   View Pickups

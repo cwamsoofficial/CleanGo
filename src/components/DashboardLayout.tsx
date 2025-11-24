@@ -95,21 +95,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       company: [
         { icon: Package, label: "Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Report Issue", path: "/dashboard/report-issue" },
-        { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
         { icon: Gift, label: "Rewards", path: "/dashboard/rewards" },
       ],
       collector: [
-        { icon: Package, label: "Assigned Pickups", path: "/dashboard/pickups" },
-        { icon: AlertCircle, label: "Issues", path: "/dashboard/issues" },
-        { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
+        { icon: Package, label: "Pickups", path: "/dashboard/pickups" },
       ],
       admin: [
         { icon: Shield, label: "Admin Dashboard", path: "/dashboard/admin" },
         { icon: Package, label: "All Pickups", path: "/dashboard/pickups" },
-        { icon: AlertCircle, label: "All Issues", path: "/dashboard/issues" },
-        { icon: Users, label: "Users", path: "/dashboard/users" },
-        { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
-        { icon: Settings, label: "Settings", path: "/dashboard/settings" },
       ],
     };
 

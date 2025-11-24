@@ -194,6 +194,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_activity_date: string | null
+          longest_streak: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       waste_pickups: {
         Row: {
           collector_id: string | null
@@ -260,6 +290,7 @@ export type Database = {
         Args: { _description: string; _points: number; _user_id: string }
         Returns: undefined
       }
+      update_user_streak: { Args: { _user_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "citizen" | "company" | "collector" | "admin"

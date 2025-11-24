@@ -15,6 +15,7 @@ interface Pickup {
   location: string | null;
   notes: string | null;
   created_at: string;
+  collector_id: string | null;
 }
 
 const Pickups = () => {
@@ -40,10 +41,8 @@ const Pickups = () => {
 
       if (userRole === "citizen" || userRole === "company") {
         query = query.eq("user_id", user.id);
-      } else if (userRole === "collector") {
-        query = query.eq("collector_id", user.id);
       }
-      // Admin sees all pickups
+      // Collectors and admins see all pickups
 
       const { data, error } = await query.order("created_at", { ascending: false });
 
@@ -59,9 +58,21 @@ const Pickups = () => {
 
   const handleUpdateStatus = async (pickupId: string, newStatus: "pending" | "in_progress" | "collected" | "failed" | "delayed") => {
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const updates: any = { status: newStatus, updated_at: new Date().toISOString() };
+      
+      // If collector is accepting a pending pickup, assign them as collector
+      if (role === "collector" && newStatus === "in_progress") {
+        updates.collector_id = user.id;
+      }
+
       const { error } = await supabase
         .from("waste_pickups")
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .update(updates)
         .eq("id", pickupId);
 
       if (error) throw error;
@@ -126,7 +137,10 @@ const Pickups = () => {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-lg">Pickup #{pickup.id.slice(0, 8)}</CardTitle>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        Pickup #{pickup.id.slice(0, 8)}
+                        {!pickup.collector_id && <Badge variant="outline">Unassigned</Badge>}
+                      </CardTitle>
                       <CardDescription>
                         Scheduled: {pickup.scheduled_date ? new Date(pickup.scheduled_date).toLocaleDateString() : "Not set"}
                       </CardDescription>

@@ -39,6 +39,7 @@ export default function Issues() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUserRole();
@@ -147,6 +148,34 @@ export default function Issues() {
         return null;
     }
   };
+
+  const fetchImageUrl = async (imagePath: string | null) => {
+    if (!imagePath) {
+      setImageUrl(null);
+      return;
+    }
+
+    try {
+      const { data } = await supabase.storage
+        .from('issue-images')
+        .createSignedUrl(imagePath, 3600); // 1 hour expiry
+
+      if (data) {
+        setImageUrl(data.signedUrl);
+      }
+    } catch (error) {
+      console.error('Error fetching image URL:', error);
+      setImageUrl(null);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedIssue) {
+      fetchImageUrl(selectedIssue.image_url);
+    } else {
+      setImageUrl(null);
+    }
+  }, [selectedIssue]);
 
   return (
     <DashboardLayout>
@@ -294,12 +323,16 @@ export default function Issues() {
 
               {selectedIssue.image_url && (
                 <div>
-                  <h3 className="font-semibold mb-2">Image</h3>
-                  <img 
-                    src={selectedIssue.image_url} 
-                    alt="Issue" 
-                    className="w-full rounded-lg border"
-                  />
+                  <h3 className="font-semibold mb-2">Photo Evidence</h3>
+                  {imageUrl ? (
+                    <img 
+                      src={imageUrl} 
+                      alt="Issue evidence" 
+                      className="w-full rounded-lg border"
+                    />
+                  ) : (
+                    <p className="text-muted-foreground">Loading image...</p>
+                  )}
                 </div>
               )}
 

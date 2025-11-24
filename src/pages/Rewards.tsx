@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Gift, TrendingUp, History } from "lucide-react";
+import { Gift, TrendingUp, History, Flame, Award } from "lucide-react";
 import { toast } from "sonner";
 import { WithdrawalDialog } from "@/components/WithdrawalDialog";
 
@@ -22,9 +22,16 @@ interface Transaction {
   created_at: string;
 }
 
+interface StreakData {
+  current_streak: number;
+  longest_streak: number;
+  last_activity_date: string | null;
+}
+
 const Rewards = () => {
   const [rewards, setRewards] = useState<RewardData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [streak, setStreak] = useState<StreakData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,8 +58,15 @@ const Rewards = () => {
         .order("created_at", { ascending: false })
         .limit(10);
 
+      const { data: streakData } = await supabase
+        .from("user_streaks")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
       setRewards(rewardsData);
       setTransactions(transactionsData || []);
+      setStreak(streakData);
     } catch {
       toast.error("Failed to load rewards data");
     } finally {
@@ -134,6 +148,63 @@ const Rewards = () => {
             Earn money for waste pickups, recycling, and issue reporting
           </p>
         </div>
+
+        {streak && (
+          <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Flame className="h-5 w-5 text-orange-500" />
+                Streak Bonuses
+              </CardTitle>
+              <CardDescription>Keep completing pickups to earn bonus rewards</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Flame className="h-8 w-8 text-orange-500" />
+                    <div>
+                      <div className="text-2xl font-bold">{streak.current_streak} days</div>
+                      <p className="text-xs text-muted-foreground">Current streak</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Award className="h-4 w-4" />
+                    <span className="text-sm">{streak.longest_streak} days</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Best streak</p>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Milestone Rewards:</p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className={`p-2 rounded border ${streak.current_streak >= 3 ? 'bg-green-500/10 border-green-500/20' : 'border-border'}`}>
+                    <div className="font-medium">3 days</div>
+                    <div className="text-muted-foreground">₦500 bonus</div>
+                  </div>
+                  <div className={`p-2 rounded border ${streak.current_streak >= 7 ? 'bg-green-500/10 border-green-500/20' : 'border-border'}`}>
+                    <div className="font-medium">7 days</div>
+                    <div className="text-muted-foreground">₦1,500 bonus</div>
+                  </div>
+                  <div className={`p-2 rounded border ${streak.current_streak >= 14 ? 'bg-green-500/10 border-green-500/20' : 'border-border'}`}>
+                    <div className="font-medium">14 days</div>
+                    <div className="text-muted-foreground">₦3,000 bonus</div>
+                  </div>
+                  <div className={`p-2 rounded border ${streak.current_streak >= 30 ? 'bg-green-500/10 border-green-500/20' : 'border-border'}`}>
+                    <div className="font-medium">30 days</div>
+                    <div className="text-muted-foreground">₦10,000 bonus</div>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  💰 Earn ₦200 for each pickup + milestone bonuses!
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card>

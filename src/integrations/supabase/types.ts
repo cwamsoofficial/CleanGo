@@ -264,7 +264,12 @@ export type Database = {
     Enums: {
       app_role: "citizen" | "company" | "collector" | "admin"
       issue_status: "pending" | "in_progress" | "resolved"
-      pickup_status: "pending" | "collected" | "failed" | "delayed"
+      pickup_status:
+        | "pending"
+        | "in_progress"
+        | "collected"
+        | "failed"
+        | "delayed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -394,7 +399,13 @@ export const Constants = {
     Enums: {
       app_role: ["citizen", "company", "collector", "admin"],
       issue_status: ["pending", "in_progress", "resolved"],
-      pickup_status: ["pending", "collected", "failed", "delayed"],
+      pickup_status: [
+        "pending",
+        "in_progress",
+        "collected",
+        "failed",
+        "delayed",
+      ],
     },
   },
 } as const

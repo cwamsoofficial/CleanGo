@@ -57,7 +57,7 @@ const Pickups = () => {
     }
   };
 
-  const handleUpdateStatus = async (pickupId: string, newStatus: "pending" | "collected" | "failed" | "delayed") => {
+  const handleUpdateStatus = async (pickupId: string, newStatus: "pending" | "in_progress" | "collected" | "failed" | "delayed") => {
     try {
       const { error } = await supabase
         .from("waste_pickups")
@@ -76,6 +76,7 @@ const Pickups = () => {
   const getStatusBadge = (status: string) => {
     const variants: Record<string, any> = {
       pending: { variant: "secondary", icon: Clock },
+      in_progress: { variant: "default", icon: Clock },
       collected: { variant: "default", icon: CheckCircle },
       failed: { variant: "destructive", icon: XCircle },
       delayed: { variant: "outline", icon: Clock },
@@ -87,7 +88,7 @@ const Pickups = () => {
     return (
       <Badge variant={config.variant} className="flex items-center gap-1">
         <Icon className="w-3 h-3" />
-        {status}
+        {status.replace('_', ' ')}
       </Badge>
     );
   };
@@ -148,9 +149,9 @@ const Pickups = () => {
                     <div className="flex gap-2 pt-2">
                       <Button
                         size="sm"
-                        onClick={() => handleUpdateStatus(pickup.id, "collected")}
+                        onClick={() => handleUpdateStatus(pickup.id, "in_progress")}
                       >
-                        Mark as Collected
+                        Accept Pickup
                       </Button>
                       <Button
                         size="sm"
@@ -158,6 +159,24 @@ const Pickups = () => {
                         onClick={() => handleUpdateStatus(pickup.id, "delayed")}
                       >
                         Mark as Delayed
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleUpdateStatus(pickup.id, "failed")}
+                      >
+                        Mark as Failed
+                      </Button>
+                    </div>
+                  )}
+
+                  {role === "collector" && pickup.status === "in_progress" && (
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleUpdateStatus(pickup.id, "collected")}
+                      >
+                        Complete Pickup
                       </Button>
                       <Button
                         size="sm"

@@ -199,7 +199,7 @@ const Rewards = () => {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  💰 Earn ₦200 for each pickup + milestone bonuses!
+                  💰 Earn ₦100 for each pickup + milestone bonuses!
                 </p>
               </div>
             </CardContent>
@@ -255,15 +255,6 @@ const Rewards = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <RewardItem
-              title="₦500 Airtime Credit"
-              description="Mobile airtime top-up"
-              cost={50}
-              userPoints={rewards?.points || 0}
-              pointsToNaira={pointsToNaira}
-              onRedeem={() => handleRedeem(50, "₦500 Airtime Credit")}
-            />
-
-            <RewardItem
               title="₦1,000 Airtime Credit"
               description="Mobile airtime top-up"
               cost={100}
@@ -282,12 +273,21 @@ const Rewards = () => {
             />
 
             <RewardItem
-              title="Community Hero Badge"
-              description="Special recognition in the community"
-              cost={100}
+              title="₦5,000 Airtime Credit"
+              description="Mobile airtime top-up"
+              cost={500}
               userPoints={rewards?.points || 0}
               pointsToNaira={pointsToNaira}
-              onRedeem={() => handleRedeem(100, "Community Hero Badge")}
+              onRedeem={() => handleRedeem(500, "₦5,000 Airtime Credit")}
+            />
+
+            <RewardItem
+              title="Community Hero Badge"
+              description="Special recognition in the community"
+              cost={1000}
+              userPoints={rewards?.points || 0}
+              pointsToNaira={pointsToNaira}
+              onRedeem={() => handleRedeem(1000, "Community Hero Badge")}
             />
           </CardContent>
         </Card>

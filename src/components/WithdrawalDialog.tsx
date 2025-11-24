@@ -72,12 +72,12 @@ export const WithdrawalDialog = ({
               placeholder="Enter amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              min="100"
+              min="1000"
               max={maxWithdrawal}
               step="10"
             />
             <p className="text-xs text-muted-foreground">
-              Minimum withdrawal: ₦100 • Maximum: ₦{maxWithdrawal.toLocaleString()}
+              Minimum withdrawal: ₦1,000 • Maximum: ₦{maxWithdrawal.toLocaleString()}
             </p>
           </div>
         </div>
@@ -98,7 +98,7 @@ export const WithdrawalDialog = ({
             disabled={
               loading ||
               !amount ||
-              parseFloat(amount) < 100 ||
+              parseFloat(amount) < 1000 ||
               parseFloat(amount) > maxWithdrawal
             }
           >

@@ -4,9 +4,11 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Gift, TrendingUp, History, Flame, Award } from "lucide-react";
 import { toast } from "sonner";
 import { WithdrawalDialog } from "@/components/WithdrawalDialog";
+import { ReferralSection } from "@/components/ReferralSection";
 
 interface RewardData {
   points: number;

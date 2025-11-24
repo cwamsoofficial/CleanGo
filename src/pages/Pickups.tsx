@@ -119,7 +119,7 @@ const Pickups = () => {
           <div>
             <h2 className="text-3xl font-bold text-foreground">Waste Pickups</h2>
             <p className="text-muted-foreground mt-1">
-              {role === "collector" ? "Manage your assigned pickups" : "View and track your waste collections"}
+              {role === "collector" ? "View and manage pickup requests" : "View and track your waste collections"}
             </p>
           </div>
         </div>

@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User } from "lucide-react";
 import { toast } from "sonner";
 
 interface Pickup {
@@ -15,6 +15,7 @@ interface Pickup {
   location: string | null;
   notes: string | null;
   created_at: string;
+  completed_at: string | null;
   collector_id: string | null;
 }
 
@@ -22,6 +23,7 @@ const Pickups = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [pickups, setPickups] = useState<Pickup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPickups();
@@ -34,6 +36,7 @@ const Pickups = () => {
       } = await supabase.auth.getUser();
       if (!user) return;
 
+      setUserId(user.id);
       const userRole = await getUserRole(user.id);
       setRole(userRole);
 
@@ -124,6 +127,59 @@ const Pickups = () => {
     );
   };
 
+  const getPickupStats = () => {
+    if (role !== "collector") return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const totalAvailable = pickups.filter(p => p.status === "pending" && !p.collector_id).length;
+    const assignedToMe = pickups.filter(p => p.collector_id === userId).length;
+    const completedToday = pickups.filter(p => {
+      if (p.status !== "collected" || !p.completed_at) return false;
+      const completedDate = new Date(p.completed_at);
+      completedDate.setHours(0, 0, 0, 0);
+      return completedDate.getTime() === today.getTime();
+    }).length;
+
+    return (
+      <div className="grid gap-4 md:grid-cols-3 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Available</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalAvailable}</div>
+            <p className="text-xs text-muted-foreground">Unassigned pickups</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Assigned to Me</CardTitle>
+            <User className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{assignedToMe}</div>
+            <p className="text-xs text-muted-foreground">Your pickups</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completed Today</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{completedToday}</div>
+            <p className="text-xs text-muted-foreground">Done today</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -137,12 +193,14 @@ const Pickups = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-foreground">Waste Pickups</h2>
+            <h2 className="text-3xl font-bold text-foreground">Pickups</h2>
             <p className="text-muted-foreground mt-1">
               {role === "collector" ? "View and manage pickup requests" : "View and track your waste collections"}
             </p>
           </div>
         </div>
+
+        {getPickupStats()}
 
         {pickups.length === 0 ? (
           <Card>

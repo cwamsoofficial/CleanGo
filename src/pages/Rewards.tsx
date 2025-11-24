@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Gift, TrendingUp, History } from "lucide-react";
 import { toast } from "sonner";
+import { WithdrawalDialog } from "@/components/WithdrawalDialog";
 
 interface RewardData {
   points: number;
@@ -89,6 +90,33 @@ const Rewards = () => {
     }
   };
 
+  const handleWithdraw = async (points: number) => {
+    if (!rewards || rewards.points < points) {
+      toast.error("Insufficient balance");
+      return;
+    }
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase.rpc("redeem_points", {
+        _user_id: user.id,
+        _points: points,
+        _description: `Withdrawal: ₦${pointsToNaira(points)}`,
+      });
+
+      if (error) throw error;
+
+      toast.success(`Successfully withdrew ₦${pointsToNaira(points)}`);
+      fetchRewardsData();
+    } catch {
+      toast.error("Failed to process withdrawal");
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -113,9 +141,16 @@ const Rewards = () => {
               <CardTitle className="text-sm font-medium">Wallet Balance</CardTitle>
               <Gift className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">₦{pointsToNaira(rewards?.points || 0).toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">Ready to redeem</p>
+            <CardContent className="space-y-3">
+              <div>
+                <div className="text-3xl font-bold text-primary">₦{pointsToNaira(rewards?.points || 0).toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">Available balance</p>
+              </div>
+              <WithdrawalDialog
+                availableBalance={rewards?.points || 0}
+                pointsToNaira={pointsToNaira}
+                onWithdraw={handleWithdraw}
+              />
             </CardContent>
           </Card>
 

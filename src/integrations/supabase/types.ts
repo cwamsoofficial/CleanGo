@@ -241,6 +241,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_points: {
+        Args: { _description: string; _points: number; _user_id: string }
+        Returns: undefined
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -251,6 +255,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      redeem_points: {
+        Args: { _description: string; _points: number; _user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

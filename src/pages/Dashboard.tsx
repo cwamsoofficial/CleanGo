@@ -3,9 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { getUserRole, type UserRole } from "@/lib/supabase";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, AlertCircle, CheckCircle, Clock, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Package, AlertCircle, CheckCircle, Clock, TrendingUp, Plus, FileText } from "lucide-react";
+import { RequestPickupDialog } from "@/components/RequestPickupDialog";
+import { RecentIssues } from "@/components/RecentIssues";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [role, setRole] = useState<UserRole | null>(null);
   const [stats, setStats] = useState({
     totalPickups: 0,
@@ -163,6 +168,8 @@ const Dashboard = () => {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">{getStatsCards()}</div>
 
         <div className="grid gap-4 md:grid-cols-2">
+          {(role === "citizen" || role === "company") && <RecentIssues />}
+          
           <Card>
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
@@ -182,10 +189,30 @@ const Dashboard = () => {
               <CardTitle>Quick Actions</CardTitle>
               <CardDescription>Commonly used features</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Use the sidebar menu to navigate to pickups, issues, analytics, and more.
-              </p>
+            <CardContent className="space-y-3">
+              {(role === "citizen" || role === "company") && (
+                <>
+                  <RequestPickupDialog />
+                  <Button 
+                    variant="outline" 
+                    className="w-full gap-2"
+                    onClick={() => navigate("/report-issue")}
+                  >
+                    <FileText className="w-4 h-4" />
+                    Report Issue
+                  </Button>
+                </>
+              )}
+              {(role === "collector" || role === "admin") && (
+                <Button 
+                  variant="outline" 
+                  className="w-full gap-2"
+                  onClick={() => navigate("/pickups")}
+                >
+                  <Package className="w-4 h-4" />
+                  View Pickups
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>

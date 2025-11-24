@@ -287,6 +287,43 @@ const Pickups = () => {
                     </div>
                   )}
 
+                  {role === "collector" && pickup.status === "failed" && (
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleUpdateStatus(pickup.id, "in_progress")}
+                      >
+                        Retry Pickup
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleUpdateStatus(pickup.id, "collected")}
+                      >
+                        Mark as Collected
+                      </Button>
+                    </div>
+                  )}
+
+                  {role === "collector" && pickup.status === "collected" && (
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleUpdateStatus(pickup.id, "in_progress")}
+                      >
+                        Revert to In Progress
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleUpdateStatus(pickup.id, "failed")}
+                      >
+                        Mark as Failed
+                      </Button>
+                    </div>
+                  )}
+
                   {(role === "citizen" || role === "company") && pickup.status === "collected" && (
                     <div className="flex items-center gap-2 text-sm text-success">
                       <CheckCircle className="w-4 h-4" />

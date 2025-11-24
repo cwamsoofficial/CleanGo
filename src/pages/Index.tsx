@@ -52,7 +52,7 @@ const Index = () => {
                   <ArrowRight className="h-5 w-5" />
                 </Button>
                 <Button size="lg" variant="outline" onClick={() => navigate("/auth")} className="text-lg rounded-full px-8">
-                  Learn More
+                  Sign in
                 </Button>
               </div>
             </div>
@@ -60,9 +60,9 @@ const Index = () => {
             {/* Right Image */}
             <div className="relative">
               <div className="rounded-2xl overflow-hidden shadow-2xl">
-                <img 
-                  src={wasteBinsHero} 
-                  alt="Colorful recycling bins for waste management" 
+                <img
+                  src={wasteBinsHero}
+                  alt="Colorful recycling bins for waste management"
                   className="w-full h-auto object-cover"
                 />
               </div>

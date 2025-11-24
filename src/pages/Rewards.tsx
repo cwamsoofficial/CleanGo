@@ -59,9 +59,12 @@ const Rewards = () => {
     }
   };
 
+  // Convert points to Naira (1 point = ₦10)
+  const pointsToNaira = (points: number) => points * 10;
+
   const handleRedeem = async (points: number, description: string) => {
     if (!rewards || rewards.points < points) {
-      toast.error("Insufficient points");
+      toast.error("Insufficient balance");
       return;
     }
 
@@ -79,10 +82,10 @@ const Rewards = () => {
 
       if (error) throw error;
 
-      toast.success(`Redeemed ${points} points for ${description}`);
+      toast.success(`Redeemed ₦${pointsToNaira(points)} for ${description}`);
       fetchRewardsData();
     } catch {
-      toast.error("Failed to redeem points");
+      toast.error("Failed to redeem");
     }
   };
 
@@ -100,18 +103,18 @@ const Rewards = () => {
         <div>
           <h2 className="text-3xl font-bold text-foreground">Rewards Program</h2>
           <p className="text-muted-foreground mt-1">
-            Earn points for your contributions and redeem them for rewards
+            Earn money for waste pickups, recycling, and issue reporting
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Available Points</CardTitle>
+              <CardTitle className="text-sm font-medium">Wallet Balance</CardTitle>
               <Gift className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{rewards?.points || 0}</div>
+              <div className="text-3xl font-bold text-primary">₦{pointsToNaira(rewards?.points || 0).toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">Ready to redeem</p>
             </CardContent>
           </Card>
@@ -122,8 +125,8 @@ const Rewards = () => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{rewards?.total_earned || 0}</div>
-              <p className="text-xs text-muted-foreground">Lifetime points</p>
+              <div className="text-3xl font-bold">₦{pointsToNaira(rewards?.total_earned || 0).toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Lifetime earnings</p>
             </CardContent>
           </Card>
 
@@ -133,8 +136,8 @@ const Rewards = () => {
               <History className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{rewards?.total_redeemed || 0}</div>
-              <p className="text-xs text-muted-foreground">Used for rewards</p>
+              <div className="text-3xl font-bold">₦{pointsToNaira(rewards?.total_redeemed || 0).toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Spent on rewards</p>
             </CardContent>
           </Card>
         </div>
@@ -146,19 +149,30 @@ const Rewards = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <RewardItem
-              title="$5 Airtime Credit"
+              title="₦500 Airtime Credit"
               description="Mobile airtime top-up"
               cost={50}
               userPoints={rewards?.points || 0}
-              onRedeem={() => handleRedeem(50, "$5 Airtime Credit")}
+              pointsToNaira={pointsToNaira}
+              onRedeem={() => handleRedeem(50, "₦500 Airtime Credit")}
             />
 
             <RewardItem
-              title="$10 Airtime Credit"
+              title="₦1,000 Airtime Credit"
               description="Mobile airtime top-up"
-              cost={90}
+              cost={100}
               userPoints={rewards?.points || 0}
-              onRedeem={() => handleRedeem(90, "$10 Airtime Credit")}
+              pointsToNaira={pointsToNaira}
+              onRedeem={() => handleRedeem(100, "₦1,000 Airtime Credit")}
+            />
+
+            <RewardItem
+              title="₦2,000 Airtime Credit"
+              description="Mobile airtime top-up"
+              cost={200}
+              userPoints={rewards?.points || 0}
+              pointsToNaira={pointsToNaira}
+              onRedeem={() => handleRedeem(200, "₦2,000 Airtime Credit")}
             />
 
             <RewardItem
@@ -166,6 +180,7 @@ const Rewards = () => {
               description="Special recognition in the community"
               cost={100}
               userPoints={rewards?.points || 0}
+              pointsToNaira={pointsToNaira}
               onRedeem={() => handleRedeem(100, "Community Hero Badge")}
             />
           </CardContent>
@@ -197,8 +212,7 @@ const Rewards = () => {
                     <Badge
                       variant={transaction.type === "earned" ? "default" : "secondary"}
                     >
-                      {transaction.type === "earned" ? "+" : "-"}
-                      {Math.abs(transaction.points)} pts
+                      {transaction.type === "earned" ? "+" : "-"}₦{pointsToNaira(Math.abs(transaction.points)).toLocaleString()}
                     </Badge>
                   </div>
                 ))}
@@ -216,12 +230,14 @@ const RewardItem = ({
   description,
   cost,
   userPoints,
+  pointsToNaira,
   onRedeem,
 }: {
   title: string;
   description: string;
   cost: number;
   userPoints: number;
+  pointsToNaira: (points: number) => number;
   onRedeem: () => void;
 }) => (
   <div className="flex items-center justify-between p-4 border border-border rounded-lg">
@@ -230,7 +246,7 @@ const RewardItem = ({
       <p className="text-sm text-muted-foreground">{description}</p>
     </div>
     <div className="flex items-center gap-3">
-      <Badge variant="secondary">{cost} points</Badge>
+      <Badge variant="secondary">₦{pointsToNaira(cost).toLocaleString()}</Badge>
       <Button size="sm" onClick={onRedeem} disabled={userPoints < cost}>
         Redeem
       </Button>

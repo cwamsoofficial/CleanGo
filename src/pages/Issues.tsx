@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, Eye } from "lucide-react";
 
 interface Issue {
   id: string;
@@ -36,6 +37,9 @@ export default function Issues() {
   const [stats, setStats] = useState<IssueStats>({ total: 0, pending: 0, in_progress: 0, resolved: 0 });
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUserRole();
@@ -145,6 +149,34 @@ export default function Issues() {
     }
   };
 
+  const fetchImageUrl = async (imagePath: string | null) => {
+    if (!imagePath) {
+      setImageUrl(null);
+      return;
+    }
+
+    try {
+      const { data } = await supabase.storage
+        .from('issue-images')
+        .createSignedUrl(imagePath, 3600); // 1 hour expiry
+
+      if (data) {
+        setImageUrl(data.signedUrl);
+      }
+    } catch (error) {
+      console.error('Error fetching image URL:', error);
+      setImageUrl(null);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedIssue) {
+      fetchImageUrl(selectedIssue.image_url);
+    } else {
+      setImageUrl(null);
+    }
+  }, [selectedIssue]);
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -225,19 +257,32 @@ export default function Issues() {
                         <TableCell>{getStatusBadge(issue.status)}</TableCell>
                         <TableCell>{format(new Date(issue.created_at), 'MMM dd, yyyy')}</TableCell>
                         <TableCell>
-                          <Select
-                            value={issue.status}
-                            onValueChange={(value) => handleStatusUpdate(issue.id, value as any)}
-                          >
-                            <SelectTrigger className="w-[140px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="in_progress">In Progress</SelectItem>
-                              <SelectItem value="resolved">Resolved</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedIssue(issue);
+                                setIsDialogOpen(true);
+                              }}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              View
+                            </Button>
+                            <Select
+                              value={issue.status}
+                              onValueChange={(value) => handleStatusUpdate(issue.id, value as any)}
+                            >
+                              <SelectTrigger className="w-[140px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="in_progress">In Progress</SelectItem>
+                                <SelectItem value="resolved">Resolved</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -248,6 +293,90 @@ export default function Issues() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Issue Details Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{selectedIssue?.title}</DialogTitle>
+            <DialogDescription>Issue details and information</DialogDescription>
+          </DialogHeader>
+          
+          {selectedIssue && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold mb-2">Status</h3>
+                {getStatusBadge(selectedIssue.status)}
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Description</h3>
+                <p className="text-muted-foreground">{selectedIssue.description}</p>
+              </div>
+
+              {selectedIssue.location && (
+                <div>
+                  <h3 className="font-semibold mb-2">Location</h3>
+                  <p className="text-muted-foreground">{selectedIssue.location}</p>
+                </div>
+              )}
+
+              {selectedIssue.image_url && (
+                <div>
+                  <h3 className="font-semibold mb-2">Photo Evidence</h3>
+                  {imageUrl ? (
+                    <img 
+                      src={imageUrl} 
+                      alt="Issue evidence" 
+                      className="w-full rounded-lg border"
+                    />
+                  ) : (
+                    <p className="text-muted-foreground">Loading image...</p>
+                  )}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-semibold mb-2">Created</h3>
+                  <p className="text-muted-foreground">
+                    {format(new Date(selectedIssue.created_at), 'PPP')}
+                  </p>
+                </div>
+
+                {selectedIssue.resolved_at && (
+                  <div>
+                    <h3 className="font-semibold mb-2">Resolved</h3>
+                    <p className="text-muted-foreground">
+                      {format(new Date(selectedIssue.resolved_at), 'PPP')}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Update Status</h3>
+                <Select
+                  value={selectedIssue.status}
+                  onValueChange={(value) => {
+                    handleStatusUpdate(selectedIssue.id, value as any);
+                    setIsDialogOpen(false);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="resolved">Resolved</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

@@ -27,6 +27,27 @@ export function ReferralSection() {
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [copied, setCopied] = useState(false);
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Users, Copy, CheckCircle, Clock, Gift } from "lucide-react";
+import { toast } from "sonner";
+
+interface ReferralData {
+  id: string;
+  referred_user_id: string;
+  referral_code: string;
+  status: "pending" | "completed";
+  points_awarded: number | null;
+  created_at: string;
+  completed_at: string | null;
+  referred_user_name?: string;
+}
+
+export const ReferralSection = () => {
+  const [referralCode, setReferralCode] = useState<string>("");
+  const [referrals, setReferrals] = useState<ReferralData[]>([]);
+  const [totalEarned, setTotalEarned] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -75,6 +96,57 @@ export function ReferralSection() {
     } catch (error) {
       console.error('Error fetching referral data:', error);
       toast.error('Failed to load referral data');
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get user's referral code
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("referral_code")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        setReferralCode(profile.referral_code || "");
+      }
+
+      // Get referrals made by this user
+      const { data: referralsData } = await supabase
+        .from("user_referrals")
+        .select("*")
+        .eq("referrer_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (referralsData) {
+        // Fetch referred user names
+        const referralsWithNames = await Promise.all(
+          referralsData.map(async (ref) => {
+            const { data: refProfile } = await supabase
+              .from("profiles")
+              .select("name")
+              .eq("id", ref.referred_user_id)
+              .single();
+
+            return {
+              ...ref,
+              referred_user_name: refProfile?.name || "Unknown User",
+            };
+          })
+        );
+
+        setReferrals(referralsWithNames);
+
+        // Calculate total earned from completed referrals
+        const earned = referralsWithNames
+          .filter((ref) => ref.status === "completed")
+          .reduce((sum, ref) => sum + (ref.points_awarded || 0), 0);
+        setTotalEarned(earned);
+      }
+    } catch (error) {
+      toast.error("Failed to load referral data");
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -251,3 +323,184 @@ export function ReferralSection() {
     </div>
   );
 }
+    const referralLink = `${window.location.origin}/auth?ref=${referralCode}`;
+    navigator.clipboard.writeText(referralLink);
+    toast.success("Referral link copied to clipboard!");
+  };
+
+  const copyReferralCode = () => {
+    navigator.clipboard.writeText(referralCode);
+    toast.success("Referral code copied!");
+  };
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-64">Loading...</div>;
+  }
+
+  const pendingReferrals = referrals.filter((r) => r.status === "pending");
+  const completedReferrals = referrals.filter((r) => r.status === "completed");
+
+  return (
+    <div className="space-y-6">
+      <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Gift className="h-5 w-5 text-primary" />
+            Your Referral Program
+          </CardTitle>
+          <CardDescription>
+            Invite friends and earn ₦500 when they complete their first pickup
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Your Referral Code</Label>
+            <div className="flex gap-2">
+              <Input
+                value={referralCode}
+                readOnly
+                className="font-mono text-lg font-bold"
+              />
+              <Button onClick={copyReferralCode} variant="outline" size="icon">
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Share Your Referral Link</Label>
+            <div className="flex gap-2">
+              <Input
+                value={`${window.location.origin}/auth?ref=${referralCode}`}
+                readOnly
+                className="text-sm"
+              />
+              <Button onClick={copyReferralLink} size="sm">
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Link
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">{referrals.length}</div>
+              <p className="text-xs text-muted-foreground">Total Referrals</p>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">{completedReferrals.length}</div>
+              <p className="text-xs text-muted-foreground">Completed</p>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">₦{(totalEarned * 10).toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Total Earned</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Your Referrals
+          </CardTitle>
+          <CardDescription>
+            Track your friends' progress and rewards
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {referrals.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">No referrals yet</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Share your referral code to start earning rewards!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {referrals.map((referral) => (
+                <div
+                  key={referral.id}
+                  className="flex items-center justify-between p-4 border border-border rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-full ${
+                      referral.status === "completed" 
+                        ? "bg-green-500/10" 
+                        : "bg-yellow-500/10"
+                    }`}>
+                      {referral.status === "completed" ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <Clock className="h-5 w-5 text-yellow-600" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium">{referral.referred_user_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Joined {new Date(referral.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {referral.status === "completed" ? (
+                      <>
+                        <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20">
+                          Completed
+                        </Badge>
+                        <p className="text-sm font-bold text-primary mt-1">
+                          +₦{((referral.points_awarded || 0) * 10).toLocaleString()}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <Badge variant="secondary">Pending</Badge>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Waiting for first pickup
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5">
+        <CardHeader>
+          <CardTitle className="text-lg">How Referrals Work</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm">
+          <div className="flex items-start gap-2">
+            <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+              1
+            </div>
+            <p>Share your unique referral code or link with friends</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+              2
+            </div>
+            <p>Your friend signs up using your referral code</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+              3
+            </div>
+            <p>When they complete their first waste pickup, you earn ₦500!</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+              4
+            </div>
+            <p>Invite unlimited friends and keep earning rewards</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

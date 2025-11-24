@@ -151,15 +151,22 @@ const Rewards = () => {
           </p>
         </div>
 
-        {streak && (
-          <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Flame className="h-5 w-5 text-orange-500" />
-                Streak Bonuses
-              </CardTitle>
-              <CardDescription>Keep completing pickups to earn bonus rewards</CardDescription>
-            </CardHeader>
+        <Tabs defaultValue="rewards" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="rewards">My Rewards</TabsTrigger>
+            <TabsTrigger value="referrals">Referrals</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="rewards" className="space-y-6">
+            {streak && (
+              <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Flame className="h-5 w-5 text-orange-500" />
+                    Streak Bonuses
+                  </CardTitle>
+                  <CardDescription>Keep completing pickups to earn bonus rewards</CardDescription>
+                </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>

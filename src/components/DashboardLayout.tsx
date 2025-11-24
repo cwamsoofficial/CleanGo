@@ -32,7 +32,6 @@ import {
   AlertCircle,
   BarChart3,
   Gift,
-  Bell,
   Users,
   Settings,
   LogOut,
@@ -85,7 +84,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const getMenuItems = () => {
     const common = [
       { icon: Home, label: "Dashboard", path: "/dashboard" },
-      { icon: Bell, label: "Notifications", path: "/dashboard/notifications" },
     ];
 
     const roleSpecific = {

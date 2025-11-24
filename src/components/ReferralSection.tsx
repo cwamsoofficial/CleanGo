@@ -114,7 +114,7 @@ export const ReferralSection = () => {
             Your Referral Program
           </CardTitle>
           <CardDescription>
-            Invite friends and earn ₦1,000 when they complete their first pickup
+            Invite friends and earn ₦500 when they complete their first pickup
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -256,7 +256,7 @@ export const ReferralSection = () => {
             <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
               3
             </div>
-            <p>When they complete their first waste pickup, you earn ₦1,000!</p>
+            <p>When they complete their first waste pickup, you earn ₦500!</p>
           </div>
           <div className="flex items-start gap-2">
             <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">

@@ -33,6 +33,7 @@ import {
   BarChart3,
   Gift,
   Users,
+  Trophy,
   Settings,
   LogOut,
   Shield,
@@ -91,22 +92,26 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         { icon: Package, label: "My Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Report Issue", path: "/dashboard/report-issue" },
         { icon: Gift, label: "Rewards", path: "/dashboard/rewards" },
+        { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },
       ],
       company: [
         { icon: Package, label: "Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Report Issue", path: "/dashboard/report-issue" },
         { icon: Gift, label: "Rewards", path: "/dashboard/rewards" },
+        { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },
       ],
       collector: [
         { icon: Package, label: "Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Issues", path: "/dashboard/issues" },
         { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
+        { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },
       ],
       admin: [
         { icon: Shield, label: "Admin Dashboard", path: "/dashboard/admin" },
         { icon: Package, label: "All Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Issues", path: "/dashboard/issues" },
         { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
+        { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },
       ],
     };
 

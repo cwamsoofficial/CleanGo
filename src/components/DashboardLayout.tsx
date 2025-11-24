@@ -99,10 +99,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       ],
       collector: [
         { icon: Package, label: "Pickups", path: "/dashboard/pickups" },
+        { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
       ],
       admin: [
         { icon: Shield, label: "Admin Dashboard", path: "/dashboard/admin" },
         { icon: Package, label: "All Pickups", path: "/dashboard/pickups" },
+        { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
       ],
     };
 

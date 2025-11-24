@@ -84,6 +84,26 @@ const Pickups = () => {
     }
   };
 
+  const handleUnassign = async (pickupId: string) => {
+    try {
+      const { error } = await supabase
+        .from("waste_pickups")
+        .update({ 
+          status: "pending", 
+          collector_id: null,
+          updated_at: new Date().toISOString() 
+        })
+        .eq("id", pickupId);
+
+      if (error) throw error;
+
+      toast.success("Pickup unassigned successfully");
+      fetchPickups();
+    } catch (error: any) {
+      toast.error("Failed to unassign pickup");
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, any> = {
       pending: { variant: "secondary", icon: Clock },
@@ -191,6 +211,13 @@ const Pickups = () => {
                         onClick={() => handleUpdateStatus(pickup.id, "collected")}
                       >
                         Complete Pickup
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleUnassign(pickup.id)}
+                      >
+                        Unassign
                       </Button>
                       <Button
                         size="sm"

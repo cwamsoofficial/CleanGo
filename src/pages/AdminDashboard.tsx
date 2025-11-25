@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Users, Trash2, AlertCircle, Award, TrendingUp } from "lucide-react";
 import AdminKeyManagement from "@/components/AdminKeyManagement";
+import SecurityDashboard from "@/components/SecurityDashboard";
 
 interface User {
   id: string;
@@ -172,6 +173,7 @@ const AdminDashboard = () => {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="keys">Admin Keys</TabsTrigger>
           </TabsList>
 
@@ -274,6 +276,10 @@ const AdminDashboard = () => {
             </Table>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-8 mt-6">
+            <SecurityDashboard />
           </TabsContent>
 
           <TabsContent value="keys" className="space-y-8 mt-6">

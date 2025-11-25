@@ -8,8 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Users, Trash2, AlertCircle, Award, TrendingUp } from "lucide-react";
+import AdminKeyManagement from "@/components/AdminKeyManagement";
 
 interface User {
   id: string;
@@ -167,6 +169,14 @@ const AdminDashboard = () => {
           </p>
         </div>
 
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="keys">Admin Keys</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-8 mt-6">
+
         {/* System Statistics */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -264,6 +274,12 @@ const AdminDashboard = () => {
             </Table>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="keys" className="space-y-8 mt-6">
+            <AdminKeyManagement />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

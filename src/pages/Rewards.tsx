@@ -167,11 +167,6 @@ const Rewards = () => {
                   </CardTitle>
                   <CardDescription>Keep completing pickups to earn bonus rewards</CardDescription>
                 </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Flame className="h-8 w-8 text-orange-500" />
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>

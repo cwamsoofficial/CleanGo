@@ -305,6 +305,24 @@ const Pickups = () => {
                     </div>
                   )}
 
+                  {role === "collector" && pickup.status === "delayed" && (
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleUpdateStatus(pickup.id, "in_progress")}
+                      >
+                        Resume Pickup
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleUpdateStatus(pickup.id, "failed")}
+                      >
+                        Mark as Failed
+                      </Button>
+                    </div>
+                  )}
+
                   {role === "collector" && pickup.status === "collected" && (
                     <div className="flex gap-2 pt-2">
                       <Button

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,6 +94,15 @@ const AdminLogin = () => {
           >
             {loading ? "Validating..." : "Validate Key"}
           </Button>
+
+          <div className="text-center pt-2">
+            <p className="text-sm text-muted-foreground">
+              Don't have an admin account?{" "}
+              <Link to="/admin/signup" className="text-primary hover:underline font-medium">
+                Sign up here
+              </Link>
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

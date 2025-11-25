@@ -243,10 +243,10 @@ const Auth = () => {
 
     try {
       const { data, error } = await supabase.rpc('validate_admin_key', {
-        _key: adminKey,
-        _email: email,
-        _ip_address: null
-      });
+        input_key: adminKey,
+        user_email: email,
+        user_ip: "127.0.0.1"
+      } as any);
 
       if (error) throw error;
 

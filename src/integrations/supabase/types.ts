@@ -397,7 +397,7 @@ export type Database = {
       }
       update_user_streak: { Args: { _user_id: string }; Returns: undefined }
       validate_admin_key: {
-        Args: { _email: string; _ip_address?: string; _key: string }
+        Args: { input_key: string; user_email: string; user_ip?: string }
         Returns: Json
       }
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,11 +48,13 @@ const getPasswordStrengthIcon = (strength: PasswordStrength) => {
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("weak");
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  const [referralCode, setReferralCode] = useState(searchParams.get("ref") || "");
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value;
@@ -98,9 +100,10 @@ const Auth = () => {
     const phone = formData.get("phone") as string;
     const address = formData.get("address") as string;
     const role = formData.get("role") as string;
+    const referralCodeInput = formData.get("referralCode") as string;
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -115,6 +118,26 @@ const Auth = () => {
       });
 
       if (error) throw error;
+
+      // If referral code provided, create referral record
+      if (referralCodeInput && data.user) {
+        const { data: referrerProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('referral_code', referralCodeInput.toUpperCase())
+          .single();
+
+        if (referrerProfile) {
+          await supabase
+            .from('user_referrals')
+            .insert({
+              referrer_id: referrerProfile.id,
+              referred_user_id: data.user.id,
+              referral_code: referralCodeInput.toUpperCase(),
+              status: 'pending'
+            });
+        }
+      }
 
       toast.success("Account created successfully! Logging you in...");
     } catch (error: any) {
@@ -405,6 +428,21 @@ const Auth = () => {
                     )}
                     <p className="text-xs text-muted-foreground">
                       Use 8+ characters with uppercase, lowercase, numbers, and symbols
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-referral">Referral Code (Optional)</Label>
+                    <Input
+                      id="signup-referral"
+                      name="referralCode"
+                      type="text"
+                      placeholder="Enter referral code"
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                      maxLength={8}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Have a referral code? Enter it to help your friend earn rewards!
                     </p>
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>

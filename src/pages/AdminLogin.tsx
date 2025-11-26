@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +16,11 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState("");
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -62,6 +68,45 @@ const AdminLogin = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!resetEmail.trim()) {
+      setResetError("Please enter your email address");
+      return;
+    }
+
+    setResetLoading(true);
+    setResetError("");
+    setResetSuccess(false);
+
+    try {
+      const redirectUrl = `${window.location.origin}/admin/reset-password`;
+      
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: redirectUrl,
+      });
+
+      if (resetError) throw resetError;
+
+      setResetSuccess(true);
+      toast({
+        title: "Email Sent",
+        description: "Check your email for password reset instructions",
+      });
+
+      // Close dialog after 2 seconds
+      setTimeout(() => {
+        setShowResetDialog(false);
+        setResetEmail("");
+        setResetSuccess(false);
+      }, 2000);
+    } catch (err: any) {
+      console.error("Password reset request error:", err);
+      setResetError(err.message || "Failed to send reset email. Please try again.");
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -118,6 +163,61 @@ const AdminLogin = () => {
           >
             {loading ? "Signing in..." : "Sign In"}
           </Button>
+
+          <div className="text-center">
+            <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+              <DialogTrigger asChild>
+                <Button variant="link" className="text-sm">
+                  Forgot password?
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Reset Password</DialogTitle>
+                  <DialogDescription>
+                    Enter your email address and we'll send you a link to reset your password
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-4 py-4">
+                  {resetError && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{resetError}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {resetSuccess && (
+                    <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+                      <AlertDescription className="text-green-600">
+                        Password reset email sent! Check your inbox.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="resetEmail">Email</Label>
+                    <Input
+                      id="resetEmail"
+                      type="email"
+                      placeholder="admin@example.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleForgotPassword()}
+                      disabled={resetLoading}
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleForgotPassword}
+                    disabled={resetLoading}
+                    className="w-full"
+                  >
+                    {resetLoading ? "Sending..." : "Send Reset Link"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
 
           <div className="text-center pt-2">
             <p className="text-sm text-muted-foreground">

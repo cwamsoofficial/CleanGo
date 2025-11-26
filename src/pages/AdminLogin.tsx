@@ -13,6 +13,10 @@ import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminLogin = () => {
+  const [adminKey, setAdminKey] = useState("");
+  const [keyValidated, setKeyValidated] = useState(false);
+  const [keyLoading, setKeyLoading] = useState(false);
+  const [keyError, setKeyError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,6 +28,44 @@ const AdminLogin = () => {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const handleKeyValidation = async () => {
+    if (!adminKey.trim()) {
+      setKeyError("Please enter an admin key");
+      return;
+    }
+
+    setKeyLoading(true);
+    setKeyError("");
+
+    try {
+      const { data, error: validateError } = await supabase.rpc('validate_admin_key', {
+        input_key: adminKey,
+        user_email: email || 'unknown',
+        user_ip: null
+      });
+
+      if (validateError) throw validateError;
+
+      const result = data as { valid: boolean; message: string };
+
+      if (!result.valid) {
+        setKeyError(result.message || "Invalid admin key");
+        return;
+      }
+
+      setKeyValidated(true);
+      toast({
+        title: "Success",
+        description: "Admin key validated successfully",
+      });
+    } catch (err: any) {
+      console.error("Key validation error:", err);
+      setKeyError(err.message || "Failed to validate admin key");
+    } finally {
+      setKeyLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -142,47 +184,87 @@ const AdminLogin = () => {
           </div>
           <CardTitle className="text-2xl">Admin Access</CardTitle>
           <CardDescription>
-            Sign in with your admin credentials
+            {keyValidated ? "Sign in with your admin credentials" : "Enter admin key to continue"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="admin@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-          </div>
+          {!keyValidated ? (
+            <>
+              {keyError && (
+                <Alert variant="destructive">
+                  <AlertDescription>{keyError}</AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="adminKey">Admin Key</Label>
+                <Input
+                  id="adminKey"
+                  type="password"
+                  placeholder="Enter admin key"
+                  value={adminKey}
+                  onChange={(e) => setAdminKey(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleKeyValidation()}
+                  disabled={keyLoading}
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <PasswordInput
-              id="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              disabled={loading}
-            />
-          </div>
+              <Button
+                onClick={handleKeyValidation}
+                disabled={keyLoading}
+                className="w-full"
+              >
+                {keyLoading ? "Validating..." : "Validate Key"}
+              </Button>
 
-          <Button
-            onClick={handleLogin}
-            disabled={loading}
-            className="w-full"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </Button>
+              <div className="text-center pt-2">
+                <p className="text-sm text-muted-foreground">
+                  Don't have an admin account?{" "}
+                  <Link to="/admin/signup" className="text-primary hover:underline font-medium">
+                    Sign up here
+                  </Link>
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="admin@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <PasswordInput
+                  id="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                  disabled={loading}
+                />
+              </div>
+
+              <Button
+                onClick={handleLogin}
+                disabled={loading}
+                className="w-full"
+              >
+                {loading ? "Signing in..." : "Sign In"}
+              </Button>
 
           <div className="text-center">
             <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
@@ -239,14 +321,16 @@ const AdminLogin = () => {
             </Dialog>
           </div>
 
-          <div className="text-center pt-2">
-            <p className="text-sm text-muted-foreground">
-              Don't have an admin account?{" "}
-              <Link to="/admin/signup" className="text-primary hover:underline font-medium">
-                Sign up here
-              </Link>
-            </p>
-          </div>
+              <div className="text-center pt-2">
+                <p className="text-sm text-muted-foreground">
+                  Don't have an admin account?{" "}
+                  <Link to="/admin/signup" className="text-primary hover:underline font-medium">
+                    Sign up here
+                  </Link>
+                </p>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

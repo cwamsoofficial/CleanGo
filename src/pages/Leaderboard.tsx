@@ -2,14 +2,23 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, Medal, Award } from "lucide-react";
+import { Trophy, Medal, Award, Star, Flame, Crown, Zap, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LeaderboardEntry {
   user_id: string;
   name: string;
   total_earned: number;
   rank: number;
+  completed_pickups: number;
+}
+
+interface Achievement {
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  label: string;
 }
 
 export default function Leaderboard() {
@@ -71,6 +80,32 @@ export default function Leaderboard() {
 
       if (profilesError) throw profilesError;
 
+      // Fetch completed pickups count for each user
+      const { data: pickupsData, error: pickupsError } = await supabase
+        .from('waste_pickups')
+        .select('user_id, collector_id, status')
+        .in('user_id', nonAdminUserIds)
+        .eq('status', 'collected');
+
+      if (pickupsError) throw pickupsError;
+
+      // Also fetch pickups where user was the collector
+      const { data: collectorPickupsData, error: collectorPickupsError } = await supabase
+        .from('waste_pickups')
+        .select('collector_id, status')
+        .in('collector_id', nonAdminUserIds)
+        .eq('status', 'collected');
+
+      if (collectorPickupsError) throw collectorPickupsError;
+
+      // Count completed pickups per user (both as user and as collector)
+      const pickupCounts: Record<string, number> = {};
+      nonAdminUserIds.forEach(id => {
+        const asUser = pickupsData?.filter(p => p.user_id === id).length || 0;
+        const asCollector = collectorPickupsData?.filter(p => p.collector_id === id).length || 0;
+        pickupCounts[id] = asUser + asCollector;
+      });
+
       // Combine data
       const leaderboardData: LeaderboardEntry[] = nonAdminRewards.map((reward, index) => {
         const profile = profilesData?.find(p => p.id === reward.user_id);
@@ -78,7 +113,8 @@ export default function Leaderboard() {
           user_id: reward.user_id,
           name: profile?.name || 'Anonymous User',
           total_earned: reward.total_earned,
-          rank: index + 1
+          rank: index + 1,
+          completed_pickups: pickupCounts[reward.user_id] || 0
         };
       });
 
@@ -108,6 +144,66 @@ export default function Leaderboard() {
 
   const pointsToNaira = (points: number) => {
     return (points * 10).toLocaleString();
+  };
+
+  const getAchievements = (entry: LeaderboardEntry): Achievement[] => {
+    const achievements: Achievement[] = [];
+
+    // Community Hero - Top 3 overall
+    if (entry.rank <= 3) {
+      achievements.push({
+        icon: Crown,
+        color: "text-yellow-500",
+        label: "Community Hero"
+      });
+    }
+
+    // Rising Star - 500+ points
+    if (entry.total_earned >= 500) {
+      achievements.push({
+        icon: Star,
+        color: "text-blue-500",
+        label: "Rising Star (500+ points)"
+      });
+    }
+
+    // On Fire - 1000+ points
+    if (entry.total_earned >= 1000) {
+      achievements.push({
+        icon: Flame,
+        color: "text-orange-500",
+        label: "On Fire (1000+ points)"
+      });
+    }
+
+    // Eco Champion - 100+ completed pickups
+    if (entry.completed_pickups >= 100) {
+      achievements.push({
+        icon: Sparkles,
+        color: "text-green-500",
+        label: "Eco Champion (100+ pickups)"
+      });
+    }
+
+    // Dedicated Collector - 50+ completed pickups
+    if (entry.completed_pickups >= 50 && entry.completed_pickups < 100) {
+      achievements.push({
+        icon: Zap,
+        color: "text-purple-500",
+        label: "Dedicated Collector (50+ pickups)"
+      });
+    }
+
+    // Getting Started - 10+ completed pickups
+    if (entry.completed_pickups >= 10 && entry.completed_pickups < 50) {
+      achievements.push({
+        icon: Award,
+        color: "text-cyan-500",
+        label: "Getting Started (10+ pickups)"
+      });
+    }
+
+    return achievements;
   };
 
   if (loading) {
@@ -162,6 +258,23 @@ export default function Leaderboard() {
                       </AvatarFallback>
                     </Avatar>
                     <p className="font-semibold">{entry.name}</p>
+                    <TooltipProvider>
+                      <div className="flex items-center justify-center gap-1 flex-wrap mb-2">
+                        {getAchievements(entry).map((achievement, idx) => {
+                          const Icon = achievement.icon;
+                          return (
+                            <Tooltip key={idx}>
+                              <TooltipTrigger>
+                                <Icon className={`h-4 w-4 ${achievement.color}`} />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-xs">{achievement.label}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
+                      </div>
+                    </TooltipProvider>
                     <p className="text-2xl font-bold text-primary">
                       ₦{pointsToNaira(entry.total_earned)}
                     </p>
@@ -201,16 +314,35 @@ export default function Leaderboard() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">
-                              {entry.name}
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">
+                                {entry.name}
+                              </p>
                               {entry.user_id === currentUserId && (
-                                <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
+                                <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
                                   You
                                 </span>
                               )}
-                            </p>
+                              <TooltipProvider>
+                                <div className="flex items-center gap-1">
+                                  {getAchievements(entry).map((achievement, idx) => {
+                                    const Icon = achievement.icon;
+                                    return (
+                                      <Tooltip key={idx}>
+                                        <TooltipTrigger>
+                                          <Icon className={`h-3.5 w-3.5 ${achievement.color}`} />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p className="text-xs">{achievement.label}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    );
+                                  })}
+                                </div>
+                              </TooltipProvider>
+                            </div>
                             <p className="text-sm text-muted-foreground">
-                              {entry.total_earned.toLocaleString()} points
+                              {entry.total_earned.toLocaleString()} points • {entry.completed_pickups} pickups
                             </p>
                           </div>
                         </div>

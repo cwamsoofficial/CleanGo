@@ -49,6 +49,7 @@ const AdminSignup = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("weak");
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,12 +84,16 @@ const AdminSignup = () => {
       toast.error("Password is too weak. Please create a stronger password.");
       return;
     }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match. Please try again.");
+      return;
+    }
     
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
 
     try {
       // Create the admin account
@@ -176,6 +181,23 @@ const AdminSignup = () => {
                 <p className="text-xs text-muted-foreground">
                   Use 8+ characters with uppercase, lowercase, numbers, and symbols
                 </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin-confirm-password">Confirm Password</Label>
+                <PasswordInput
+                  id="admin-confirm-password"
+                  name="confirmPassword"
+                  placeholder="••••••••"
+                  minLength={8}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                {confirmPassword && password !== confirmPassword && (
+                  <p className="text-xs text-destructive">
+                    Passwords do not match
+                  </p>
+                )}
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (

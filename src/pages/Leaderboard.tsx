@@ -41,17 +41,38 @@ export default function Leaderboard() {
         return;
       }
 
-      // Fetch profiles for these users
+      // Fetch roles to filter out admins
       const userIds = rewardsData.map(r => r.user_id);
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', userIds);
+
+      if (rolesError) throw rolesError;
+
+      // Filter out admin users
+      const nonAdminRewards = rewardsData.filter(reward => {
+        const userRole = rolesData?.find(r => r.user_id === reward.user_id);
+        return userRole?.role !== 'admin';
+      });
+
+      if (nonAdminRewards.length === 0) {
+        setLeaderboard([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch profiles for non-admin users
+      const nonAdminUserIds = nonAdminRewards.map(r => r.user_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, name')
-        .in('id', userIds);
+        .in('id', nonAdminUserIds);
 
       if (profilesError) throw profilesError;
 
       // Combine data
-      const leaderboardData: LeaderboardEntry[] = rewardsData.map((reward, index) => {
+      const leaderboardData: LeaderboardEntry[] = nonAdminRewards.map((reward, index) => {
         const profile = profilesData?.find(p => p.id === reward.user_id);
         return {
           user_id: reward.user_id,

@@ -35,12 +35,46 @@ const AdminLogin = () => {
     setError("");
 
     try {
+      // Check if account is locked
+      const { data: isLocked, error: lockCheckError } = await supabase.rpc('is_account_locked', {
+        user_email: email
+      });
+
+      if (lockCheckError) {
+        console.error("Error checking lock status:", lockCheckError);
+      }
+
+      if (isLocked) {
+        setError("Account temporarily locked due to multiple failed login attempts. Please try again in 30 minutes.");
+        setLoading(false);
+        return;
+      }
+
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        // Log failed attempt
+        const { data: failResult } = await supabase.rpc('handle_failed_login', {
+          user_email: email,
+          failure_reason: signInError.message,
+          ip_addr: null,
+          user_agent_str: navigator.userAgent
+        });
+
+        const result = failResult as any;
+        if (result?.locked) {
+          setError(`Account locked after ${result.attempts} failed attempts. Please try again in ${result.lockout_minutes} minutes.`);
+        } else if (result?.remaining_attempts) {
+          setError(`Invalid email or password. ${result.remaining_attempts} attempts remaining before lockout.`);
+        } else {
+          setError("Invalid email or password");
+        }
+        setLoading(false);
+        return;
+      }
 
       if (!data.user) {
         throw new Error("Login failed");
@@ -75,6 +109,13 @@ const AdminLogin = () => {
         return;
       }
 
+      // Log successful login
+      await supabase.rpc('handle_successful_login', {
+        user_email: email,
+        ip_addr: null,
+        user_agent_str: navigator.userAgent
+      });
+
       toast({
         title: "Success",
         description: "Logged in successfully",
@@ -82,11 +123,7 @@ const AdminLogin = () => {
       navigate("/dashboard/admin");
     } catch (err: any) {
       console.error("Login error:", err);
-      if (err.message === "Invalid login credentials") {
-        setError("Invalid email or password");
-      } else {
-        setError(err.message || "Failed to log in. Please try again.");
-      }
+      setError(err.message || "Failed to log in. Please try again.");
     } finally {
       setLoading(false);
     }

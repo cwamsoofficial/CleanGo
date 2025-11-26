@@ -8,12 +8,14 @@ import { AlertTriangle, Shield, Activity, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
-interface SecurityAttempt {
+interface LoginAttempt {
   id: string;
+  user_id: string | null;
   email: string;
-  ip_address: string | null;
   success: boolean;
-  error_reason: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  failure_reason: string | null;
   created_at: string;
 }
 
@@ -24,7 +26,7 @@ interface IPStats {
 }
 
 const SecurityDashboard = () => {
-  const [attempts, setAttempts] = useState<SecurityAttempt[]>([]);
+  const [attempts, setAttempts] = useState<LoginAttempt[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ const SecurityDashboard = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from("admin_key_attempts")
+        .from("login_attempts")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(1000);
@@ -92,9 +94,9 @@ const SecurityDashboard = () => {
 
   // Error reasons distribution
   const errorReasons = attempts
-    .filter((a) => !a.success && a.error_reason)
+    .filter((a) => !a.success && a.failure_reason)
     .reduce((acc, attempt) => {
-      const reason = attempt.error_reason!;
+      const reason = attempt.failure_reason!;
       acc[reason] = (acc[reason] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
@@ -115,7 +117,7 @@ const SecurityDashboard = () => {
       <div>
         <h2 className="text-3xl font-bold">Security Dashboard</h2>
         <p className="text-muted-foreground">
-          Monitor admin access attempts and identify suspicious activity
+          Monitor login attempts and identify suspicious activity
         </p>
       </div>
 
@@ -184,8 +186,8 @@ const SecurityDashboard = () => {
         {/* Attempts Over Time */}
         <Card>
           <CardHeader>
-            <CardTitle>Attempts Over Time (Last 7 Days)</CardTitle>
-            <CardDescription>Daily failed and successful validation attempts</CardDescription>
+            <CardTitle>Login Attempts Over Time (Last 7 Days)</CardTitle>
+            <CardDescription>Daily failed and successful login attempts</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -280,8 +282,8 @@ const SecurityDashboard = () => {
       {/* Recent Attempts Log */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Validation Attempts</CardTitle>
-          <CardDescription>Last 20 admin key validation attempts</CardDescription>
+          <CardTitle>Recent Login Attempts</CardTitle>
+          <CardDescription>Last 50 login attempts across all users</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -290,16 +292,20 @@ const SecurityDashboard = () => {
                 <TableHead>Timestamp</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>IP Address</TableHead>
+                <TableHead>User Agent</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Error Reason</TableHead>
+                <TableHead>Failure Reason</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {attempts.slice(0, 20).map((attempt) => (
+              {attempts.slice(0, 50).map((attempt) => (
                 <TableRow key={attempt.id}>
                   <TableCell>{format(new Date(attempt.created_at), "PPpp")}</TableCell>
                   <TableCell>{attempt.email}</TableCell>
-                  <TableCell className="font-mono">{attempt.ip_address || "N/A"}</TableCell>
+                  <TableCell className="font-mono text-xs">{attempt.ip_address || "N/A"}</TableCell>
+                  <TableCell className="text-xs max-w-xs truncate" title={attempt.user_agent || ""}>
+                    {attempt.user_agent || "N/A"}
+                  </TableCell>
                   <TableCell>
                     {attempt.success ? (
                       <Badge className="bg-primary">Success</Badge>
@@ -308,7 +314,7 @@ const SecurityDashboard = () => {
                     )}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {attempt.error_reason || "-"}
+                    {attempt.failure_reason || "-"}
                   </TableCell>
                 </TableRow>
               ))}

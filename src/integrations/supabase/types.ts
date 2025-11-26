@@ -125,6 +125,39 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempts: {
+        Row: {
+          created_at: string
+          email: string
+          failure_reason: string | null
+          id: string
+          ip_address: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -162,7 +195,10 @@ export type Database = {
           banned_at: string | null
           banned_reason: string | null
           created_at: string
+          failed_login_attempts: number | null
           id: string
+          last_failed_login_at: string | null
+          locked_until: string | null
           name: string
           phone: string | null
           referral_code: string | null
@@ -174,7 +210,10 @@ export type Database = {
           banned_at?: string | null
           banned_reason?: string | null
           created_at?: string
+          failed_login_attempts?: number | null
           id: string
+          last_failed_login_at?: string | null
+          locked_until?: string | null
           name: string
           phone?: string | null
           referral_code?: string | null
@@ -186,7 +225,10 @@ export type Database = {
           banned_at?: string | null
           banned_reason?: string | null
           created_at?: string
+          failed_login_attempts?: number | null
           id?: string
+          last_failed_login_at?: string | null
+          locked_until?: string | null
           name?: string
           phone?: string | null
           referral_code?: string | null
@@ -398,6 +440,19 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      handle_failed_login: {
+        Args: {
+          failure_reason?: string
+          ip_addr?: string
+          user_agent_str?: string
+          user_email: string
+        }
+        Returns: Json
+      }
+      handle_successful_login: {
+        Args: { ip_addr?: string; user_agent_str?: string; user_email: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -405,6 +460,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_account_locked: { Args: { user_email: string }; Returns: boolean }
       redeem_points: {
         Args: { _description: string; _points: number; _user_id: string }
         Returns: undefined

@@ -53,6 +53,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("weak");
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const [referralCode, setReferralCode] = useState(searchParams.get("ref") || "");
@@ -91,12 +92,16 @@ const Auth = () => {
       toast.error("Password is too weak. Please create a stronger password.");
       return;
     }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match. Please try again.");
+      return;
+    }
     
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
     const name = formData.get("name") as string;
     const phone = formData.get("phone") as string;
     const address = formData.get("address") as string;
@@ -427,6 +432,23 @@ const Auth = () => {
                     <p className="text-xs text-muted-foreground">
                       Use 8+ characters with uppercase, lowercase, numbers, and symbols
                     </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+                    <PasswordInput
+                      id="signup-confirm-password"
+                      name="confirmPassword"
+                      placeholder="••••••••"
+                      minLength={8}
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    {confirmPassword && password !== confirmPassword && (
+                      <p className="text-xs text-destructive">
+                        Passwords do not match
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-referral">Referral Code (Optional)</Label>

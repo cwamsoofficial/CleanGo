@@ -61,14 +61,21 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         return;
       }
 
-      const userRole = await getUserRole(user.id);
-      setRole(userRole);
-
+      // Check if user is banned
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name")
+        .select("name, banned, banned_reason")
         .eq("id", user.id)
         .single();
+
+      if (profile?.banned) {
+        await supabase.auth.signOut();
+        navigate("/auth");
+        return;
+      }
+
+      const userRole = await getUserRole(user.id);
+      setRole(userRole);
 
       if (profile) {
         setUserName(profile.name);

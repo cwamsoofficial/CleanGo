@@ -158,6 +158,9 @@ export type Database = {
       profiles: {
         Row: {
           address: string | null
+          banned: boolean
+          banned_at: string | null
+          banned_reason: string | null
           created_at: string
           id: string
           name: string
@@ -167,6 +170,9 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          banned?: boolean
+          banned_at?: string | null
+          banned_reason?: string | null
           created_at?: string
           id: string
           name: string
@@ -176,6 +182,9 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          banned?: boolean
+          banned_at?: string | null
+          banned_reason?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -380,6 +389,11 @@ export type Database = {
         Args: { _description: string; _points: number; _user_id: string }
         Returns: undefined
       }
+      ban_user: {
+        Args: { _reason?: string; _user_id: string }
+        Returns: undefined
+      }
+      delete_user_account: { Args: { _user_id: string }; Returns: undefined }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -395,6 +409,7 @@ export type Database = {
         Args: { _description: string; _points: number; _user_id: string }
         Returns: undefined
       }
+      unban_user: { Args: { _user_id: string }; Returns: undefined }
       update_user_streak: { Args: { _user_id: string }; Returns: undefined }
       validate_admin_key: {
         Args: { input_key: string; user_email: string; user_ip?: string }

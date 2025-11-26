@@ -162,12 +162,34 @@ const Auth = () => {
     const password = formData.get("password") as string;
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
+
+      // Check if user is banned
+      if (data.user) {
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("banned, banned_reason")
+          .eq("id", data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error checking ban status:", profileError);
+        }
+
+        if (profile?.banned) {
+          await supabase.auth.signOut();
+          const reason = profile.banned_reason 
+            ? `Reason: ${profile.banned_reason}` 
+            : "Contact support for more information.";
+          toast.error(`Your account has been banned. ${reason}`);
+          return;
+        }
+      }
 
       toast.success("Welcome back!");
     } catch (error: any) {

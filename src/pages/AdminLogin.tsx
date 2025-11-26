@@ -55,6 +55,26 @@ const AdminLogin = () => {
         return;
       }
 
+      // Check if user is banned
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("banned, banned_reason")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Error checking ban status:", profileError);
+      }
+
+      if (profile?.banned) {
+        await supabase.auth.signOut();
+        const reason = profile.banned_reason 
+          ? `Reason: ${profile.banned_reason}` 
+          : "Contact support for more information.";
+        setError(`Your account has been banned. ${reason}`);
+        return;
+      }
+
       toast({
         title: "Success",
         description: "Logged in successfully",

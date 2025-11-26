@@ -30,6 +30,29 @@ const Dashboard = () => {
       const userRole = await getUserRole(user.id);
       setRole(userRole);
 
+      // For admins, fetch all data without filtering by user
+      if (userRole === "admin") {
+        const { data: allPickups } = await supabase
+          .from("waste_pickups")
+          .select("*");
+
+        const { data: allIssues } = await supabase
+          .from("issue_reports")
+          .select("*");
+
+        // Get today's date for completed today count
+        const today = new Date().toISOString().split('T')[0];
+
+        setStats({
+          totalPickups: allPickups?.length || 0,
+          pendingPickups: allIssues?.filter((i) => i.status === "pending").length || 0,
+          completedPickups: allPickups?.filter((p) => p.status === "collected" && p.completed_at?.startsWith(today)).length || 0,
+          issues: allIssues?.length || 0,
+          points: 0,
+        });
+        return;
+      }
+
       // Fetch pickups data
       const { data: pickups } = await supabase
         .from("waste_pickups")

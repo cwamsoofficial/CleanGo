@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, User, Mail, Phone, MapPin } from "lucide-react";
+import { Loader2, User, Mail, Phone, MapPin, ShieldCheck } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { getUserRole } from "@/lib/supabase";
 
@@ -14,7 +15,9 @@ const Settings = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [changingEmail, setChangingEmail] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [newEmail, setNewEmail] = useState("");
   const [profile, setProfile] = useState({
     name: "",
     email: "",
@@ -94,6 +97,32 @@ const Settings = () => {
     }
   };
 
+  const handleEmailChange = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setChangingEmail(true);
+
+    try {
+      if (!newEmail || newEmail === profile.email) {
+        toast.error("Please enter a different email address");
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({
+        email: newEmail,
+      });
+
+      if (error) throw error;
+
+      toast.success("Verification email sent! Please check both your old and new email addresses to confirm the change.");
+      setNewEmail("");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update email");
+      console.error(error);
+    } finally {
+      setChangingEmail(false);
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -106,7 +135,7 @@ const Settings = () => {
 
   return (
     <DashboardLayout>
-      <div className="container max-w-2xl mx-auto py-8 px-4">
+      <div className="container max-w-2xl mx-auto py-8 px-4 space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Profile Settings</CardTitle>
@@ -153,11 +182,11 @@ const Settings = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="current-email">Current Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="email"
+                    id="current-email"
                     type="email"
                     value={profile.email}
                     className="pl-10 bg-muted"
@@ -165,7 +194,7 @@ const Settings = () => {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Email cannot be changed
+                  Your current email address
                 </p>
               </div>
 
@@ -207,6 +236,67 @@ const Settings = () => {
                   </>
                 ) : (
                   "Save Changes"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-primary" />
+              Change Email Address
+            </CardTitle>
+            <CardDescription>
+              Update your email address. You'll need to verify both your old and new email addresses for security.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleEmailChange} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-email">New Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="new-email"
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    className="pl-10"
+                    placeholder="Enter new email address"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  A verification email will be sent to both your current and new email addresses
+                </p>
+              </div>
+
+              <Separator />
+
+              <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                <p className="text-sm font-medium">Important Security Notice:</p>
+                <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+                  <li>Verification emails will be sent to both addresses</li>
+                  <li>You must confirm the change from both email accounts</li>
+                  <li>Your email won't change until verification is complete</li>
+                  <li>Check your spam folder if you don't see the emails</li>
+                </ul>
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={changingEmail || !newEmail}
+              >
+                {changingEmail ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending Verification...
+                  </>
+                ) : (
+                  "Change Email Address"
                 )}
               </Button>
             </form>

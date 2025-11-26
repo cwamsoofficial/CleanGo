@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getUserRole } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,15 +11,16 @@ import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminLogin = () => {
-  const [adminKey, setAdminKey] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleValidateKey = async () => {
-    if (!adminKey.trim()) {
-      setError("Please enter an admin key");
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter both email and password");
       return;
     }
 
@@ -26,28 +28,38 @@ const AdminLogin = () => {
     setError("");
 
     try {
-      const { data, error: rpcError } = await supabase.rpc("validate_admin_key", {
-        input_key: adminKey,
-        user_email: "admin-login",
-        user_ip: "127.0.0.1",
-      } as any);
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      if (rpcError) throw rpcError;
+      if (signInError) throw signInError;
 
-      const result = data as { valid: boolean; error?: string; message: string };
-
-      if (result.valid) {
-        toast({
-          title: "Success",
-          description: "Admin key validated successfully",
-        });
-        navigate("/dashboard/admin");
-      } else {
-        setError(result.message || "Invalid admin key");
+      if (!data.user) {
+        throw new Error("Login failed");
       }
-    } catch (err) {
-      console.error("Admin key validation error:", err);
-      setError("Failed to validate admin key. Please try again.");
+
+      // Check if user is an admin
+      const role = await getUserRole(data.user.id);
+      
+      if (role !== 'admin') {
+        await supabase.auth.signOut();
+        setError("Access denied. This login is for administrators only.");
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Logged in successfully",
+      });
+      navigate("/dashboard/admin");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      if (err.message === "Invalid login credentials") {
+        setError("Invalid email or password");
+      } else {
+        setError(err.message || "Failed to log in. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -64,7 +76,7 @@ const AdminLogin = () => {
           </div>
           <CardTitle className="text-2xl">Admin Access</CardTitle>
           <CardDescription>
-            Enter your admin key to access the admin dashboard
+            Sign in with your admin credentials
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -75,24 +87,36 @@ const AdminLogin = () => {
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="adminKey">Admin Key</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              id="adminKey"
+              id="email"
+              type="email"
+              placeholder="admin@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
               type="password"
-              placeholder="Enter admin key"
-              value={adminKey}
-              onChange={(e) => setAdminKey(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleValidateKey()}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               disabled={loading}
             />
           </div>
 
           <Button
-            onClick={handleValidateKey}
+            onClick={handleLogin}
             disabled={loading}
             className="w-full"
           >
-            {loading ? "Validating..." : "Validate Key"}
+            {loading ? "Signing in..." : "Sign In"}
           </Button>
 
           <div className="text-center pt-2">

@@ -132,6 +132,7 @@ const AdminSignup = () => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const name = formData.get("name") as string;
+    const address = formData.get("address") as string;
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -140,6 +141,7 @@ const AdminSignup = () => {
         options: {
           data: {
             name,
+            address,
             role: 'admin',
           },
           emailRedirectTo: `${window.location.origin}/dashboard`,
@@ -245,6 +247,16 @@ const AdminSignup = () => {
                     name="email"
                     type="email"
                     placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-address">Address</Label>
+                  <Input
+                    id="admin-address"
+                    name="address"
+                    type="text"
+                    placeholder="123 Main Street, City"
                     required
                   />
                 </div>

@@ -94,6 +94,7 @@ const AdminSignup = () => {
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
+    const username = formData.get("username") as string;
 
     try {
       // Create the admin account
@@ -103,6 +104,7 @@ const AdminSignup = () => {
         options: {
           data: {
             role: 'admin',
+            name: username,
           },
           emailRedirectTo: `${window.location.origin}/dashboard/admin`,
         },
@@ -146,6 +148,16 @@ const AdminSignup = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAdminSignUp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="admin-username">Username</Label>
+                <Input
+                  id="admin-username"
+                  name="username"
+                  type="text"
+                  placeholder="Enter your username"
+                  required
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="admin-email">Email</Label>
                 <Input

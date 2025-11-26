@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -246,10 +247,9 @@ const Auth = () => {
               <form onSubmit={handleUpdatePassword} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="new-password">New Password</Label>
-                  <Input
+                  <PasswordInput
                     id="new-password"
                     name="password"
-                    type="password"
                     placeholder="••••••••"
                     required
                     value={password}
@@ -321,10 +321,9 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signin-password">Password</Label>
-                    <Input
+                    <PasswordInput
                       id="signin-password"
                       name="password"
-                      type="password"
                       placeholder="••••••••"
                       required
                     />
@@ -405,10 +404,9 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
-                    <Input
+                    <PasswordInput
                       id="signup-password"
                       name="password"
-                      type="password"
                       placeholder="••••••••"
                       minLength={8}
                       required

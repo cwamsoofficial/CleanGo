@@ -17,6 +17,7 @@ interface Pickup {
   created_at: string;
   completed_at: string | null;
   collector_id: string | null;
+  collector_name?: string;
 }
 
 const Pickups = () => {
@@ -51,7 +52,33 @@ const Pickups = () => {
 
       if (error) throw error;
 
-      setPickups(data || []);
+      // For admins, fetch collector names
+      if (userRole === "admin" && data) {
+        const collectorIds = data
+          .filter(p => p.collector_id)
+          .map(p => p.collector_id);
+
+        if (collectorIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, name")
+            .in("id", collectorIds);
+
+          const pickupsWithCollectors = data.map(pickup => {
+            if (pickup.collector_id) {
+              const profile = profiles?.find(p => p.id === pickup.collector_id);
+              return { ...pickup, collector_name: profile?.name || "Unknown" };
+            }
+            return pickup;
+          });
+
+          setPickups(pickupsWithCollectors);
+        } else {
+          setPickups(data);
+        }
+      } else {
+        setPickups(data || []);
+      }
     } catch (error: any) {
       toast.error("Failed to load pickups");
     } finally {
@@ -231,6 +258,12 @@ const Pickups = () => {
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4" />
                       {pickup.location}
+                    </div>
+                  )}
+                  {role === "admin" && pickup.collector_name && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <User className="w-4 h-4" />
+                      Collector: {pickup.collector_name}
                     </div>
                   )}
                   {pickup.notes && (

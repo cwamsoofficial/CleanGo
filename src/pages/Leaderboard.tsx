@@ -59,55 +59,44 @@ export default function Leaderboard() {
 
       if (rolesError) throw rolesError;
 
-      // Filter out admin users
-      const nonAdminRewards = rewardsData.filter(reward => {
+      // Filter out admin and collector users (only show citizens and companies)
+      const eligibleRewards = rewardsData.filter(reward => {
         const userRole = rolesData?.find(r => r.user_id === reward.user_id);
-        return userRole?.role !== 'admin';
+        return userRole?.role !== 'admin' && userRole?.role !== 'collector';
       });
 
-      if (nonAdminRewards.length === 0) {
+      if (eligibleRewards.length === 0) {
         setLeaderboard([]);
         setLoading(false);
         return;
       }
 
-      // Fetch profiles for non-admin users
-      const nonAdminUserIds = nonAdminRewards.map(r => r.user_id);
+      // Fetch profiles for eligible users
+      const eligibleUserIds = eligibleRewards.map(r => r.user_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, name')
-        .in('id', nonAdminUserIds);
+        .in('id', eligibleUserIds);
 
       if (profilesError) throw profilesError;
 
-      // Fetch completed pickups count for each user
+      // Fetch completed pickups count for each user (only as requesters, not as collectors)
       const { data: pickupsData, error: pickupsError } = await supabase
         .from('waste_pickups')
-        .select('user_id, collector_id, status')
-        .in('user_id', nonAdminUserIds)
+        .select('user_id, status')
+        .in('user_id', eligibleUserIds)
         .eq('status', 'collected');
 
       if (pickupsError) throw pickupsError;
 
-      // Also fetch pickups where user was the collector
-      const { data: collectorPickupsData, error: collectorPickupsError } = await supabase
-        .from('waste_pickups')
-        .select('collector_id, status')
-        .in('collector_id', nonAdminUserIds)
-        .eq('status', 'collected');
-
-      if (collectorPickupsError) throw collectorPickupsError;
-
-      // Count completed pickups per user (both as user and as collector)
+      // Count completed pickups per user
       const pickupCounts: Record<string, number> = {};
-      nonAdminUserIds.forEach(id => {
-        const asUser = pickupsData?.filter(p => p.user_id === id).length || 0;
-        const asCollector = collectorPickupsData?.filter(p => p.collector_id === id).length || 0;
-        pickupCounts[id] = asUser + asCollector;
+      eligibleUserIds.forEach(id => {
+        pickupCounts[id] = pickupsData?.filter(p => p.user_id === id).length || 0;
       });
 
       // Combine data
-      const leaderboardData: LeaderboardEntry[] = nonAdminRewards.map((reward, index) => {
+      const leaderboardData: LeaderboardEntry[] = eligibleRewards.map((reward, index) => {
         const profile = profilesData?.find(p => p.id === reward.user_id);
         return {
           user_id: reward.user_id,

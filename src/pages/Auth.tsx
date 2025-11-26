@@ -162,12 +162,49 @@ const Auth = () => {
     const password = formData.get("password") as string;
 
     try {
+      // Check if account is locked
+      const { data: isLocked } = await supabase.rpc('is_account_locked', {
+        user_email: email
+      });
+
+      if (isLocked) {
+        toast.error("Account temporarily locked due to multiple failed login attempts. Please try again in 30 minutes.");
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Log failed attempt
+        const { data: failResult } = await supabase.rpc('handle_failed_login', {
+          user_email: email,
+          failure_reason: error.message,
+          ip_addr: null,
+          user_agent_str: navigator.userAgent
+        });
+
+        const result = failResult as any;
+        if (result?.locked) {
+          toast.error(`Account locked after ${result.attempts} failed attempts. Please try again in ${result.lockout_minutes} minutes.`);
+        } else if (result?.remaining_attempts) {
+          toast.error(`Invalid credentials. ${result.remaining_attempts} attempts remaining before lockout.`);
+        } else {
+          toast.error(error.message);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Log successful login
+      await supabase.rpc('handle_successful_login', {
+        user_email: email,
+        ip_addr: null,
+        user_agent_str: navigator.userAgent
+      });
 
       // Check if user is banned
       if (data.user) {

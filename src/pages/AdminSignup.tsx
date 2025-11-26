@@ -86,33 +86,11 @@ const AdminSignup = () => {
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const adminKey = formData.get("adminKey") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
     try {
-      // First validate the admin key
-      const { data: validationData, error: rpcError } = await supabase.rpc('validate_admin_key', {
-        input_key: adminKey,
-        user_email: email,
-        user_ip: "127.0.0.1"
-      });
-
-      if (rpcError) {
-        toast.error("Failed to validate Admin Key");
-        setLoading(false);
-        return;
-      }
-
-      const result = validationData as { valid: boolean; error?: string; message: string };
-
-      if (!result.valid) {
-        toast.error(result.message || "Invalid Admin Key");
-        setLoading(false);
-        return;
-      }
-
-      // Admin key is valid, create the account
+      // Create the admin account
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -157,24 +135,11 @@ const AdminSignup = () => {
           <CardHeader>
             <CardTitle>Admin Registration</CardTitle>
             <CardDescription>
-              Admin Key required for authorization
+              Create your administrator account
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAdminSignUp} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="admin-key">Admin Key</Label>
-                <Input
-                  id="admin-key"
-                  name="adminKey"
-                  type="text"
-                  placeholder="ADMIN-2024-MASTER"
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Enter ADMIN-2024-MASTER to create an admin account
-                </p>
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="admin-email">Email</Label>
                 <Input

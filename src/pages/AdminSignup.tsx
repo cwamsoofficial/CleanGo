@@ -47,11 +47,6 @@ const getPasswordStrengthIcon = (strength: PasswordStrength) => {
 
 const AdminSignup = () => {
   const navigate = useNavigate();
-  const [adminKey, setAdminKey] = useState("");
-  const [keyValidated, setKeyValidated] = useState(false);
-  const [keyLoading, setKeyLoading] = useState(false);
-  const [keyError, setKeyError] = useState("");
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -61,41 +56,6 @@ const AdminSignup = () => {
     const newPassword = e.target.value;
     setPassword(newPassword);
     setPasswordStrength(calculatePasswordStrength(newPassword));
-  };
-
-  const handleKeyValidation = async () => {
-    if (!adminKey.trim()) {
-      setKeyError("Please enter an admin key");
-      return;
-    }
-
-    setKeyLoading(true);
-    setKeyError("");
-
-    try {
-      const { data, error: validateError } = await supabase.rpc('validate_admin_key', {
-        input_key: adminKey,
-        user_email: email || 'unknown',
-        user_ip: null
-      });
-
-      if (validateError) throw validateError;
-
-      const result = data as { valid: boolean; message: string };
-
-      if (!result.valid) {
-        setKeyError(result.message || "Invalid admin key");
-        return;
-      }
-
-      setKeyValidated(true);
-      toast.success("Admin key validated successfully");
-    } catch (err: any) {
-      console.error("Key validation error:", err);
-      setKeyError(err.message || "Failed to validate admin key");
-    } finally {
-      setKeyLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -131,6 +91,9 @@ const AdminSignup = () => {
     }
     
     setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
 
     try {
       // Create the admin account
@@ -178,63 +141,21 @@ const AdminSignup = () => {
           <CardHeader>
             <CardTitle>Admin Registration</CardTitle>
             <CardDescription>
-              {keyValidated ? "Create your administrator account" : "Enter admin key to continue"}
+              Create your administrator account
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!keyValidated ? (
-              <div className="space-y-4">
-                {keyError && (
-                  <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm">
-                    {keyError}
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <Label htmlFor="adminKey">Admin Key</Label>
-                  <Input
-                    id="adminKey"
-                    type="password"
-                    placeholder="Enter admin key"
-                    value={adminKey}
-                    onChange={(e) => setAdminKey(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleKeyValidation()}
-                    disabled={keyLoading}
-                  />
-                </div>
-                <Button
-                  onClick={handleKeyValidation}
-                  disabled={keyLoading}
-                  className="w-full"
-                >
-                  {keyLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Validating...
-                    </>
-                  ) : (
-                    "Validate Key"
-                  )}
-                </Button>
-                <div className="text-center pt-2">
-                  <Link to="/admin/login" className="text-sm text-muted-foreground hover:text-primary inline-flex items-center gap-1">
-                    <ArrowLeft className="w-4 h-4" />
-                    Back to Admin Login
-                  </Link>
-                </div>
+            <form onSubmit={handleAdminSignUp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="admin-email">Email</Label>
+                <Input
+                  id="admin-email"
+                  name="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  required
+                />
               </div>
-            ) : (
-              <form onSubmit={handleAdminSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="admin-email">Email</Label>
-                  <Input
-                    id="admin-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
               <div className="space-y-2">
                 <Label htmlFor="admin-password">Password</Label>
                 <PasswordInput
@@ -278,24 +199,23 @@ const AdminSignup = () => {
                   </p>
                 )}
               </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    "Create Admin Account"
-                  )}
-                </Button>
-                <div className="text-center pt-2">
-                  <Link to="/admin/login" className="text-sm text-muted-foreground hover:text-primary inline-flex items-center gap-1">
-                    <ArrowLeft className="w-4 h-4" />
-                    Back to Admin Login
-                  </Link>
-                </div>
-              </form>
-            )}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Admin Account"
+                )}
+              </Button>
+              <div className="text-center pt-2">
+                <Link to="/admin/login" className="text-sm text-muted-foreground hover:text-primary inline-flex items-center gap-1">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Admin Login
+                </Link>
+              </div>
+            </form>
           </CardContent>
         </Card>
       </div>

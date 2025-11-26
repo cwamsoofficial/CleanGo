@@ -60,7 +60,7 @@ const AdminSignup = () => {
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/admin");
+        navigate("/dashboard/admin");
       }
     });
 
@@ -68,7 +68,7 @@ const AdminSignup = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
-        navigate("/admin");
+        navigate("/dashboard/admin");
       }
     });
 
@@ -98,7 +98,7 @@ const AdminSignup = () => {
           data: {
             role: 'admin',
           },
-          emailRedirectTo: `${window.location.origin}/admin`,
+          emailRedirectTo: `${window.location.origin}/dashboard/admin`,
         },
       });
 

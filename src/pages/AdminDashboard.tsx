@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Users, Trash2, AlertCircle, Award, TrendingUp } from "lucide-react";
-import AdminKeyManagement from "@/components/AdminKeyManagement";
 import SecurityDashboard from "@/components/SecurityDashboard";
 import UserManagement from "@/components/UserManagement";
 
@@ -176,7 +175,6 @@ const AdminDashboard = () => {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
-            <TabsTrigger value="keys">Admin Keys</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 mt-6">
@@ -286,10 +284,6 @@ const AdminDashboard = () => {
 
           <TabsContent value="security" className="space-y-8 mt-6">
             <SecurityDashboard />
-          </TabsContent>
-
-          <TabsContent value="keys" className="space-y-8 mt-6">
-            <AdminKeyManagement />
           </TabsContent>
         </Tabs>
       </div>

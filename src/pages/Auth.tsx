@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 import logo from "@/assets/cwamso-logo.png";
 
 type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
+type AuthView = "signin" | "signup" | "reset";
 
 const calculatePasswordStrength = (password: string): PasswordStrength => {
   let strength = 0;
@@ -57,11 +57,24 @@ const Auth = () => {
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("weak");
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const [referralCode, setReferralCode] = useState(searchParams.get("ref") || "");
+  const [authView, setAuthView] = useState<AuthView>("signin");
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value;
     setPassword(newPassword);
     setPasswordStrength(calculatePasswordStrength(newPassword));
+  };
+
+  const resetForm = () => {
+    setPassword("");
+    setConfirmPassword("");
+    setPasswordStrength("weak");
+    setResetSent(false);
+  };
+
+  const switchView = (view: AuthView) => {
+    resetForm();
+    setAuthView(view);
   };
 
   useEffect(() => {
@@ -358,239 +371,312 @@ const Auth = () => {
           <p className="text-muted-foreground">Community Waste Management Software</p>
         </div>
 
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            <TabsTrigger value="reset">Reset</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="signin">
-            <Card>
-              <CardHeader>
-                <CardTitle>Welcome Back</CardTitle>
-                <CardDescription>Sign in to your account to continue</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
-                    <Input
-                      id="signin-email"
-                      name="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
+        {/* Sign In View */}
+        {authView === "signin" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Log in to your account</CardTitle>
+              <CardDescription>Welcome back! Sign in to continue</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signin-email">Email address</Label>
+                  <Input
+                    id="signin-email"
+                    name="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
                     <Label htmlFor="signin-password">Password</Label>
-                    <PasswordInput
-                      id="signin-password"
-                      name="password"
-                      placeholder="••••••••"
-                      required
-                    />
+                    <button
+                      type="button"
+                      onClick={() => switchView("reset")}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Forgot?
+                    </button>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing in...
-                      </>
-                    ) : (
-                      "Sign In"
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                  <PasswordInput
+                    id="signin-password"
+                    name="password"
+                    placeholder="Enter password"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Log in"
+                  )}
+                </Button>
+              </form>
 
-          <TabsContent value="signup">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Account</CardTitle>
-                <CardDescription>Join CWaMSo to manage waste efficiently</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignUp} className="space-y-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => switchView("signup")}
+              >
+                Sign up
+              </Button>
+
+              <p className="text-center text-sm text-muted-foreground">
+                New to CWaMSo?{" "}
+                <button
+                  type="button"
+                  onClick={() => switchView("signup")}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Create an account
+                </button>
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Sign Up View */}
+        {authView === "signup" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Create your account</CardTitle>
+              <CardDescription>Join CWaMSo to manage waste efficiently</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name">Full Name</Label>
+                  <Input
+                    id="signup-name"
+                    name="name"
+                    type="text"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email address</Label>
+                  <Input
+                    id="signup-email"
+                    name="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-phone">Phone</Label>
+                  <Input
+                    id="signup-phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="+1 (555) 000-0000"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-address">Address</Label>
+                  <Input
+                    id="signup-address"
+                    name="address"
+                    type="text"
+                    placeholder="123 Main St, City, State"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-role">Role</Label>
+                  <Select name="role" defaultValue="citizen" required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="citizen">Citizen</SelectItem>
+                      <SelectItem value="company">Company/Organization</SelectItem>
+                      <SelectItem value="collector">Waste Collector</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password</Label>
+                  <PasswordInput
+                    id="signup-password"
+                    name="password"
+                    placeholder="Create a password"
+                    minLength={8}
+                    required
+                    value={password}
+                    onChange={handlePasswordChange}
+                  />
+                  {password && (
+                    <div className="flex items-center gap-2 text-sm">
+                      {(() => {
+                        const Icon = getPasswordStrengthIcon(passwordStrength);
+                        return <Icon className={`w-4 h-4 ${getPasswordStrengthColor(passwordStrength)}`} />;
+                      })()}
+                      <span className={getPasswordStrengthColor(passwordStrength)}>
+                        Password strength: {passwordStrength}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+                  <PasswordInput
+                    id="signup-confirm-password"
+                    name="confirmPassword"
+                    placeholder="Confirm your password"
+                    minLength={8}
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  {confirmPassword && password !== confirmPassword && (
+                    <p className="text-sm text-destructive">Passwords do not match</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-referral">Referral Code (Optional)</Label>
+                  <Input
+                    id="signup-referral"
+                    name="referralCode"
+                    type="text"
+                    placeholder="Enter referral code"
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    "Sign up"
+                  )}
+                </Button>
+              </form>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => switchView("signin")}
+              >
+                Log in
+              </Button>
+
+              <p className="text-center text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => switchView("signin")}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Sign in
+                </button>
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Reset Password View */}
+        {authView === "reset" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Reset your password</CardTitle>
+              <CardDescription>
+                {resetSent
+                  ? "Check your email for the reset link"
+                  : "Enter your email to receive a password reset link"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {!resetSent ? (
+                <form onSubmit={handlePasswordReset} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="reset-email">Email address</Label>
                     <Input
-                      id="signup-name"
-                      name="name"
-                      type="text"
-                      placeholder="John Doe"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
+                      id="reset-email"
                       name="email"
                       type="email"
                       placeholder="your@email.com"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-phone">Phone</Label>
-                    <Input
-                      id="signup-phone"
-                      name="phone"
-                      type="tel"
-                      placeholder="+1 (555) 000-0000"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-address">Address</Label>
-                    <Input
-                      id="signup-address"
-                      name="address"
-                      type="text"
-                      placeholder="123 Main St, City, State"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-role">Role</Label>
-                    <Select name="role" defaultValue="citizen" required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="citizen">Citizen</SelectItem>
-                        <SelectItem value="company">Company/Organization</SelectItem>
-                        <SelectItem value="collector">Waste Collector</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <PasswordInput
-                      id="signup-password"
-                      name="password"
-                      placeholder="••••••••"
-                      minLength={8}
-                      required
-                      value={password}
-                      onChange={handlePasswordChange}
-                    />
-                    {password && (
-                      <div className="flex items-center gap-2 text-sm">
-                        {(() => {
-                          const Icon = getPasswordStrengthIcon(passwordStrength);
-                          return <Icon className={`w-4 h-4 ${getPasswordStrengthColor(passwordStrength)}`} />;
-                        })()}
-                        <span className={getPasswordStrengthColor(passwordStrength)}>
-                          Password strength: <span className="font-semibold capitalize">{passwordStrength.replace("-", " ")}</span>
-                        </span>
-                      </div>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      Use 8+ characters with uppercase, lowercase, numbers, and symbols
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-confirm-password">Confirm Password</Label>
-                    <PasswordInput
-                      id="signup-confirm-password"
-                      name="confirmPassword"
-                      placeholder="••••••••"
-                      minLength={8}
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    {confirmPassword && password !== confirmPassword && (
-                      <p className="text-xs text-destructive">
-                        Passwords do not match
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-referral">Referral Code (Optional)</Label>
-                    <Input
-                      id="signup-referral"
-                      name="referralCode"
-                      type="text"
-                      placeholder="Enter referral code"
-                      value={referralCode}
-                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                      maxLength={8}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Have a referral code? Enter it to help your friend earn rewards!
-                    </p>
-                  </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating account...
+                        Sending...
                       </>
                     ) : (
-                      "Create Account"
+                      "Send reset link"
                     )}
                   </Button>
                 </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground mb-4">
+                    We've sent a password reset link to your email address.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setResetSent(false);
+                    }}
+                  >
+                    Send again
+                  </Button>
+                </div>
+              )}
 
-          <TabsContent value="reset">
-            <Card>
-              <CardHeader>
-                <CardTitle>Reset Password</CardTitle>
-                <CardDescription>
-                  {resetSent
-                    ? "Check your email for the reset link"
-                    : "Enter your email to receive a reset link"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {!resetSent ? (
-                  <form onSubmit={handlePasswordReset} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="reset-email">Email</Label>
-                      <Input
-                        id="reset-email"
-                        name="email"
-                        type="email"
-                        placeholder="your@email.com"
-                        required
-                      />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        "Send Reset Link"
-                      )}
-                    </Button>
-                  </form>
-                ) : (
-                  <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground mb-4">
-                      We've sent a password reset link to your email. Click the link to reset your password.
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => setResetSent(false)}
-                      className="w-full"
-                    >
-                      Send Another Link
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => switchView("signin")}
+              >
+                Back to login
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

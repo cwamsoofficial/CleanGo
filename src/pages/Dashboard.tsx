@@ -95,10 +95,10 @@ const Dashboard = () => {
             description="All waste collections"
           />
           <StatsCard
-            title="Pending Issues"
+            title="Total Issues"
             value={stats.issues}
             icon={AlertCircle}
-            description="Awaiting resolution"
+            description="All reported issues"
           />
           <StatsCard
             title="Completed Today"

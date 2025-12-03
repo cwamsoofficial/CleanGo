@@ -4,7 +4,8 @@ import { getUserRole, type UserRole } from "@/lib/supabase";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, AlertCircle, CheckCircle, Clock, TrendingUp, Plus, FileText } from "lucide-react";
+import { Package, AlertCircle, CheckCircle, Clock, TrendingUp, Plus, FileText, CreditCard, Receipt } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { RequestPickupDialog } from "@/components/RequestPickupDialog";
 import { RecentIssues } from "@/components/RecentIssues";
 import { useNavigate } from "react-router-dom";
@@ -239,6 +240,80 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Digital Billing & Payments - Demo for Citizens/Companies */}
+        {(role === "citizen" || role === "company") && (
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    Digital Billing & Payments
+                  </CardTitle>
+                  <CardDescription>Manage your waste service bills</CardDescription>
+                </div>
+                <Badge variant="secondary" className="text-xs">Demo</Badge>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium">Current Balance</p>
+                    <p className="text-2xl font-bold text-primary">₦2,500.00</p>
+                  </div>
+                  <Button size="sm" className="gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    Pay Now
+                  </Button>
+                </div>
+                
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Payment Methods</p>
+                  <div className="flex gap-2">
+                    <Badge variant="outline">Bank Transfer</Badge>
+                    <Badge variant="outline">Card Payment</Badge>
+                    <Badge variant="outline">USSD</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Receipt className="h-5 w-5 text-primary" />
+                  Recent Bills
+                </CardTitle>
+                <CardDescription>Your billing history</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { month: "November 2025", amount: "₦2,500.00", status: "Pending" },
+                    { month: "October 2025", amount: "₦2,500.00", status: "Paid" },
+                    { month: "September 2025", amount: "₦2,500.00", status: "Paid" },
+                  ].map((bill, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 border rounded-lg">
+                      <div>
+                        <p className="text-sm font-medium">{bill.month}</p>
+                        <p className="text-xs text-muted-foreground">Waste Collection Service</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">{bill.amount}</p>
+                        <Badge 
+                          variant={bill.status === "Paid" ? "default" : "destructive"}
+                          className="text-xs"
+                        >
+                          {bill.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

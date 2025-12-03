@@ -7,6 +7,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Loader2, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 import logo from "@/assets/cwamso-logo.png";
@@ -560,6 +561,35 @@ const Auth = () => {
                     value={referralCode}
                     onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                   />
+                </div>
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="terms"
+                    name="terms"
+                    required
+                    className="mt-1"
+                  />
+                  <label
+                    htmlFor="terms"
+                    className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
+                  >
+                    I agree to the{" "}
+                    <a
+                      href="/terms"
+                      target="_blank"
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="/privacy"
+                      target="_blank"
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Privacy Policy
+                    </a>
+                  </label>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (

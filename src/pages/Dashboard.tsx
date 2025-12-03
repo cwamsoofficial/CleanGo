@@ -241,6 +241,120 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Digital Billing & Payments Confirmation - Demo for Collectors */}
+        {role === "collector" && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-primary" />
+                  Payment Confirmations
+                </CardTitle>
+                <CardDescription>Confirm received payments from users</CardDescription>
+              </div>
+              <Badge variant="secondary" className="text-xs">Demo</Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[
+                  { user: "John Doe", amount: "₦2,500.00", date: "Dec 3, 2025", status: "Pending" },
+                  { user: "ABC Company", amount: "₦5,000.00", date: "Dec 2, 2025", status: "Confirmed" },
+                  { user: "Mary Johnson", amount: "₦2,500.00", date: "Dec 1, 2025", status: "Confirmed" },
+                ].map((payment, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium">{payment.user}</p>
+                      <p className="text-xs text-muted-foreground">{payment.date}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{payment.amount}</p>
+                      {payment.status === "Pending" ? (
+                        <Button size="sm" variant="default">Confirm</Button>
+                      ) : (
+                        <Badge variant="default">Confirmed</Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Digital Billing & Payments Activity - Demo for Admins */}
+        {role === "admin" && (
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    Billing Activity Overview
+                  </CardTitle>
+                  <CardDescription>Monitor all payment activities</CardDescription>
+                </div>
+                <Badge variant="secondary" className="text-xs">Demo</Badge>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Total Revenue</p>
+                    <p className="text-xl font-bold text-primary">₦125,000</p>
+                  </div>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Pending Payments</p>
+                    <p className="text-xl font-bold text-orange-500">₦15,000</p>
+                  </div>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">This Month</p>
+                    <p className="text-xl font-bold">₦45,000</p>
+                  </div>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Active Subscribers</p>
+                    <p className="text-xl font-bold">48</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Receipt className="h-5 w-5 text-primary" />
+                  Recent Transactions
+                </CardTitle>
+                <CardDescription>Latest payment activities</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { user: "John Doe", type: "Payment", amount: "₦2,500.00", status: "Completed" },
+                    { user: "XYZ Corp", type: "Payment", amount: "₦5,000.00", status: "Pending" },
+                    { user: "Mary Johnson", type: "Refund", amount: "₦1,000.00", status: "Processed" },
+                    { user: "Tech Ltd", type: "Payment", amount: "₦7,500.00", status: "Completed" },
+                  ].map((tx, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 border rounded-lg">
+                      <div>
+                        <p className="text-sm font-medium">{tx.user}</p>
+                        <p className="text-xs text-muted-foreground">{tx.type}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">{tx.amount}</p>
+                        <Badge 
+                          variant={tx.status === "Completed" ? "default" : tx.status === "Pending" ? "destructive" : "secondary"}
+                          className="text-xs"
+                        >
+                          {tx.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Digital Billing & Payments - Demo for Citizens/Companies */}
         {(role === "citizen" || role === "company") && (
           <div className="grid gap-4 md:grid-cols-2">

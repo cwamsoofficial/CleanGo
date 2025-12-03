@@ -38,6 +38,7 @@ import {
   Settings,
   LogOut,
   Shield,
+  CreditCard,
 } from "lucide-react";
 import logo from "@/assets/cwamso-logo.png";
 
@@ -99,6 +100,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       citizen: [
         { icon: Package, label: "My Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Report Issue", path: "/dashboard/report-issue" },
+        { icon: CreditCard, label: "Billing", path: "/dashboard/billing" },
         { icon: Gift, label: "Rewards", path: "/dashboard/rewards" },
         { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },
         { icon: Award, label: "Achievements", path: "/dashboard/achievements" },
@@ -106,6 +108,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       company: [
         { icon: Package, label: "Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Report Issue", path: "/dashboard/report-issue" },
+        { icon: CreditCard, label: "Billing", path: "/dashboard/billing" },
         { icon: Gift, label: "Rewards", path: "/dashboard/rewards" },
         { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },
         { icon: Award, label: "Achievements", path: "/dashboard/achievements" },
@@ -113,6 +116,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       collector: [
         { icon: Package, label: "Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Issues", path: "/dashboard/issues" },
+        { icon: CreditCard, label: "Payments", path: "/dashboard/billing" },
         { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
         { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },
         { icon: Award, label: "Achievements", path: "/dashboard/achievements" },
@@ -121,6 +125,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         { icon: Shield, label: "Admin Dashboard", path: "/dashboard/admin" },
         { icon: Package, label: "All Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Issues", path: "/dashboard/issues" },
+        { icon: CreditCard, label: "Billing Activity", path: "/dashboard/billing" },
         { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
         { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },
       ],

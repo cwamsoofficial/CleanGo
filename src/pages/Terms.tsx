@@ -217,9 +217,8 @@ const Terms = () => {
               For questions about these Terms of Service:
             </p>
             <ul className="list-none text-muted-foreground mt-2 space-y-1">
-              <li><strong>Email:</strong> legal@cwamso.com</li>
-              <li><strong>Support:</strong> support@cwamso.com</li>
-              <li><strong>Address:</strong> CWaMSo Headquarters, Community Waste Management</li>
+              <li><strong>Email:</strong> cwamsoofficial@gmail.com</li>
+              <li><strong>Address:</strong> CWaMSo Headquarters, Kano State, Nigeria</li>
             </ul>
           </section>
         </div>

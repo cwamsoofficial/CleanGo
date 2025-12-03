@@ -601,6 +601,17 @@ const Auth = () => {
                   Sign in
                 </button>
               </p>
+
+              <p className="text-center text-sm text-muted-foreground">
+                Forgot your password?{" "}
+                <button
+                  type="button"
+                  onClick={() => switchView("reset")}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Reset it here
+                </button>
+              </p>
             </CardContent>
           </Card>
         )}

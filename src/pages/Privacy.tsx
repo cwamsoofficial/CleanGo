@@ -114,7 +114,7 @@ const Privacy = () => {
               <li><strong>Withdraw Consent:</strong> Withdraw consent at any time</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-4">
-              To exercise these rights, contact us at privacy@cwamso.com or through your account settings.
+              To exercise these rights, contact us at cwamsoofficial@gmail.com or through your account settings.
             </p>
           </section>
 
@@ -166,9 +166,8 @@ const Privacy = () => {
               For privacy-related inquiries or to exercise your rights:
             </p>
             <ul className="list-none text-muted-foreground mt-2 space-y-1">
-              <li><strong>Email:</strong> privacy@cwamso.com</li>
-              <li><strong>Data Protection Officer:</strong> dpo@cwamso.com</li>
-              <li><strong>Address:</strong> CWaMSo Headquarters, Community Waste Management</li>
+              <li><strong>Email:</strong> cwamsoofficial@gmail.com</li>
+              <li><strong>Address:</strong> CWaMSo Headquarters, Kano State, Nigeria</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-4">
               You have the right to lodge a complaint with a supervisory authority if you believe your data protection rights have been violated.

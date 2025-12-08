@@ -3,9 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getUserRole, type UserRole } from "@/lib/supabase";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CreditCard, Receipt, Download, CheckCircle, Clock, TrendingUp, Users } from "lucide-react";
+import { CreditCard, Receipt, Clock, TrendingUp, Users } from "lucide-react";
 
 const Billing = () => {
   const [role, setRole] = useState<UserRole | null>(null);
@@ -21,34 +19,6 @@ const Billing = () => {
     fetchRole();
   }, []);
 
-  // Demo data for bills
-  const demoBills = [
-    { id: 1, month: "November 2025", amount: "₦2,500.00", dueDate: "Dec 15, 2025", status: "Pending" },
-    { id: 2, month: "October 2025", amount: "₦2,500.00", dueDate: "Nov 15, 2025", status: "Paid" },
-    { id: 3, month: "September 2025", amount: "₦2,500.00", dueDate: "Oct 15, 2025", status: "Paid" },
-    { id: 4, month: "August 2025", amount: "₦2,500.00", dueDate: "Sep 15, 2025", status: "Paid" },
-    { id: 5, month: "July 2025", amount: "₦2,500.00", dueDate: "Aug 15, 2025", status: "Paid" },
-  ];
-
-  // Demo data for collector confirmations
-  const demoConfirmations = [
-    { id: 1, user: "John Doe", amount: "₦2,500.00", date: "Dec 3, 2025", status: "Pending" },
-    { id: 2, user: "ABC Company Ltd", amount: "₦5,000.00", date: "Dec 2, 2025", status: "Confirmed" },
-    { id: 3, user: "Mary Johnson", amount: "₦2,500.00", date: "Dec 1, 2025", status: "Confirmed" },
-    { id: 4, user: "XYZ Enterprise", amount: "₦7,500.00", date: "Nov 30, 2025", status: "Pending" },
-    { id: 5, user: "Grace Obi", amount: "₦2,500.00", date: "Nov 29, 2025", status: "Confirmed" },
-  ];
-
-  // Demo data for admin transactions
-  const demoTransactions = [
-    { id: 1, user: "John Doe", type: "Payment", amount: "₦2,500.00", date: "Dec 3, 2025", status: "Completed" },
-    { id: 2, user: "XYZ Corporation", type: "Payment", amount: "₦5,000.00", date: "Dec 2, 2025", status: "Pending" },
-    { id: 3, user: "Mary Johnson", type: "Refund", amount: "₦1,000.00", date: "Dec 1, 2025", status: "Processed" },
-    { id: 4, user: "Tech Solutions Ltd", type: "Payment", amount: "₦7,500.00", date: "Nov 30, 2025", status: "Completed" },
-    { id: 5, user: "Grace Obi", type: "Payment", amount: "₦2,500.00", date: "Nov 29, 2025", status: "Completed" },
-    { id: 6, user: "ABC Company", type: "Payment", amount: "₦5,000.00", date: "Nov 28, 2025", status: "Failed" },
-  ];
-
   const renderCitizenCompanyView = () => (
     <div className="space-y-6">
       <div>
@@ -63,18 +33,18 @@ const Billing = () => {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">₦2,500.00</div>
-            <p className="text-xs text-muted-foreground">Due Dec 15, 2025</p>
+            <div className="text-2xl font-bold text-primary">₦0.00</div>
+            <p className="text-xs text-muted-foreground">No outstanding balance</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Paid (2025)</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
+            <Receipt className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₦25,000.00</div>
-            <p className="text-xs text-muted-foreground">10 payments made</p>
+            <div className="text-2xl font-bold">₦0.00</div>
+            <p className="text-xs text-muted-foreground">0 payments made</p>
           </CardContent>
         </Card>
         <Card>
@@ -83,95 +53,27 @@ const Billing = () => {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Dec 15</div>
-            <p className="text-xs text-muted-foreground">12 days remaining</p>
+            <div className="text-2xl font-bold">--</div>
+            <p className="text-xs text-muted-foreground">No upcoming bills</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-primary" />
-                  Make Payment
-                </CardTitle>
-                <CardDescription>Pay your current balance</CardDescription>
-              </div>
-              <Badge variant="secondary">Demo</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <p className="text-sm text-muted-foreground">Amount Due</p>
-              <p className="text-3xl font-bold text-primary">₦2,500.00</p>
-              <p className="text-xs text-muted-foreground mt-1">November 2025 - Waste Collection Service</p>
-            </div>
-            
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Select Payment Method</p>
-              <div className="grid grid-cols-3 gap-2">
-                <Button variant="outline" className="h-auto py-3 flex flex-col">
-                  <span className="text-xs">Bank Transfer</span>
-                </Button>
-                <Button variant="outline" className="h-auto py-3 flex flex-col">
-                  <span className="text-xs">Card Payment</span>
-                </Button>
-                <Button variant="outline" className="h-auto py-3 flex flex-col">
-                  <span className="text-xs">USSD</span>
-                </Button>
-              </div>
-            </div>
-
-            <Button className="w-full" size="lg">
-              <CreditCard className="h-4 w-4 mr-2" />
-              Pay ₦2,500.00
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Receipt className="h-5 w-5 text-primary" />
-                  Billing History
-                </CardTitle>
-                <CardDescription>View and download past invoices</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {demoBills.map((bill) => (
-                <div key={bill.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium">{bill.month}</p>
-                    <p className="text-xs text-muted-foreground">Due: {bill.dueDate}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{bill.amount}</p>
-                      <Badge 
-                        variant={bill.status === "Paid" ? "default" : "destructive"}
-                        className="text-xs"
-                      >
-                        {bill.status}
-                      </Badge>
-                    </div>
-                    <Button variant="ghost" size="icon">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Receipt className="h-5 w-5 text-primary" />
+            Billing History
+          </CardTitle>
+          <CardDescription>View and download past invoices</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-muted-foreground">
+            <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>No billing history yet</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 
@@ -189,17 +91,17 @@ const Billing = () => {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-500">2</div>
+            <div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">Awaiting your confirmation</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Confirmed Today</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <Receipt className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">5</div>
+            <div className="text-2xl font-bold text-primary">0</div>
             <p className="text-xs text-muted-foreground">Payments verified</p>
           </CardContent>
         </Card>
@@ -209,7 +111,7 @@ const Billing = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₦45,000</div>
+            <div className="text-2xl font-bold">₦0</div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>
@@ -217,38 +119,16 @@ const Billing = () => {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Receipt className="h-5 w-5 text-primary" />
-                Payment Requests
-              </CardTitle>
-              <CardDescription>Review and confirm user payments</CardDescription>
-            </div>
-            <Badge variant="secondary">Demo</Badge>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Receipt className="h-5 w-5 text-primary" />
+            Payment Requests
+          </CardTitle>
+          <CardDescription>Review and confirm user payments</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {demoConfirmations.map((payment) => (
-              <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <p className="text-sm font-medium">{payment.user}</p>
-                  <p className="text-xs text-muted-foreground">{payment.date}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <p className="text-sm font-medium">{payment.amount}</p>
-                  {payment.status === "Pending" ? (
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="default">Confirm</Button>
-                      <Button size="sm" variant="outline">Reject</Button>
-                    </div>
-                  ) : (
-                    <Badge variant="default">Confirmed</Badge>
-                  )}
-                </div>
-              </div>
-            ))}
+          <div className="text-center py-8 text-muted-foreground">
+            <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>No payment requests to confirm</p>
           </div>
         </CardContent>
       </Card>
@@ -269,7 +149,7 @@ const Billing = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">₦1,250,000</div>
+            <div className="text-2xl font-bold text-primary">₦0</div>
             <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
@@ -279,8 +159,8 @@ const Billing = () => {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₦125,000</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
+            <div className="text-2xl font-bold">₦0</div>
+            <p className="text-xs text-muted-foreground">No revenue yet</p>
           </CardContent>
         </Card>
         <Card>
@@ -289,8 +169,8 @@ const Billing = () => {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-500">₦45,000</div>
-            <p className="text-xs text-muted-foreground">18 invoices</p>
+            <div className="text-2xl font-bold">₦0</div>
+            <p className="text-xs text-muted-foreground">0 invoices</p>
           </CardContent>
         </Card>
         <Card>
@@ -299,8 +179,8 @@ const Billing = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">248</div>
-            <p className="text-xs text-muted-foreground">+8 this week</p>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-xs text-muted-foreground">No subscribers yet</p>
           </CardContent>
         </Card>
       </div>
@@ -308,40 +188,16 @@ const Billing = () => {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Receipt className="h-5 w-5 text-primary" />
-                  Recent Transactions
-                </CardTitle>
-                <CardDescription>Latest payment activities</CardDescription>
-              </div>
-              <Badge variant="secondary">Demo</Badge>
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-primary" />
+              Recent Transactions
+            </CardTitle>
+            <CardDescription>Latest payment activities</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {demoTransactions.map((tx) => (
-                <div key={tx.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium">{tx.user}</p>
-                    <p className="text-xs text-muted-foreground">{tx.type} • {tx.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{tx.amount}</p>
-                    <Badge 
-                      variant={
-                        tx.status === "Completed" ? "default" : 
-                        tx.status === "Pending" ? "secondary" : 
-                        tx.status === "Failed" ? "destructive" : "outline"
-                      }
-                      className="text-xs"
-                    >
-                      {tx.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-8 text-muted-foreground">
+              <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No transactions yet</p>
             </div>
           </CardContent>
         </Card>
@@ -355,25 +211,9 @@ const Billing = () => {
             <CardDescription>Monthly breakdown</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[
-                { month: "December 2025", amount: "₦125,000", growth: "+12%" },
-                { month: "November 2025", amount: "₦112,000", growth: "+8%" },
-                { month: "October 2025", amount: "₦104,000", growth: "+5%" },
-                { month: "September 2025", amount: "₦99,000", growth: "+3%" },
-              ].map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium">{item.month}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <p className="text-sm font-medium">{item.amount}</p>
-                    <Badge variant="outline" className="text-xs text-green-600">
-                      {item.growth}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-8 text-muted-foreground">
+              <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No revenue data available</p>
             </div>
           </CardContent>
         </Card>

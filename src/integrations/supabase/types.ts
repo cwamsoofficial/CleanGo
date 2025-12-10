@@ -14,72 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      admin_key_attempts: {
-        Row: {
-          created_at: string
-          email: string
-          error_reason: string | null
-          id: string
-          ip_address: string | null
-          key_attempted: string
-          success: boolean
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          error_reason?: string | null
-          id?: string
-          ip_address?: string | null
-          key_attempted: string
-          success?: boolean
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          error_reason?: string | null
-          id?: string
-          ip_address?: string | null
-          key_attempted?: string
-          success?: boolean
-        }
-        Relationships: []
-      }
-      admin_keys: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          current_uses: number
-          expires_at: string | null
-          id: string
-          key_hash: string
-          max_uses: number | null
-          notes: string | null
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          current_uses?: number
-          expires_at?: string | null
-          id?: string
-          key_hash: string
-          max_uses?: number | null
-          notes?: string | null
-          status?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          current_uses?: number
-          expires_at?: string | null
-          id?: string
-          key_hash?: string
-          max_uses?: number | null
-          notes?: string | null
-          status?: string
-        }
-        Relationships: []
-      }
       issue_reports: {
         Row: {
           assigned_collector_id: string | null
@@ -467,10 +401,6 @@ export type Database = {
       }
       unban_user: { Args: { _user_id: string }; Returns: undefined }
       update_user_streak: { Args: { _user_id: string }; Returns: undefined }
-      validate_admin_key: {
-        Args: { input_key: string; user_email: string; user_ip?: string }
-        Returns: Json
-      }
     }
     Enums: {
       app_role: "citizen" | "company" | "collector" | "admin"

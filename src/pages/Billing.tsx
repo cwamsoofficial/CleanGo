@@ -50,9 +50,9 @@ const Billing = () => {
             <CardTitle>Coming Soon</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12">
+            <div className="flex flex-col items-center justify-center py-12">
               {getIcon()}
-              <p className="mt-4 text-muted-foreground">
+              <p className="mt-4 text-muted-foreground text-center">
                 Billing features are currently under development.
               </p>
             </div>

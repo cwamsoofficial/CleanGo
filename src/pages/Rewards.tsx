@@ -189,14 +189,10 @@ const Rewards = () => {
                   
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Milestone Rewards:</p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-3 gap-2 text-xs">
                       <div className={`p-2 rounded border ${streak.current_streak >= 3 ? 'bg-green-500/10 border-green-500/20' : 'border-border'}`}>
                         <div className="font-medium">3 days</div>
                         <div className="text-muted-foreground">₦500 bonus</div>
-                      </div>
-                      <div className={`p-2 rounded border ${streak.current_streak >= 7 ? 'bg-green-500/10 border-green-500/20' : 'border-border'}`}>
-                        <div className="font-medium">7 days</div>
-                        <div className="text-muted-foreground">₦1,500 bonus</div>
                       </div>
                       <div className={`p-2 rounded border ${streak.current_streak >= 14 ? 'bg-green-500/10 border-green-500/20' : 'border-border'}`}>
                         <div className="font-medium">14 days</div>

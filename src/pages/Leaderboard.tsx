@@ -24,6 +24,7 @@ interface Achievement {
 export default function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,6 +35,17 @@ export default function Leaderboard() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUserId(user?.id || null);
+
+      // Check if current user is admin
+      if (user) {
+        const { data: currentUserRole } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        setIsAdmin(currentUserRole?.role === 'admin');
+      }
 
       // Fetch top users by total earned points
       const { data: rewardsData, error: rewardsError } = await supabase
@@ -275,8 +287,8 @@ export default function Leaderboard() {
               ))}
             </div>
 
-            {/* Rest of leaderboard */}
-            {leaderboard.length > 3 && (
+            {/* Rest of leaderboard - Only for admins */}
+            {isAdmin && leaderboard.length > 3 && (
               <Card>
                 <CardHeader>
                   <CardTitle>All Rankings</CardTitle>

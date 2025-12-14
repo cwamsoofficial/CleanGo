@@ -61,7 +61,7 @@ const UserManagement = () => {
 
         return {
           id: profile.id,
-          email: `user-${profile.id.slice(0, 8)}`, // Placeholder - would need edge function for real emails
+          email: profile.id.slice(0, 8), // User ID prefix - emails are not accessible via public schema
           name: profile.name,
           role: role?.role || "citizen",
           banned: profile.banned || false,

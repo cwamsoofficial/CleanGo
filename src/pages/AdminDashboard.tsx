@@ -80,7 +80,7 @@ const AdminDashboard = () => {
         const roleInfo = rolesData?.find(r => r.user_id === profile.id);
         return {
           id: profile.id,
-          email: "user@example.com",
+          email: profile.id.slice(0, 8),
           name: profile.name,
           role: roleInfo?.role || "citizen",
           created_at: profile.created_at,

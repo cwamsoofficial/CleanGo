@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { RequestPickupDialog } from "@/components/RequestPickupDialog";
 import { RecentIssues } from "@/components/RecentIssues";
 import { useNavigate } from "react-router-dom";
+import { OnboardingTour, useOnboarding } from "@/components/OnboardingTour";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -20,6 +21,8 @@ const Dashboard = () => {
     issues: 0,
     points: 0,
   });
+  
+  const { showOnboarding, hasChecked, completeOnboarding, skipOnboarding } = useOnboarding();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -179,8 +182,17 @@ const Dashboard = () => {
     );
   };
 
+  // Only show onboarding for citizens and companies (not collectors/admins)
+  const shouldShowOnboarding = hasChecked && showOnboarding && (role === "citizen" || role === "company");
+
   return (
     <DashboardLayout>
+      {shouldShowOnboarding && (
+        <OnboardingTour 
+          onComplete={completeOnboarding} 
+          onSkip={skipOnboarding} 
+        />
+      )}
       <div className="space-y-6">
         <div>
           <h2 className="text-3xl font-bold text-foreground">Dashboard Overview</h2>

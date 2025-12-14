@@ -1,3 +1,30 @@
+import DashboardLayout from "@/components/DashboardLayout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Construction } from "lucide-react";
+
+const Rewards = () => {
+  return (
+    <DashboardLayout>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="pt-12 pb-12 space-y-4">
+            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Construction className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold">In Progress</h2>
+            <p className="text-muted-foreground">
+              The Rewards feature is currently under development. Check back soon!
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default Rewards;
+
+/* COMMENTED OUT - Original Rewards Implementation
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -368,3 +395,4 @@ const RewardItem = ({
 );
 
 export default Rewards;
+*/

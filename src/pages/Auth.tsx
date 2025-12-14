@@ -58,7 +58,8 @@ const Auth = () => {
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("weak");
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const [referralCode, setReferralCode] = useState(searchParams.get("ref") || "");
-  const [authView, setAuthView] = useState<AuthView>("signin");
+  const initialView = searchParams.get("view") === "signup" ? "signup" : "signin";
+  const [authView, setAuthView] = useState<AuthView>(initialView);
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value;

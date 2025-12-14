@@ -47,7 +47,7 @@ const Index = () => {
                 CWaMSo connects citizens, collectors, and authorities through a digital platform that ensures smarter, cleaner communities.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" onClick={() => navigate("/auth")} className="text-lg gap-2 rounded-full px-8">
+                <Button size="lg" onClick={() => navigate("/auth?view=signup")} className="text-lg gap-2 rounded-full px-8">
                   Get Started
                   <ArrowRight className="h-5 w-5" />
                 </Button>
@@ -130,7 +130,7 @@ const Index = () => {
           <Button
             size="lg"
             variant="secondary"
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate("/auth?view=signup")}
             className="text-lg"
           >
             Start Your Journey

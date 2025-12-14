@@ -10,6 +10,7 @@ import { RequestPickupDialog } from "@/components/RequestPickupDialog";
 import { RecentIssues } from "@/components/RecentIssues";
 import { useNavigate } from "react-router-dom";
 import { OnboardingTour, useOnboarding } from "@/components/OnboardingTour";
+import { InteractiveTour } from "@/components/InteractiveTour";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -188,7 +189,7 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       {shouldShowOnboarding && (
-        <OnboardingTour 
+        <InteractiveTour 
           onComplete={completeOnboarding} 
           onSkip={skipOnboarding}
           role={role as "citizen" | "company" | "collector"}
@@ -202,7 +203,7 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">{getStatsCards()}</div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-tour="dashboard-stats">{getStatsCards()}</div>
 
         <div className="grid gap-4 md:grid-cols-2">
           {(role === "citizen" || role === "company") && <RecentIssues />}
@@ -229,11 +230,14 @@ const Dashboard = () => {
             <CardContent className="space-y-3">
               {(role === "citizen" || role === "company") && (
                 <>
-                  <RequestPickupDialog />
+                  <div data-tour="request-pickup">
+                    <RequestPickupDialog />
+                  </div>
                   <Button 
                     variant="outline" 
                     className="w-full gap-2"
                     onClick={() => navigate("/report-issue")}
+                    data-tour="report-issue"
                   >
                     <FileText className="w-4 h-4" />
                     Report Issue

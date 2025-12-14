@@ -1,3 +1,28 @@
+import DashboardLayout from "@/components/DashboardLayout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Construction } from "lucide-react";
+
+export default function Leaderboard() {
+  return (
+    <DashboardLayout>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="pt-12 pb-12 space-y-4">
+            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Construction className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold">In Progress</h2>
+            <p className="text-muted-foreground">
+              The Leaderboard feature is currently under development. Check back soon!
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+/* COMMENTED OUT - Original Leaderboard Implementation
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -235,7 +260,6 @@ export default function Leaderboard() {
           </Card>
         ) : (
           <>
-            {/* Top 3 Podium */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {leaderboard.slice(0, 3).map((entry) => (
                 <Card 
@@ -287,7 +311,6 @@ export default function Leaderboard() {
               ))}
             </div>
 
-            {/* Rest of leaderboard - Only for admins */}
             {isAdmin && leaderboard.length > 3 && (
               <Card>
                 <CardHeader>
@@ -364,3 +387,4 @@ export default function Leaderboard() {
     </DashboardLayout>
   );
 }
+*/

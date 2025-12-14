@@ -12,7 +12,12 @@ import {
   ChevronRight,
   ChevronLeft,
   Sparkles,
-  CheckCircle
+  CheckCircle,
+  MapPin,
+  Clock,
+  Truck,
+  DollarSign,
+  Users
 } from "lucide-react";
 
 interface OnboardingStep {
@@ -23,7 +28,7 @@ interface OnboardingStep {
   tip: string;
 }
 
-const steps: OnboardingStep[] = [
+const citizenSteps: OnboardingStep[] = [
   {
     id: "welcome",
     title: "Welcome to CWaMSo!",
@@ -75,15 +80,90 @@ const steps: OnboardingStep[] = [
   }
 ];
 
+const collectorSteps: OnboardingStep[] = [
+  {
+    id: "welcome",
+    title: "Welcome, Collector!",
+    description: "You're now part of the CWaMSo waste collection team. Let's show you how to manage pickups efficiently.",
+    icon: Truck,
+    tip: "This quick tour will help you understand your role and maximize your earnings."
+  },
+  {
+    id: "dashboard",
+    title: "Your Collector Dashboard",
+    description: "Your dashboard shows assigned pickups, pending requests, and completed collections. Monitor your performance at a glance.",
+    icon: BarChart3,
+    tip: "Check your dashboard frequently to see new pickup requests in your area."
+  },
+  {
+    id: "pickups-list",
+    title: "View Available Pickups",
+    description: "Go to the Pickups page to see all available pickup requests. Unassigned pickups are marked and waiting for a collector.",
+    icon: Package,
+    tip: "Accept pickups quickly - they're available on a first-come, first-served basis!"
+  },
+  {
+    id: "accept-pickup",
+    title: "Accept & Manage Pickups",
+    description: "Click 'Accept Pickup' to assign yourself. Update status as you progress: In Progress → Collected. You can also mark as Delayed or Failed if needed.",
+    icon: CheckCircle,
+    tip: "If you can't complete a pickup, use 'Unassign' to release it back to the available pool."
+  },
+  {
+    id: "pickup-stats",
+    title: "Track Your Statistics",
+    description: "At the top of the Pickups page, you'll see: Total Available, Assigned to You, and Completed Today. Use these to plan your routes.",
+    icon: Clock,
+    tip: "Completing more pickups means more earnings and higher rankings!"
+  },
+  {
+    id: "issues",
+    title: "Resolve Reported Issues",
+    description: "The Issues page shows problems reported by citizens. Accept issues, investigate, and mark them resolved to earn extra points.",
+    icon: AlertCircle,
+    tip: "Resolving issues earns you ₦50 per resolution - a great way to boost your income!"
+  },
+  {
+    id: "locations",
+    title: "Location Information",
+    description: "Each pickup shows the user's location. Use this to plan efficient collection routes and minimize travel time.",
+    icon: MapPin,
+    tip: "Group nearby pickups together to save time and complete more collections per day."
+  },
+  {
+    id: "earnings",
+    title: "Earn While You Collect",
+    description: "You earn ₦100 for every completed pickup and ₦50 for resolved issues. Build streaks for bonus rewards!",
+    icon: DollarSign,
+    tip: "Maintain a 14-day streak for ₦3,000 bonus, 30-day streak for ₦10,000 bonus!"
+  },
+  {
+    id: "analytics",
+    title: "View Your Analytics",
+    description: "The Analytics page shows your performance trends, completion rates, and pickup history. Use insights to improve your efficiency.",
+    icon: BarChart3,
+    tip: "Track your weekly trends to identify your most productive days and times."
+  },
+  {
+    id: "complete",
+    title: "Ready to Collect!",
+    description: "You're all set to start collecting waste and earning money. Head to Pickups to accept your first collection!",
+    icon: CheckCircle,
+    tip: "Start by checking available pickups and accepting ones in your area."
+  }
+];
+
 interface OnboardingTourProps {
   onComplete: () => void;
   onSkip: () => void;
+  role?: "citizen" | "company" | "collector";
 }
 
-export const OnboardingTour = ({ onComplete, onSkip }: OnboardingTourProps) => {
+export const OnboardingTour = ({ onComplete, onSkip, role = "citizen" }: OnboardingTourProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
+  const steps = role === "collector" ? collectorSteps : citizenSteps;
   const step = steps[currentStep];
   const progress = ((currentStep + 1) / steps.length) * 100;
   const isLastStep = currentStep === steps.length - 1;

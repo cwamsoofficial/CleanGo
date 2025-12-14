@@ -182,15 +182,16 @@ const Dashboard = () => {
     );
   };
 
-  // Only show onboarding for citizens and companies (not collectors/admins)
-  const shouldShowOnboarding = hasChecked && showOnboarding && (role === "citizen" || role === "company");
+  // Show onboarding for citizens, companies, and collectors (not admins)
+  const shouldShowOnboarding = hasChecked && showOnboarding && (role === "citizen" || role === "company" || role === "collector");
 
   return (
     <DashboardLayout>
       {shouldShowOnboarding && (
         <OnboardingTour 
           onComplete={completeOnboarding} 
-          onSkip={skipOnboarding} 
+          onSkip={skipOnboarding}
+          role={role as "citizen" | "company" | "collector"}
         />
       )}
       <div className="space-y-6">

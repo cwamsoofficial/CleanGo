@@ -375,7 +375,7 @@ const Auth = () => {
 
         {/* Sign In View */}
         {authView === "signin" && (
-          <Card>
+          <Card className="animate-fade-in"key="signin">
             <CardHeader>
               <CardTitle>Log in to your account</CardTitle>
               <CardDescription>Welcome back! Sign in to continue</CardDescription>
@@ -456,7 +456,7 @@ const Auth = () => {
 
         {/* Sign Up View */}
         {authView === "signup" && (
-          <Card>
+          <Card className="animate-fade-in" key="signup">
             <CardHeader>
               <CardTitle>Create your account</CardTitle>
               <CardDescription>Join CWaMSo to manage waste efficiently</CardDescription>
@@ -648,7 +648,7 @@ const Auth = () => {
 
         {/* Reset Password View */}
         {authView === "reset" && (
-          <Card>
+          <Card className="animate-fade-in" key="reset">
             <CardHeader>
               <CardTitle>Reset your password</CardTitle>
               <CardDescription>

@@ -50,11 +50,13 @@ const Dashboard = () => {
       if (userRole === "admin") {
         const { data: allPickups } = await supabase
           .from("waste_pickups")
-          .select("*");
+          .select("*")
+          .order("created_at", { ascending: false });
 
         const { data: allIssues } = await supabase
           .from("issue_reports")
-          .select("*");
+          .select("*")
+          .order("created_at", { ascending: false });
 
         // Get today's date for completed today count
         const today = new Date().toISOString().split('T')[0];
@@ -66,6 +68,34 @@ const Dashboard = () => {
           issues: allIssues?.length || 0,
           points: 0,
         });
+
+        // Build recent activity for admin
+        const activities: Activity[] = [];
+        
+        allPickups?.slice(0, 3).forEach((p) => {
+          activities.push({
+            id: p.id,
+            type: "pickup",
+            title: `Waste Pickup - ${p.status}`,
+            status: p.status,
+            location: p.location,
+            date: p.created_at,
+          });
+        });
+        
+        allIssues?.slice(0, 3).forEach((i) => {
+          activities.push({
+            id: i.id,
+            type: "issue",
+            title: i.title,
+            status: i.status,
+            location: i.location,
+            date: i.created_at,
+          });
+        });
+        
+        activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setRecentActivity(activities.slice(0, 5));
         return;
       }
 

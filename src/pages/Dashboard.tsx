@@ -294,7 +294,7 @@ const Dashboard = () => {
                   <Button 
                     variant="link" 
                     className="w-full text-sm text-muted-foreground hover:text-primary p-0 h-auto mt-2"
-                    onClick={() => navigate("/dashboard/pickups")}
+                    onClick={() => navigate("/dashboard/activity")}
                   >
                     View All Activity →
                   </Button>

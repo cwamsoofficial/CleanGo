@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { AlertCircle, CheckCircle, Clock, Eye } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, Eye, X, ZoomIn } from "lucide-react";
 
 interface Issue {
   id: string;
@@ -40,6 +40,7 @@ export default function Issues() {
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
     fetchUserRole();
@@ -326,21 +327,24 @@ export default function Issues() {
                   <h3 className="font-semibold mb-2">Photo Evidence</h3>
                   {imageUrl ? (
                     <div className="space-y-2">
-                      <a 
-                        href={imageUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="block cursor-pointer group"
+                      <button 
+                        onClick={() => setIsLightboxOpen(true)}
+                        className="block cursor-pointer group w-full text-left"
                       >
-                        <img 
-                          src={imageUrl} 
-                          alt="Issue evidence" 
-                          className="w-full rounded-lg border transition-transform hover:scale-[1.02] hover:shadow-lg"
-                        />
+                        <div className="relative">
+                          <img 
+                            src={imageUrl} 
+                            alt="Issue evidence" 
+                            className="w-full rounded-lg border transition-all hover:scale-[1.02] hover:shadow-lg"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg flex items-center justify-center">
+                            <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
                         <p className="text-sm text-muted-foreground mt-1 group-hover:text-primary transition-colors">
-                          Click image to view full size
+                          Click to view full size
                         </p>
-                      </a>
+                      </button>
                     </div>
                   ) : (
                     <p className="text-muted-foreground">Loading image...</p>
@@ -385,6 +389,27 @@ export default function Issues() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Lightbox Modal */}
+      <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none">
+          <button
+            onClick={() => setIsLightboxOpen(false)}
+            className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+          {imageUrl && (
+            <div className="flex items-center justify-center w-full h-full p-4">
+              <img 
+                src={imageUrl} 
+                alt="Issue evidence full size" 
+                className="max-w-full max-h-[85vh] object-contain rounded-lg"
+              />
             </div>
           )}
         </DialogContent>

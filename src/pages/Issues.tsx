@@ -325,11 +325,23 @@ export default function Issues() {
                 <div>
                   <h3 className="font-semibold mb-2">Photo Evidence</h3>
                   {imageUrl ? (
-                    <img 
-                      src={imageUrl} 
-                      alt="Issue evidence" 
-                      className="w-full rounded-lg border"
-                    />
+                    <div className="space-y-2">
+                      <a 
+                        href={imageUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block cursor-pointer group"
+                      >
+                        <img 
+                          src={imageUrl} 
+                          alt="Issue evidence" 
+                          className="w-full rounded-lg border transition-transform hover:scale-[1.02] hover:shadow-lg"
+                        />
+                        <p className="text-sm text-muted-foreground mt-1 group-hover:text-primary transition-colors">
+                          Click image to view full size
+                        </p>
+                      </a>
+                    </div>
                   ) : (
                     <p className="text-muted-foreground">Loading image...</p>
                   )}

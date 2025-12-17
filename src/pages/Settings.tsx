@@ -6,21 +6,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, User, Mail, Phone, MapPin } from "lucide-react";
+import { Loader2, User, Mail, Phone, MapPin, RotateCcw } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { getUserRole } from "@/lib/supabase";
+import { useOnboarding } from "@/components/OnboardingTour";
 
 const Settings = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const { resetOnboarding } = useOnboarding();
   const [profile, setProfile] = useState({
     name: "",
     email: "",
     phone: "",
     address: "",
   });
+
+  const handleRestartTour = () => {
+    resetOnboarding();
+    navigate("/dashboard");
+    toast.success("Tour restarted! Redirecting to dashboard...");
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -211,6 +219,29 @@ const Settings = () => {
                 )}
               </Button>
             </form>
+          </CardContent>
+        </Card>
+
+        {/* Help & Tour Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Help & Tour</CardTitle>
+            <CardDescription>
+              Need a refresher on how to use CWaMSo?
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              variant="outline" 
+              onClick={handleRestartTour}
+              className="gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Restart Onboarding Tour
+            </Button>
+            <p className="text-sm text-muted-foreground mt-2">
+              This will replay the interactive tour to help you navigate the platform.
+            </p>
           </CardContent>
         </Card>
 

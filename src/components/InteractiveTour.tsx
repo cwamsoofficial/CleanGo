@@ -38,6 +38,18 @@ const citizenTourSteps: TourStep[] = [
     position: "bottom"
   },
   {
+    target: "[data-tour='nav-my-pickups']",
+    title: "Pickups Page",
+    description: "View all your scheduled and completed pickups. Track the status of each collection request.",
+    position: "right"
+  },
+  {
+    target: "[data-tour='nav-report-issue']",
+    title: "Report Issues Page",
+    description: "View and manage all your reported issues. Check their status and see resolution updates.",
+    position: "right"
+  },
+  {
     target: "[data-tour='nav-rewards']",
     title: "Rewards & Earnings",
     description: "View your earnings, redeem rewards, and track your referral bonuses here. Earn ₦100 per completed pickup!",
@@ -60,15 +72,36 @@ const collectorTourSteps: TourStep[] = [
   },
   {
     target: "[data-tour='nav-pickups']",
-    title: "View All Pickups",
-    description: "Access the full list of available and assigned pickups. Accept new requests to start earning!",
+    title: "Pickups Management",
+    description: "Access available and assigned pickups. View statistics, accept requests, and update pickup statuses.",
     position: "right"
   },
   {
+    target: "[data-tour='pickup-stats']",
+    title: "Pickup Statistics",
+    description: "See total available pickups, your assigned pickups, and completed pickups for today at a glance.",
+    position: "bottom",
+    fallbackPosition: { top: 200, left: 400 }
+  },
+  {
+    target: "[data-tour='pickup-list']",
+    title: "Pickup List",
+    description: "Browse all pickups here. Accept unassigned ones, update status, or unassign yourself if needed.",
+    position: "bottom",
+    fallbackPosition: { top: 350, left: 400 }
+  },
+  {
     target: "[data-tour='nav-issues']",
-    title: "Resolve Issues",
-    description: "View reported issues in your area. Resolve them to earn ₦50 per issue!",
+    title: "Issues Management",
+    description: "View all reported issues. Accept, investigate, and resolve them to earn ₦50 per resolution!",
     position: "right"
+  },
+  {
+    target: "[data-tour='issue-list']",
+    title: "Issue List",
+    description: "See reported problems with photos and locations. Update status as you work on resolving them.",
+    position: "bottom",
+    fallbackPosition: { top: 350, left: 400 }
   },
   {
     target: "[data-tour='nav-analytics']",
@@ -77,7 +110,13 @@ const collectorTourSteps: TourStep[] = [
     position: "right"
   },
   {
-    target: "[data-tour='nav-rewards']",
+    target: "[data-tour='nav-leaderboard']",
+    title: "Leaderboard",
+    description: "See how you rank among other collectors and compete for top spots!",
+    position: "right"
+  },
+  {
+    target: "[data-tour='nav-payments']",
     title: "Your Earnings",
     description: "View your total earnings, maintain streaks for bonuses, and withdraw your money!",
     position: "right"

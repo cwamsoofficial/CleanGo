@@ -291,6 +291,13 @@ const Dashboard = () => {
                       </Badge>
                     </div>
                   ))}
+                  <Button 
+                    variant="link" 
+                    className="w-full text-sm text-muted-foreground hover:text-primary p-0 h-auto mt-2"
+                    onClick={() => navigate("/dashboard/pickups")}
+                  >
+                    View All Activity →
+                  </Button>
                 </div>
               )}
             </CardContent>

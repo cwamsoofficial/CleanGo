@@ -369,6 +369,7 @@ export type Database = {
         Args: { _reason?: string; _user_id: string }
         Returns: undefined
       }
+      check_ip_rate_limit: { Args: { ip_addr: string }; Returns: Json }
       delete_user_account: { Args: { _user_id: string }; Returns: undefined }
       get_user_role: {
         Args: { _user_id: string }

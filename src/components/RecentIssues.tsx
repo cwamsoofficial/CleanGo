@@ -78,7 +78,7 @@ export function RecentIssues() {
             <CardTitle>Recent Issues</CardTitle>
             <CardDescription>Your reported issues</CardDescription>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate("/report-issue")}>
+          <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/report-issue")}>
             <AlertCircle className="w-4 h-4 mr-2" />
             Report New
           </Button>

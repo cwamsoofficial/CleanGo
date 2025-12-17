@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { AlertCircle, CheckCircle, Clock, Eye, X, ZoomIn } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, Download, Eye, X, ZoomIn } from "lucide-react";
 
 interface Issue {
   id: string;
@@ -326,7 +326,7 @@ export default function Issues() {
                 <div>
                   <h3 className="font-semibold mb-2">Photo Evidence</h3>
                   {imageUrl ? (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <button 
                         onClick={() => setIsLightboxOpen(true)}
                         className="block cursor-pointer group w-full text-left"
@@ -341,10 +341,33 @@ export default function Issues() {
                             <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1 group-hover:text-primary transition-colors">
-                          Click to view full size
-                        </p>
                       </button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsLightboxOpen(true)}
+                        >
+                          <ZoomIn className="w-4 h-4 mr-2" />
+                          View Full Size
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = imageUrl;
+                            link.download = `issue-evidence-${selectedIssue.id}.jpg`;
+                            link.target = '_blank';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download
+                        </Button>
+                      </div>
                     </div>
                   ) : (
                     <p className="text-muted-foreground">Loading image...</p>

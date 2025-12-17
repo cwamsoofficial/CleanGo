@@ -227,11 +227,42 @@ export const InteractiveTour = ({ onComplete, onSkip, role = "citizen" }: Intera
     return () => setMounted(false);
   }, []);
 
+  // Scroll element into view and calculate positions
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !step) return;
+    
+    const scrollAndPosition = () => {
+      const element = document.querySelector(step.target);
+      
+      if (element) {
+        // Check if element is in viewport
+        const rect = element.getBoundingClientRect();
+        const isInViewport = 
+          rect.top >= 0 &&
+          rect.left >= 0 &&
+          rect.bottom <= window.innerHeight &&
+          rect.right <= window.innerWidth;
+        
+        if (!isInViewport) {
+          // Scroll element into view with smooth animation
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+          });
+          
+          // Wait for scroll to complete before calculating positions
+          setTimeout(calculatePositions, 400);
+        } else {
+          calculatePositions();
+        }
+      } else {
+        calculatePositions();
+      }
+    };
     
     // Small delay to ensure DOM is ready
-    const timeout = setTimeout(calculatePositions, 100);
+    const timeout = setTimeout(scrollAndPosition, 100);
     
     const handleResize = () => {
       if (resizeTimeoutRef.current) {
@@ -251,7 +282,7 @@ export const InteractiveTour = ({ onComplete, onSkip, role = "citizen" }: Intera
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", calculatePositions);
     };
-  }, [calculatePositions, mounted, currentStep]);
+  }, [calculatePositions, mounted, currentStep, step]);
 
   const handleNext = () => {
     if (isLastStep) {

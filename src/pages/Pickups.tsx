@@ -170,7 +170,7 @@ const Pickups = () => {
     }).length;
 
     return (
-      <div className="grid gap-4 md:grid-cols-3 mb-6">
+      <div className="grid gap-4 md:grid-cols-3 mb-6" data-tour="pickup-stats">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Available</CardTitle>
@@ -236,7 +236,7 @@ const Pickups = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-4" data-tour="pickup-list">
             {pickups.map((pickup) => (
               <Card key={pickup.id}>
                 <CardHeader>

@@ -525,7 +525,7 @@ export default function Issues() {
         </div>
 
         {/* Issues Table */}
-        <Card>
+        <Card data-tour="issue-list">
           <CardHeader>
             <CardTitle>Issue Reports</CardTitle>
             <CardDescription>Manage and track all reported issues</CardDescription>

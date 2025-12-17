@@ -1,255 +1,168 @@
-import { useState } from "react";
-import { z } from "zod";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { Loader2, Upload } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ReportIssueDialog } from "@/components/ReportIssueDialog";
+import { AlertCircle, MapPin, Calendar, FileText } from "lucide-react";
+import { format } from "date-fns";
 
-// Validation schema for issue reports
-const reportSchema = z.object({
-  title: z.string()
-    .trim()
-    .min(1, "Title is required")
-    .max(200, "Title must be less than 200 characters"),
-  description: z.string()
-    .trim()
-    .min(10, "Description must be at least 10 characters")
-    .max(2000, "Description must be less than 2000 characters"),
-  location: z.string()
-    .trim()
-    .max(500, "Location must be less than 500 characters")
-    .optional()
-    .transform(val => val || null)
-});
+interface IssueReport {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  location: string | null;
+  created_at: string;
+  image_url: string | null;
+}
 
 const ReportIssue = () => {
-  const [loading, setLoading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [errors, setErrors] = useState<{ title?: string; description?: string; location?: string }>({});
+  const [reports, setReports] = useState<IssueReport[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setErrors({});
-    setLoading(true);
+  const fetchReports = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    const formData = new FormData(e.currentTarget);
-    const rawData = {
-      title: formData.get("title") as string,
-      description: formData.get("description") as string,
-      location: formData.get("location") as string,
-    };
+    const { data, error } = await supabase
+      .from("issue_reports")
+      .select("*")
+      .eq("reporter_id", user.id)
+      .order("created_at", { ascending: false });
 
-    // Validate input with zod
-    const validationResult = reportSchema.safeParse(rawData);
-    
-    if (!validationResult.success) {
-      const fieldErrors: { title?: string; description?: string; location?: string } = {};
-      validationResult.error.errors.forEach((err) => {
-        const field = err.path[0] as string;
-        fieldErrors[field as keyof typeof fieldErrors] = err.message;
-      });
-      setErrors(fieldErrors);
-      setLoading(false);
-      toast.error("Please fix the validation errors");
-      return;
+    if (!error && data) {
+      setReports(data);
     }
+    setLoading(false);
+  };
 
-    const { title, description, location } = validationResult.data;
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      let imageUrl = null;
-
-      // Upload image if provided
-      if (imageFile) {
-        try {
-          // Validate file size (max 5MB)
-          if (imageFile.size > 5 * 1024 * 1024) {
-            toast.error("Image file too large. Maximum size is 5MB.");
-            setLoading(false);
-            return;
-          }
-
-          const fileExt = imageFile.name.split(".").pop()?.toLowerCase();
-          const fileName = `${Date.now()}.${fileExt}`;
-          // Use user.id as folder name to match storage RLS policy
-          const filePath = `${user.id}/${fileName}`;
-
-          console.log("Uploading image to:", filePath);
-          
-          const { error: uploadError, data: uploadData } = await supabase.storage
-            .from("issue-images")
-            .upload(filePath, imageFile);
-
-          if (uploadError) {
-            console.error("Image upload error:", uploadError);
-            toast.error(`Failed to upload image: ${uploadError.message}`);
-          } else {
-            console.log("Image uploaded successfully:", uploadData);
-            // Store the file path (not public URL) since bucket is private
-            imageUrl = filePath;
-            toast.success("Image uploaded successfully");
-          }
-        } catch (uploadError: any) {
-          console.error("Image upload exception:", uploadError);
-          toast.error(`Upload failed: ${uploadError.message || 'Unknown error'}`);
-        }
-      }
-
-      // Insert issue report with validated data
-      const { error } = await supabase.from("issue_reports").insert({
-        reporter_id: user.id,
-        title,
-        description,
-        location,
-        image_url: imageUrl,
-        status: "pending",
-      });
-
-      if (error) throw error;
-
-      // Award points securely using RPC
-      const { error: rewardError } = await supabase.rpc("award_points", {
-        _user_id: user.id,
-        _points: 3,
-        _description: "Reported waste management issue",
-      });
-
-      if (rewardError) {
-        console.log("Reward RPC error:", rewardError);
-      }
-
-      toast.success("Issue reported successfully!");
-      (e.target as HTMLFormElement).reset();
-      setImageFile(null);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to report issue");
-    } finally {
-      setLoading(false);
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "resolved":
+        return "default";
+      case "pending":
+        return "secondary";
+      case "in_progress":
+        return "outline";
+      default:
+        return "outline";
     }
   };
 
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold text-foreground">Report an Issue</h2>
-          <p className="text-muted-foreground mt-1">
-            Help improve waste management by reporting issues in your area
-          </p>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground">My Reports</h2>
+            <p className="text-muted-foreground mt-1">
+              View and manage your reported issues
+            </p>
+          </div>
+          <ReportIssueDialog onSuccess={fetchReports} />
         </div>
 
+        {/* Stats Card */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{reports.length}</div>
+              <p className="text-xs text-muted-foreground">All time submissions</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending</CardTitle>
+              <AlertCircle className="h-4 w-4 text-amber-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {reports.filter(r => r.status === "pending").length}
+              </div>
+              <p className="text-xs text-muted-foreground">Awaiting review</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+              <AlertCircle className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {reports.filter(r => r.status === "resolved").length}
+              </div>
+              <p className="text-xs text-muted-foreground">Successfully resolved</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Reports List */}
         <Card>
           <CardHeader>
-            <CardTitle>Issue Details</CardTitle>
+            <CardTitle>Your Reported Issues</CardTitle>
             <CardDescription>
-              Provide as much detail as possible to help us resolve the issue quickly
+              {reports.length === 0 
+                ? "You haven't reported any issues yet" 
+                : `Showing ${reports.length} report${reports.length === 1 ? "" : "s"}`}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Issue Title *</Label>
-                <Input
-                  id="title"
-                  name="title"
-                  placeholder="e.g., Overflowing bin on Main Street"
-                  maxLength={200}
-                  required
-                />
-                {errors.title && (
-                  <p className="text-sm text-destructive">{errors.title}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder="Describe the issue in detail..."
-                  rows={5}
-                  maxLength={2000}
-                  required
-                />
-                {errors.description && (
-                  <p className="text-sm text-destructive">{errors.description}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  name="location"
-                  placeholder="e.g., 123 Main Street, City Center"
-                  maxLength={500}
-                />
-                {errors.location && (
-                  <p className="text-sm text-destructive">{errors.location}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="image">Photo Evidence</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                  />
-                  {imageFile && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setImageFile(null)}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </div>
-                {imageFile && (
-                  <div className="mt-2 space-y-2">
-                    <img
-                      src={URL.createObjectURL(imageFile)}
-                      alt="Preview"
-                      className="w-full max-w-xs rounded-lg border"
-                    />
-                    <p className="text-sm text-primary">
-                      ✓ Image selected: {imageFile.name} ({(imageFile.size / 1024).toFixed(1)} KB)
-                    </p>
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Upload a photo to help us understand the issue better (max 5MB)
+            {loading ? (
+              <p className="text-sm text-muted-foreground text-center py-8">Loading reports...</p>
+            ) : reports.length === 0 ? (
+              <div className="text-center py-8">
+                <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No reports yet</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Click "Create Report" to submit your first issue
                 </p>
               </div>
-
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Submit Report
-                  </>
-                )}
-              </Button>
-            </form>
+            ) : (
+              <div className="space-y-3">
+                {reports.map((report) => (
+                  <div
+                    key={report.id}
+                    className="flex items-start gap-4 p-4 rounded-lg border bg-card"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
+                      <AlertCircle className="w-5 h-5 text-destructive" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-medium truncate">{report.title}</p>
+                        <Badge variant={getStatusVariant(report.status)} className="shrink-0">
+                          {report.status.replace("_", " ")}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                        {report.description}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        {report.location && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {report.location}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {format(new Date(report.created_at), "MMM d, yyyy")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

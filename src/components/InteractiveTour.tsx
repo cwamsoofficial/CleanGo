@@ -165,18 +165,18 @@ export const InteractiveTour = ({ onComplete, onSkip, role = "citizen" }: Intera
       const rect = element.getBoundingClientRect();
       const padding = 8;
       
-      // Spotlight position
+      // Spotlight position (viewport coordinates for fixed overlay)
       setSpotlightPos({
-        top: rect.top - padding + window.scrollY,
+        top: rect.top - padding,
         left: rect.left - padding,
         width: rect.width + padding * 2,
         height: rect.height + padding * 2
       });
 
-      // Tooltip position
+      // Tooltip position (viewport coordinates for fixed container)
       const tooltipWidth = 320;
-      const tooltipHeight = 180;
-      const gap = 16;
+      const tooltipHeight = 200;
+      const gap = 12;
 
       let top = 0;
       let left = 0;
@@ -184,23 +184,23 @@ export const InteractiveTour = ({ onComplete, onSkip, role = "citizen" }: Intera
 
       switch (step.position) {
         case "bottom":
-          top = rect.bottom + gap + window.scrollY;
+          top = rect.bottom + gap;
           left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
           arrowPosition = "top";
           break;
         case "top":
-          top = rect.top - tooltipHeight - gap + window.scrollY;
+          top = rect.top - tooltipHeight - gap;
           left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
           arrowPosition = "bottom";
           break;
         case "left":
-          top = rect.top + (rect.height / 2) - (tooltipHeight / 2) + window.scrollY;
+          top = rect.top + (rect.height / 2) - (tooltipHeight / 2);
           left = rect.left - tooltipWidth - gap;
           arrowPosition = "right";
           break;
         case "right":
         default:
-          top = rect.top + (rect.height / 2) - (tooltipHeight / 2) + window.scrollY;
+          top = rect.top + (rect.height / 2) - (tooltipHeight / 2);
           left = rect.right + gap;
           arrowPosition = "left";
           break;
@@ -208,14 +208,14 @@ export const InteractiveTour = ({ onComplete, onSkip, role = "citizen" }: Intera
 
       // Keep tooltip within viewport
       left = Math.max(16, Math.min(left, window.innerWidth - tooltipWidth - 16));
-      top = Math.max(16, top);
+      top = Math.max(16, Math.min(top, window.innerHeight - tooltipHeight - 16));
 
       setTooltipPos({ top, left, arrowPosition });
     } else {
       // Fallback: center the tooltip
       setSpotlightPos(null);
       setTooltipPos({
-        top: window.innerHeight / 2 - 90,
+        top: window.innerHeight / 2 - 100,
         left: window.innerWidth / 2 - 160,
         arrowPosition: "top"
       });

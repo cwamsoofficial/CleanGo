@@ -69,7 +69,7 @@ const ReportIssue = () => {
 
       let imageUrl = null;
 
-      // Upload image if provided (skip if storage not configured)
+      // Upload image if provided
       if (imageFile) {
         try {
           const fileExt = imageFile.name.split(".").pop();
@@ -80,14 +80,15 @@ const ReportIssue = () => {
             .from("issue-images")
             .upload(filePath, imageFile);
 
-          if (!uploadError) {
-            const {
-              data: { publicUrl },
-            } = supabase.storage.from("issue-images").getPublicUrl(filePath);
-            imageUrl = publicUrl;
+          if (uploadError) {
+            console.error("Image upload error:", uploadError);
+            toast.error("Failed to upload image, but report will be submitted");
+          } else {
+            // Store the file path (not public URL) since bucket is private
+            imageUrl = filePath;
           }
         } catch (uploadError) {
-          console.log("Image upload skipped:", uploadError);
+          console.error("Image upload exception:", uploadError);
         }
       }
 

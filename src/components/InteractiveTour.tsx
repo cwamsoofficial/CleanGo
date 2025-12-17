@@ -291,7 +291,7 @@ export const InteractiveTour = ({ onComplete, onSkip, role = "citizen" }: Intera
 
   return createPortal(
     <div 
-      className={`fixed inset-0 z-[100] transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[99999] transition-opacity duration-300 ${
         isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
     >
@@ -317,7 +317,7 @@ export const InteractiveTour = ({ onComplete, onSkip, role = "citizen" }: Intera
           y="0"
           width="100%"
           height="100%"
-          fill="rgba(0, 0, 0, 0.75)"
+          fill="rgba(0, 0, 0, 0.85)"
           mask="url(#spotlight-mask)"
           style={{ pointerEvents: "auto" }}
           onClick={handleSkip}
@@ -333,6 +333,7 @@ export const InteractiveTour = ({ onComplete, onSkip, role = "citizen" }: Intera
             left: spotlightPos.left,
             width: spotlightPos.width,
             height: spotlightPos.height,
+            zIndex: 99999
           }}
         />
       )}
@@ -340,11 +341,11 @@ export const InteractiveTour = ({ onComplete, onSkip, role = "citizen" }: Intera
       {/* Tooltip */}
       {tooltipPos && (
         <Card 
-          className="absolute w-80 shadow-2xl border-primary/30 animate-fade-in"
+          className="absolute w-80 shadow-2xl border-primary/30 animate-fade-in bg-card"
           style={{
             top: tooltipPos.top,
             left: tooltipPos.left,
-            zIndex: 101
+            zIndex: 100000
           }}
         >
           {/* Arrow */}

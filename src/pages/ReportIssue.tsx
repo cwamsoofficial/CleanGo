@@ -72,24 +72,36 @@ const ReportIssue = () => {
       // Upload image if provided
       if (imageFile) {
         try {
-          const fileExt = imageFile.name.split(".").pop();
+          // Validate file size (max 5MB)
+          if (imageFile.size > 5 * 1024 * 1024) {
+            toast.error("Image file too large. Maximum size is 5MB.");
+            setLoading(false);
+            return;
+          }
+
+          const fileExt = imageFile.name.split(".").pop()?.toLowerCase();
           const fileName = `${Date.now()}.${fileExt}`;
           // Use user.id as folder name to match storage RLS policy
           const filePath = `${user.id}/${fileName}`;
 
-          const { error: uploadError } = await supabase.storage
+          console.log("Uploading image to:", filePath);
+          
+          const { error: uploadError, data: uploadData } = await supabase.storage
             .from("issue-images")
             .upload(filePath, imageFile);
 
           if (uploadError) {
             console.error("Image upload error:", uploadError);
-            toast.error("Failed to upload image, but report will be submitted");
+            toast.error(`Failed to upload image: ${uploadError.message}`);
           } else {
+            console.log("Image uploaded successfully:", uploadData);
             // Store the file path (not public URL) since bucket is private
             imageUrl = filePath;
+            toast.success("Image uploaded successfully");
           }
-        } catch (uploadError) {
+        } catch (uploadError: any) {
           console.error("Image upload exception:", uploadError);
+          toast.error(`Upload failed: ${uploadError.message || 'Unknown error'}`);
         }
       }
 
@@ -207,8 +219,20 @@ const ReportIssue = () => {
                     </Button>
                   )}
                 </div>
+                {imageFile && (
+                  <div className="mt-2 space-y-2">
+                    <img
+                      src={URL.createObjectURL(imageFile)}
+                      alt="Preview"
+                      className="w-full max-w-xs rounded-lg border"
+                    />
+                    <p className="text-sm text-primary">
+                      ✓ Image selected: {imageFile.name} ({(imageFile.size / 1024).toFixed(1)} KB)
+                    </p>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
-                  Upload a photo to help us understand the issue better
+                  Upload a photo to help us understand the issue better (max 5MB)
                 </p>
               </div>
 

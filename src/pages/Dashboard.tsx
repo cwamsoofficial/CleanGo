@@ -4,13 +4,23 @@ import { getUserRole, type UserRole } from "@/lib/supabase";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, AlertCircle, CheckCircle, Clock, TrendingUp, FileText } from "lucide-react";
+import { Package, AlertCircle, CheckCircle, Clock, TrendingUp, FileText, MapPin, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { RequestPickupDialog } from "@/components/RequestPickupDialog";
 import { RecentIssues } from "@/components/RecentIssues";
 import { useNavigate } from "react-router-dom";
 import { OnboardingTour, useOnboarding } from "@/components/OnboardingTour";
 import { InteractiveTour } from "@/components/InteractiveTour";
+import { format } from "date-fns";
+
+interface Activity {
+  id: string;
+  type: "pickup" | "issue";
+  title: string;
+  status: string;
+  location: string | null;
+  date: string;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -22,6 +32,7 @@ const Dashboard = () => {
     issues: 0,
     points: 0,
   });
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
   
   const { showOnboarding, hasChecked, completeOnboarding, skipOnboarding } = useOnboarding();
 
@@ -84,6 +95,35 @@ const Dashboard = () => {
         issues: issues?.length || 0,
         points: rewards?.points || 0,
       });
+
+      // Build recent activity from pickups and issues
+      const activities: Activity[] = [];
+      
+      pickups?.slice(0, 3).forEach((p) => {
+        activities.push({
+          id: p.id,
+          type: "pickup",
+          title: `Waste Pickup - ${p.status}`,
+          status: p.status,
+          location: p.location,
+          date: p.created_at,
+        });
+      });
+      
+      issues?.slice(0, 3).forEach((i) => {
+        activities.push({
+          id: i.id,
+          type: "issue",
+          title: i.title,
+          status: i.status,
+          location: i.location,
+          date: i.created_at,
+        });
+      });
+      
+      // Sort by date and take top 5
+      activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setRecentActivity(activities.slice(0, 5));
     };
 
     fetchDashboardData();
@@ -214,11 +254,41 @@ const Dashboard = () => {
               <CardDescription>Your latest waste management activities</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                {stats.totalPickups > 0
-                  ? "Check the sidebar for detailed pickup and issue information."
-                  : "No recent activity. Start by scheduling a pickup or reporting an issue."}
-              </p>
+              {recentActivity.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No recent activity. Start by scheduling a pickup or reporting an issue.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {recentActivity.map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-3 p-2 rounded-lg border bg-card">
+                      {activity.type === "pickup" ? (
+                        <Package className="w-4 h-4 text-primary mt-0.5" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-destructive mt-0.5" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{activity.title}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          {activity.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {activity.location}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {format(new Date(activity.date), "MMM d")}
+                          </span>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="text-xs shrink-0">
+                        {activity.status.replace("_", " ")}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -236,7 +306,7 @@ const Dashboard = () => {
                   <Button 
                     variant="outline" 
                     className="w-full gap-2"
-                    onClick={() => navigate("/report-issue")}
+                    onClick={() => navigate("/dashboard/report-issue")}
                     data-tour="report-issue"
                   >
                     <FileText className="w-4 h-4" />

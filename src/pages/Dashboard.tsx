@@ -261,7 +261,11 @@ const Dashboard = () => {
               ) : (
                 <div className="space-y-3">
                   {recentActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-3 p-2 rounded-lg border bg-card">
+                    <div 
+                      key={activity.id} 
+                      className="flex items-start gap-3 p-2 rounded-lg border bg-card cursor-pointer hover:bg-accent/50 transition-colors"
+                      onClick={() => navigate(activity.type === "pickup" ? "/dashboard/pickups" : "/dashboard/issues")}
+                    >
                       {activity.type === "pickup" ? (
                         <Package className="w-4 h-4 text-primary mt-0.5" />
                       ) : (

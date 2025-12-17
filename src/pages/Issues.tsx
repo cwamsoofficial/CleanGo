@@ -4,12 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { AlertCircle, CheckCircle, Clock, Download, Eye, X, ZoomIn } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, Download, Edit, Eye, Trash2, X, ZoomIn } from "lucide-react";
 
 interface Issue {
   id: string;
@@ -37,10 +41,13 @@ export default function Issues() {
   const [stats, setStats] = useState<IssueStats>({ total: 0, pending: 0, in_progress: 0, resolved: 0 });
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editForm, setEditForm] = useState({ title: '', description: '', location: '' });
 
   useEffect(() => {
     fetchUserRole();
@@ -56,6 +63,8 @@ export default function Issues() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      
+      setUserId(user.id);
 
       const { data, error } = await supabase
         .from('user_roles')
@@ -135,6 +144,59 @@ export default function Issues() {
       console.error('Error updating issue:', error);
       toast.error('Failed to update issue status');
     }
+  };
+
+  const handleDelete = async (issueId: string) => {
+    try {
+      const { error } = await supabase
+        .from('issue_reports')
+        .delete()
+        .eq('id', issueId);
+
+      if (error) throw error;
+
+      toast.success('Issue deleted successfully');
+      setIsDialogOpen(false);
+      setSelectedIssue(null);
+      fetchIssues();
+    } catch (error) {
+      console.error('Error deleting issue:', error);
+      toast.error('Failed to delete issue');
+    }
+  };
+
+  const handleEditSubmit = async () => {
+    if (!selectedIssue) return;
+    
+    try {
+      const { error } = await supabase
+        .from('issue_reports')
+        .update({
+          title: editForm.title,
+          description: editForm.description,
+          location: editForm.location || null,
+        })
+        .eq('id', selectedIssue.id);
+
+      if (error) throw error;
+
+      toast.success('Issue updated successfully');
+      setIsEditMode(false);
+      setIsDialogOpen(false);
+      fetchIssues();
+    } catch (error) {
+      console.error('Error updating issue:', error);
+      toast.error('Failed to update issue');
+    }
+  };
+
+  const startEdit = (issue: Issue) => {
+    setEditForm({
+      title: issue.title,
+      description: issue.description,
+      location: issue.location || '',
+    });
+    setIsEditMode(true);
   };
 
   const getStatusBadge = (status: string) => {
@@ -296,14 +358,19 @@ export default function Issues() {
       </div>
 
       {/* Issue Details Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) setIsEditMode(false);
+      }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{selectedIssue?.title}</DialogTitle>
-            <DialogDescription>Issue details and information</DialogDescription>
+            <DialogTitle>{isEditMode ? 'Edit Issue' : selectedIssue?.title}</DialogTitle>
+            <DialogDescription>
+              {isEditMode ? 'Update your issue report' : 'Issue details and information'}
+            </DialogDescription>
           </DialogHeader>
           
-          {selectedIssue && (
+          {selectedIssue && !isEditMode && (
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Status</h3>
@@ -393,24 +460,114 @@ export default function Issues() {
                 )}
               </div>
 
-              <div>
-                <h3 className="font-semibold mb-2">Update Status</h3>
-                <Select
-                  value={selectedIssue.status}
-                  onValueChange={(value) => {
-                    handleStatusUpdate(selectedIssue.id, value as any);
-                    setIsDialogOpen(false);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                  </SelectContent>
-                </Select>
+              {(userRole === 'collector' || userRole === 'admin') && (
+                <div>
+                  <h3 className="font-semibold mb-2">Update Status</h3>
+                  <Select
+                    value={selectedIssue.status}
+                    onValueChange={(value) => {
+                      handleStatusUpdate(selectedIssue.id, value as any);
+                      setIsDialogOpen(false);
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex gap-2 pt-4 border-t">
+                {/* Edit button for citizens on their own pending reports */}
+                {selectedIssue.reporter_id === userId && selectedIssue.status === 'pending' && (
+                  <Button
+                    variant="outline"
+                    onClick={() => startEdit(selectedIssue)}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Report
+                  </Button>
+                )}
+
+                {/* Delete button for admins */}
+                {userRole === 'admin' && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive">
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Report
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Issue Report</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this issue report? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(selectedIssue.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Edit Form */}
+          {selectedIssue && isEditMode && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Title</Label>
+                <Input
+                  id="edit-title"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  placeholder="Issue title"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  placeholder="Issue description"
+                  rows={4}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-location">Location</Label>
+                <Input
+                  id="edit-location"
+                  value={editForm.location}
+                  onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                  placeholder="Issue location"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button onClick={handleEditSubmit}>
+                  Save Changes
+                </Button>
+                <Button variant="outline" onClick={() => setIsEditMode(false)}>
+                  Cancel
+                </Button>
               </div>
             </div>
           )}

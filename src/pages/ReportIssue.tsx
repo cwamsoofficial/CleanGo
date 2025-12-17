@@ -73,8 +73,9 @@ const ReportIssue = () => {
       if (imageFile) {
         try {
           const fileExt = imageFile.name.split(".").pop();
-          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-          const filePath = `issue-reports/${fileName}`;
+          const fileName = `${Date.now()}.${fileExt}`;
+          // Use user.id as folder name to match storage RLS policy
+          const filePath = `${user.id}/${fileName}`;
 
           const { error: uploadError } = await supabase.storage
             .from("issue-images")

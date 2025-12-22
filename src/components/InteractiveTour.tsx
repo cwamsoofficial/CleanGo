@@ -29,13 +29,13 @@ const citizenTourSteps: TourStep[] = [
     target: "[data-tour='request-pickup']",
     title: "Request a Pickup",
     description: "Click here to schedule a waste collection. Enter your location and any special notes for the collector.",
-    position: "bottom"
+    position: "left"
   },
   {
     target: "[data-tour='report-issue']",
     title: "Report Issues",
     description: "See overflowing bins or illegal dumping? Report it here with photos and location details.",
-    position: "bottom"
+    position: "right"
   },
   {
     target: "[data-tour='nav-my-pickups']",

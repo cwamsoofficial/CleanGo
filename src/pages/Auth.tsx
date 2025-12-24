@@ -469,7 +469,7 @@ const Auth = () => {
                     id="signup-name"
                     name="name"
                     type="text"
-                    placeholder="Aminu Ibrahim"
+                    placeholder="Enter your full name"
                     required
                   />
                 </div>
@@ -479,7 +479,7 @@ const Auth = () => {
                     id="signup-email"
                     name="email"
                     type="email"
-                    placeholder="aminu@email.com"
+                    placeholder="Enter a valid email address"
                     required
                   />
                 </div>
@@ -489,7 +489,7 @@ const Auth = () => {
                     id="signup-phone"
                     name="phone"
                     type="tel"
-                    placeholder="+234 801 234 5678"
+                    placeholder="Enter your phone number"
                   />
                 </div>
                 <div className="space-y-2">
@@ -498,7 +498,7 @@ const Auth = () => {
                     id="signup-address"
                     name="address"
                     type="text"
-                    placeholder="15 Murtala Mohammed Way, Kano"
+                    placeholder="Enter your residential address"
                   />
                 </div>
                 <div className="space-y-2">

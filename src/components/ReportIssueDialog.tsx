@@ -124,16 +124,7 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
 
       if (error) throw error;
 
-      // Award points securely using RPC
-      const { error: rewardError } = await supabase.rpc("award_points", {
-        _user_id: user.id,
-        _points: 3,
-        _description: "Reported waste management issue",
-      });
-
-      if (rewardError) {
-        console.log("Reward RPC error:", rewardError);
-      }
+      // Points are automatically awarded by database trigger (on_issue_report_created)
 
       toast.success("Issue reported successfully!");
       setImageFile(null);

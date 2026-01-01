@@ -35,28 +35,14 @@ const AdminLogin = () => {
     setError("");
 
     try {
-      // Check if account is locked
-      const { data: isLocked, error: lockCheckError } = await supabase.rpc('is_account_locked', {
-        user_email: email
-      });
-
-      if (lockCheckError) {
-        console.error("Error checking lock status:", lockCheckError);
-      }
-
-      if (isLocked) {
-        setError("Account temporarily locked due to multiple failed login attempts. Please try again in 30 minutes.");
-        setLoading(false);
-        return;
-      }
-
+      // Attempt sign in - account lock status is checked server-side via handle_failed_login
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (signInError) {
-        // Log failed attempt
+        // Log failed attempt and check lock status server-side
         const { data: failResult } = await supabase.rpc('handle_failed_login', {
           user_email: email,
           failure_reason: signInError.message,
@@ -66,9 +52,10 @@ const AdminLogin = () => {
 
         const result = failResult as any;
         if (result?.locked) {
-          setError(`Account locked after ${result.attempts} failed attempts. Please try again in ${result.lockout_minutes} minutes.`);
+          // Generic message - don't reveal specific details
+          setError(result.message || "Too many failed login attempts. Please try again later.");
         } else if (result?.remaining_attempts) {
-          setError(`Invalid email or password. ${result.remaining_attempts} attempts remaining before lockout.`);
+          setError(`Invalid email or password. ${result.remaining_attempts} attempts remaining.`);
         } else {
           setError("Invalid email or password");
         }

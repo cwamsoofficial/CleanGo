@@ -160,10 +160,10 @@ const Pickups = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const totalAvailable = pickups.filter(p => p.status === "pending" && !p.collector_id).length;
     const assignedToMe = pickups.filter(p => p.collector_id === userId).length;
+    const inProgress = pickups.filter(p => p.status === "in_progress" && p.collector_id === userId).length;
     const completedToday = pickups.filter(p => {
-      if (p.status !== "collected" || !p.completed_at) return false;
+      if (p.status !== "collected" || !p.completed_at || p.collector_id !== userId) return false;
       const completedDate = new Date(p.completed_at);
       completedDate.setHours(0, 0, 0, 0);
       return completedDate.getTime() === today.getTime();
@@ -173,23 +173,23 @@ const Pickups = () => {
       <div className="grid gap-4 md:grid-cols-3 mb-6" data-tour="pickup-stats">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Available</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Assigned</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalAvailable}</div>
-            <p className="text-xs text-muted-foreground">Unassigned pickups</p>
+            <div className="text-2xl font-bold">{assignedToMe}</div>
+            <p className="text-xs text-muted-foreground">Your pickups</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assigned to Me</CardTitle>
+            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{assignedToMe}</div>
-            <p className="text-xs text-muted-foreground">Your pickups</p>
+            <div className="text-2xl font-bold">{inProgress}</div>
+            <p className="text-xs text-muted-foreground">Active pickups</p>
           </CardContent>
         </Card>
 
@@ -270,31 +270,6 @@ const Pickups = () => {
                     <p className="text-sm text-muted-foreground">{pickup.notes}</p>
                   )}
 
-                  {role === "collector" && pickup.status === "pending" && (
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleUpdateStatus(pickup.id, "in_progress")}
-                      >
-                        Accept Pickup
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleUpdateStatus(pickup.id, "delayed")}
-                      >
-                        Mark as Delayed
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleUpdateStatus(pickup.id, "failed")}
-                      >
-                        Mark as Failed
-                      </Button>
-                    </div>
-                  )}
-
                   {role === "collector" && pickup.status === "in_progress" && (
                     <div className="flex gap-2 pt-2">
                       <Button
@@ -306,9 +281,9 @@ const Pickups = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleUnassign(pickup.id)}
+                        onClick={() => handleUpdateStatus(pickup.id, "delayed")}
                       >
-                        Unassign
+                        Mark as Delayed
                       </Button>
                       <Button
                         size="sm"
@@ -328,13 +303,6 @@ const Pickups = () => {
                       >
                         Retry Pickup
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleUpdateStatus(pickup.id, "collected")}
-                      >
-                        Mark as Collected
-                      </Button>
                     </div>
                   )}
 
@@ -345,25 +313,6 @@ const Pickups = () => {
                         onClick={() => handleUpdateStatus(pickup.id, "in_progress")}
                       >
                         Resume Pickup
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleUpdateStatus(pickup.id, "failed")}
-                      >
-                        Mark as Failed
-                      </Button>
-                    </div>
-                  )}
-
-                  {role === "collector" && pickup.status === "collected" && (
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleUpdateStatus(pickup.id, "in_progress")}
-                      >
-                        Revert to In Progress
                       </Button>
                       <Button
                         size="sm"

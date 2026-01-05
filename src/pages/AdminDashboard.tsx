@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Users, Trash2, AlertCircle, Award, TrendingUp } from "lucide-react";
+import { Users, Trash2, AlertCircle, Award, ClipboardList } from "lucide-react";
 import SecurityDashboard from "@/components/SecurityDashboard";
 import UserManagement from "@/components/UserManagement";
+import AdminAssignments from "@/components/AdminAssignments";
 
 interface User {
   id: string;
@@ -173,6 +174,10 @@ const AdminDashboard = () => {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="assignments" className="flex items-center gap-2">
+              <ClipboardList className="w-4 h-4" />
+              Assignments
+            </TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
           </TabsList>
@@ -276,6 +281,10 @@ const AdminDashboard = () => {
             </Table>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="assignments" className="space-y-8 mt-6">
+            <AdminAssignments />
           </TabsContent>
 
           <TabsContent value="users" className="space-y-8 mt-6">

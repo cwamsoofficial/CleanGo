@@ -92,8 +92,8 @@ export default function Issues() {
       if (userRole === 'citizen' || userRole === 'company') {
         query = query.eq('reporter_id', user.id);
       } else if (userRole === 'collector') {
-        // Collectors see their assigned issues or unassigned ones
-        query = query.or(`assigned_collector_id.eq.${user.id},assigned_collector_id.is.null`);
+        // Collectors only see their assigned issues
+        query = query.eq('assigned_collector_id', user.id);
       }
       // Admins see all (no filter)
 
@@ -124,11 +124,6 @@ export default function Issues() {
       if (!user) return;
 
       const updateData: any = { status: newStatus };
-      
-      // If moving to in_progress, assign current collector
-      if (newStatus === 'in_progress' && userRole === 'collector') {
-        updateData.assigned_collector_id = user.id;
-      }
       
       // If marking as resolved, set resolved_at timestamp
       if (newStatus === 'resolved') {

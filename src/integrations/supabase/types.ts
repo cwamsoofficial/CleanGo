@@ -122,6 +122,50 @@ export type Database = {
         }
         Relationships: []
       }
+      pickup_requests: {
+        Row: {
+          admin_notes: string | null
+          collector_id: string
+          created_at: string
+          id: string
+          pickup_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          collector_id: string
+          created_at?: string
+          id?: string
+          pickup_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          collector_id?: string
+          created_at?: string
+          id?: string
+          pickup_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pickup_requests_pickup_id_fkey"
+            columns: ["pickup_id"]
+            isOneToOne: false
+            referencedRelation: "waste_pickups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -361,6 +405,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_pickup_request: {
+        Args: { _request_id: string }
+        Returns: undefined
+      }
       award_points: {
         Args: { _description: string; _points: number; _user_id: string }
         Returns: undefined
@@ -398,6 +446,10 @@ export type Database = {
       is_account_locked: { Args: { user_email: string }; Returns: boolean }
       redeem_points: {
         Args: { _description: string; _points: number; _user_id: string }
+        Returns: undefined
+      }
+      reject_pickup_request: {
+        Args: { _reason?: string; _request_id: string }
         Returns: undefined
       }
       unban_user: { Args: { _user_id: string }; Returns: undefined }

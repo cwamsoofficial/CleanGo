@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Package, AlertCircle, User, Clock, CheckCircle, XCircle, Users, BarChart3, Search, Filter } from "lucide-react";
+import { Package, AlertCircle, User, Clock, CheckCircle, XCircle, Users, BarChart3, Search, Filter, Inbox, Check, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 
@@ -39,11 +39,25 @@ interface Issue {
   reporter_name?: string;
 }
 
+interface PickupRequest {
+  id: string;
+  pickup_id: string;
+  collector_id: string;
+  status: string;
+  created_at: string;
+  collector_name?: string;
+  pickup_location?: string;
+  pickup_scheduled?: string | null;
+  requester_name?: string;
+}
+
 export default function AdminAssignments() {
   const [collectors, setCollectors] = useState<Collector[]>([]);
   const [pickups, setPickups] = useState<Pickup[]>([]);
   const [issues, setIssues] = useState<Issue[]>([]);
+  const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingRequest, setProcessingRequest] = useState<string | null>(null);
   
   // Filter states
   const [pickupSearch, setPickupSearch] = useState("");
@@ -123,6 +137,53 @@ export default function AdminAssignments() {
       } else {
         setIssues([]);
       }
+
+      // Fetch pending pickup requests
+      const { data: requestsData } = await supabase
+        .from("pickup_requests")
+        .select("*")
+        .eq("status", "pending")
+        .order("created_at", { ascending: true });
+
+      if (requestsData && requestsData.length > 0) {
+        // Get collector names and pickup details
+        const collectorIds = [...new Set(requestsData.map(r => r.collector_id))];
+        const pickupIds = [...new Set(requestsData.map(r => r.pickup_id))];
+
+        const { data: collectorProfiles } = await supabase
+          .from("profiles")
+          .select("id, name")
+          .in("id", collectorIds);
+
+        const { data: pickupDetails } = await supabase
+          .from("waste_pickups")
+          .select("id, location, scheduled_date, user_id")
+          .in("id", pickupIds);
+
+        // Get requester names
+        const requesterIds = pickupDetails?.map(p => p.user_id) || [];
+        const { data: requesterProfiles } = await supabase
+          .from("profiles")
+          .select("id, name")
+          .in("id", requesterIds);
+
+        const requestsWithDetails = requestsData.map(request => {
+          const collector = collectorProfiles?.find(p => p.id === request.collector_id);
+          const pickup = pickupDetails?.find(p => p.id === request.pickup_id);
+          const requester = requesterProfiles?.find(p => p.id === pickup?.user_id);
+          return {
+            ...request,
+            collector_name: collector?.name || "Unknown",
+            pickup_location: pickup?.location || "Not specified",
+            pickup_scheduled: pickup?.scheduled_date,
+            requester_name: requester?.name || "Unknown",
+          };
+        });
+
+        setPickupRequests(requestsWithDetails);
+      } else {
+        setPickupRequests([]);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to load data");
@@ -170,6 +231,36 @@ export default function AdminAssignments() {
     } catch (error) {
       console.error("Error assigning issue:", error);
       toast.error("Failed to assign issue");
+    }
+  };
+
+  const handleApproveRequest = async (requestId: string) => {
+    try {
+      setProcessingRequest(requestId);
+      const { error } = await supabase.rpc("approve_pickup_request", { _request_id: requestId });
+      if (error) throw error;
+      toast.success("Request approved - pickup assigned to collector");
+      fetchData();
+    } catch (error: any) {
+      console.error("Error approving request:", error);
+      toast.error(error.message || "Failed to approve request");
+    } finally {
+      setProcessingRequest(null);
+    }
+  };
+
+  const handleRejectRequest = async (requestId: string) => {
+    try {
+      setProcessingRequest(requestId);
+      const { error } = await supabase.rpc("reject_pickup_request", { _request_id: requestId });
+      if (error) throw error;
+      toast.success("Request rejected");
+      fetchData();
+    } catch (error: any) {
+      console.error("Error rejecting request:", error);
+      toast.error(error.message || "Failed to reject request");
+    } finally {
+      setProcessingRequest(null);
     }
   };
 
@@ -261,6 +352,13 @@ export default function AdminAssignments() {
     <div className="space-y-6">
       <Tabs defaultValue="pickups" className="w-full">
         <TabsList>
+          <TabsTrigger value="requests" className="flex items-center gap-2">
+            <Inbox className="w-4 h-4" />
+            Requests
+            {pickupRequests.length > 0 && (
+              <Badge variant="destructive" className="ml-1">{pickupRequests.length}</Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="workload" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Workload
@@ -280,6 +378,87 @@ export default function AdminAssignments() {
             )}
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="requests" className="space-y-6 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Inbox className="w-5 h-5" />
+                Pending Pickup Requests
+              </CardTitle>
+              <CardDescription>
+                Collectors requesting to be assigned to pickups
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {pickupRequests.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">
+                  No pending requests
+                </p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Collector</TableHead>
+                      <TableHead>Pickup Location</TableHead>
+                      <TableHead>Scheduled</TableHead>
+                      <TableHead>Requested By</TableHead>
+                      <TableHead>Requested At</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pickupRequests.map((request) => (
+                      <TableRow key={request.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-muted-foreground" />
+                            {request.collector_name}
+                          </div>
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {request.pickup_location}
+                        </TableCell>
+                        <TableCell>
+                          {request.pickup_scheduled
+                            ? format(new Date(request.pickup_scheduled), "MMM dd, yyyy")
+                            : "Not set"}
+                        </TableCell>
+                        <TableCell>{request.requester_name}</TableCell>
+                        <TableCell>
+                          {format(new Date(request.created_at), "MMM dd, HH:mm")}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleApproveRequest(request.id)}
+                              disabled={processingRequest === request.id}
+                              className="flex items-center gap-1"
+                            >
+                              <Check className="w-3 h-3" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRejectRequest(request.id)}
+                              disabled={processingRequest === request.id}
+                              className="flex items-center gap-1"
+                            >
+                              <X className="w-3 h-3" />
+                              Reject
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="workload" className="space-y-6 mt-4">
           <Card>

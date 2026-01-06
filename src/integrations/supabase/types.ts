@@ -467,6 +467,23 @@ export type Database = {
       }
       check_ip_rate_limit: { Args: { ip_addr: string }; Returns: Json }
       delete_user_account: { Args: { _user_id: string }; Returns: undefined }
+      get_leaderboard: {
+        Args: { limit_count?: number }
+        Returns: {
+          name: string
+          pickups_completed: number
+          points: number
+          total_earned: number
+          user_id: string
+        }[]
+      }
+      get_public_profile: {
+        Args: { profile_id: string }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]

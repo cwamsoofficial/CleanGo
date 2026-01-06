@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User, ClipboardList, Send } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User, ClipboardList, Send, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -225,6 +225,29 @@ const Pickups = () => {
     }
   };
 
+  const handleCancelPickupRequest = async (pickupId: string) => {
+    try {
+      setRequestingPickup(pickupId);
+      const request = myRequests.find(r => r.pickup_id === pickupId && r.status === 'pending');
+      if (!request) return;
+
+      const { error } = await supabase
+        .from("pickup_requests")
+        .delete()
+        .eq("id", request.id);
+
+      if (error) throw error;
+
+      toast.success("Request cancelled");
+      fetchPickups();
+    } catch (error: any) {
+      console.error("Error cancelling request:", error);
+      toast.error("Failed to cancel request");
+    } finally {
+      setRequestingPickup(null);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, any> = {
       pending: { variant: "secondary", icon: Clock },
@@ -434,10 +457,28 @@ const Pickups = () => {
                       <TableCell>
                         {(() => {
                           const existingRequest = myRequests.find(r => r.pickup_id === pickup.id);
+                          if (existingRequest && existingRequest.status === 'pending') {
+                            return (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={requestingPickup === pickup.id}
+                                onClick={() => handleCancelPickupRequest(pickup.id)}
+                                className="flex items-center gap-2"
+                              >
+                                {requestingPickup === pickup.id ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <X className="w-3 h-3" />
+                                )}
+                                Cancel Request
+                              </Button>
+                            );
+                          }
                           if (existingRequest) {
                             return (
-                              <Badge variant={existingRequest.status === 'pending' ? 'secondary' : existingRequest.status === 'approved' ? 'default' : 'destructive'}>
-                                {existingRequest.status === 'pending' ? 'Requested' : existingRequest.status}
+                              <Badge variant={existingRequest.status === 'approved' ? 'default' : 'destructive'}>
+                                {existingRequest.status}
                               </Badge>
                             );
                           }
@@ -449,7 +490,11 @@ const Pickups = () => {
                               onClick={() => handleRequestPickup(pickup.id)}
                               className="flex items-center gap-2"
                             >
-                              <Send className="w-3 h-3" />
+                              {requestingPickup === pickup.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <Send className="w-3 h-3" />
+                              )}
                               Request
                             </Button>
                           );

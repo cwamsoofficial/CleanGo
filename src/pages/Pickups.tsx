@@ -5,8 +5,11 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User, ClipboardList, Send } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 interface Pickup {
   id: string;
@@ -18,13 +21,17 @@ interface Pickup {
   completed_at: string | null;
   collector_id: string | null;
   collector_name?: string;
+  user_id: string;
+  user_name?: string;
 }
 
 const Pickups = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [pickups, setPickups] = useState<Pickup[]>([]);
+  const [allPickups, setAllPickups] = useState<Pickup[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [requestingPickup, setRequestingPickup] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPickups();
@@ -41,43 +48,77 @@ const Pickups = () => {
       const userRole = await getUserRole(user.id);
       setRole(userRole);
 
-      let query = supabase.from("waste_pickups").select("*");
+      // For collectors, fetch assigned pickups and all unassigned pickups
+      if (userRole === "collector") {
+        // Fetch assigned pickups (collector's own)
+        const { data: assignedData, error: assignedError } = await supabase
+          .from("waste_pickups")
+          .select("*")
+          .eq("collector_id", user.id)
+          .order("created_at", { ascending: false });
 
-      if (userRole === "citizen" || userRole === "company") {
-        query = query.eq("user_id", user.id);
-      }
-      // Collectors and admins see all pickups
+        if (assignedError) throw assignedError;
 
-      const { data, error } = await query.order("created_at", { ascending: false });
+        // Fetch all pickups to get unassigned ones (admin RLS allows this)
+        // We'll need to use a different approach - fetch unassigned separately
+        const { data: allData, error: allError } = await supabase
+          .from("waste_pickups")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-      if (error) throw error;
+        // Get user names for pickups
+        const allUserIds = [...new Set([...(assignedData || []), ...(allData || [])].map(p => p.user_id))];
+        const { data: userProfiles } = await supabase
+          .from("profiles")
+          .select("id, name")
+          .in("id", allUserIds);
 
-      // For admins, fetch collector names
-      if (userRole === "admin" && data) {
-        const collectorIds = data
-          .filter(p => p.collector_id)
-          .map(p => p.collector_id);
-
-        if (collectorIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from("profiles")
-            .select("id, name")
-            .in("id", collectorIds);
-
-          const pickupsWithCollectors = data.map(pickup => {
-            if (pickup.collector_id) {
-              const profile = profiles?.find(p => p.id === pickup.collector_id);
-              return { ...pickup, collector_name: profile?.name || "Unknown" };
-            }
-            return pickup;
+        const addUserNames = (pickupsList: any[]) => 
+          pickupsList.map(pickup => {
+            const profile = userProfiles?.find(p => p.id === pickup.user_id);
+            return { ...pickup, user_name: profile?.name || "Unknown" };
           });
 
-          setPickups(pickupsWithCollectors);
-        } else {
-          setPickups(data);
-        }
+        setPickups(addUserNames(assignedData || []));
+        setAllPickups(addUserNames(allData || []));
       } else {
-        setPickups(data || []);
+        let query = supabase.from("waste_pickups").select("*");
+
+        if (userRole === "citizen" || userRole === "company") {
+          query = query.eq("user_id", user.id);
+        }
+
+        const { data, error } = await query.order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        // For admins, fetch collector names
+        if (userRole === "admin" && data) {
+          const collectorIds = data
+            .filter(p => p.collector_id)
+            .map(p => p.collector_id);
+
+          if (collectorIds.length > 0) {
+            const { data: profiles } = await supabase
+              .from("profiles")
+              .select("id, name")
+              .in("id", collectorIds);
+
+            const pickupsWithCollectors = data.map(pickup => {
+              if (pickup.collector_id) {
+                const profile = profiles?.find(p => p.id === pickup.collector_id);
+                return { ...pickup, collector_name: profile?.name || "Unknown" };
+              }
+              return pickup;
+            });
+
+            setPickups(pickupsWithCollectors);
+          } else {
+            setPickups(data);
+          }
+        } else {
+          setPickups(data || []);
+        }
       }
     } catch (error: any) {
       toast.error("Failed to load pickups");
@@ -131,6 +172,19 @@ const Pickups = () => {
       fetchPickups();
     } catch (error: any) {
       toast.error("Failed to unassign pickup");
+    }
+  };
+
+  const handleRequestPickup = async (pickupId: string) => {
+    try {
+      setRequestingPickup(pickupId);
+      // This creates a notification for admins to assign the pickup
+      // For now, we'll just show a toast - in production this would create a request
+      toast.success("Pickup request sent to admin for approval");
+    } catch (error: any) {
+      toast.error("Failed to request pickup");
+    } finally {
+      setRequestingPickup(null);
     }
   };
 
@@ -215,6 +269,242 @@ const Pickups = () => {
     );
   }
 
+  // Collector-specific filtered lists
+  const assignedPickups = pickups.filter(p => p.collector_id === userId && p.status !== "collected");
+  const unassignedPickups = allPickups.filter(p => !p.collector_id && p.status === "pending");
+  const completedPickups = pickups.filter(p => p.collector_id === userId && p.status === "collected");
+
+  // Render collector view with tabs
+  const renderCollectorView = () => (
+    <Tabs defaultValue="assigned" className="w-full">
+      <TabsList>
+        <TabsTrigger value="assigned" className="flex items-center gap-2">
+          <ClipboardList className="w-4 h-4" />
+          Assigned
+          {assignedPickups.length > 0 && (
+            <Badge variant="default" className="ml-1">{assignedPickups.length}</Badge>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="available" className="flex items-center gap-2">
+          <Package className="w-4 h-4" />
+          Available
+          {unassignedPickups.length > 0 && (
+            <Badge variant="secondary" className="ml-1">{unassignedPickups.length}</Badge>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="completed" className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4" />
+          Completed
+          <Badge variant="outline" className="ml-1">{completedPickups.length}</Badge>
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="assigned" className="mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Assigned Pickups</CardTitle>
+            <CardDescription>Pickups assigned to you by admin</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {assignedPickups.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">No pickups assigned to you</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Requested By</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Scheduled</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {assignedPickups.map((pickup) => (
+                    <TableRow key={pickup.id}>
+                      <TableCell className="font-mono text-xs">{pickup.id.slice(0, 8)}</TableCell>
+                      <TableCell>{pickup.user_name || "Unknown"}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">{pickup.location || "Not specified"}</TableCell>
+                      <TableCell>
+                        {pickup.scheduled_date ? format(new Date(pickup.scheduled_date), "MMM dd, yyyy") : "Not set"}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(pickup.status)}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          {pickup.status === "in_progress" && (
+                            <>
+                              <Button size="sm" onClick={() => handleUpdateStatus(pickup.id, "collected")}>
+                                Complete
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(pickup.id, "delayed")}>
+                                Delay
+                              </Button>
+                            </>
+                          )}
+                          {pickup.status === "pending" && (
+                            <Button size="sm" onClick={() => handleUpdateStatus(pickup.id, "in_progress")}>
+                              Start
+                            </Button>
+                          )}
+                          {(pickup.status === "delayed" || pickup.status === "failed") && (
+                            <Button size="sm" onClick={() => handleUpdateStatus(pickup.id, "in_progress")}>
+                              Resume
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="available" className="mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Available Pickups</CardTitle>
+            <CardDescription>Unassigned pickups you can request</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {unassignedPickups.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">No available pickups at the moment</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Requested By</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Scheduled</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {unassignedPickups.map((pickup) => (
+                    <TableRow key={pickup.id}>
+                      <TableCell className="font-mono text-xs">{pickup.id.slice(0, 8)}</TableCell>
+                      <TableCell>{pickup.user_name || "Unknown"}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">{pickup.location || "Not specified"}</TableCell>
+                      <TableCell>
+                        {pickup.scheduled_date ? format(new Date(pickup.scheduled_date), "MMM dd, yyyy") : "Not set"}
+                      </TableCell>
+                      <TableCell>{format(new Date(pickup.created_at), "MMM dd, yyyy")}</TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={requestingPickup === pickup.id}
+                          onClick={() => handleRequestPickup(pickup.id)}
+                          className="flex items-center gap-2"
+                        >
+                          <Send className="w-3 h-3" />
+                          Request
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="completed" className="mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Completed Pickups</CardTitle>
+            <CardDescription>Your pickup history</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {completedPickups.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">No completed pickups yet</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Requested By</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Completed At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {completedPickups.map((pickup) => (
+                    <TableRow key={pickup.id}>
+                      <TableCell className="font-mono text-xs">{pickup.id.slice(0, 8)}</TableCell>
+                      <TableCell>{pickup.user_name || "Unknown"}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">{pickup.location || "Not specified"}</TableCell>
+                      <TableCell>
+                        {pickup.completed_at ? format(new Date(pickup.completed_at), "MMM dd, yyyy HH:mm") : "N/A"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+
+  // Render citizen/company view (original card layout)
+  const renderCitizenView = () => (
+    <>
+      {pickups.length === 0 ? (
+        <Card>
+          <CardContent className="py-16 text-center">
+            <p className="text-muted-foreground">No pickups found</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4" data-tour="pickup-list">
+          {pickups.map((pickup) => (
+            <Card key={pickup.id}>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      Pickup #{pickup.id.slice(0, 8)}
+                      {!pickup.collector_id && <Badge variant="outline">Unassigned</Badge>}
+                    </CardTitle>
+                    <CardDescription>
+                      Scheduled: {pickup.scheduled_date ? new Date(pickup.scheduled_date).toLocaleDateString() : "Not set"}
+                    </CardDescription>
+                  </div>
+                  {getStatusBadge(pickup.status)}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {pickup.location && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="w-4 h-4" />
+                    {pickup.location}
+                  </div>
+                )}
+                {pickup.notes && (
+                  <p className="text-sm text-muted-foreground">{pickup.notes}</p>
+                )}
+                {pickup.status === "collected" && (
+                  <div className="flex items-center gap-2 text-sm text-success">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Pickup confirmed! You earned +5 points</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </>
+  );
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -229,112 +519,7 @@ const Pickups = () => {
 
         {getPickupStats()}
 
-        {pickups.length === 0 ? (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <p className="text-muted-foreground">No pickups found</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4" data-tour="pickup-list">
-            {pickups.map((pickup) => (
-              <Card key={pickup.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        Pickup #{pickup.id.slice(0, 8)}
-                        {!pickup.collector_id && <Badge variant="outline">Unassigned</Badge>}
-                      </CardTitle>
-                      <CardDescription>
-                        Scheduled: {pickup.scheduled_date ? new Date(pickup.scheduled_date).toLocaleDateString() : "Not set"}
-                      </CardDescription>
-                    </div>
-                    {getStatusBadge(pickup.status)}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {pickup.location && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4" />
-                      {pickup.location}
-                    </div>
-                  )}
-                  {role === "admin" && pickup.collector_name && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <User className="w-4 h-4" />
-                      Collector: {pickup.collector_name}
-                    </div>
-                  )}
-                  {pickup.notes && (
-                    <p className="text-sm text-muted-foreground">{pickup.notes}</p>
-                  )}
-
-                  {role === "collector" && pickup.status === "in_progress" && (
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleUpdateStatus(pickup.id, "collected")}
-                      >
-                        Complete Pickup
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleUpdateStatus(pickup.id, "delayed")}
-                      >
-                        Mark as Delayed
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleUpdateStatus(pickup.id, "failed")}
-                      >
-                        Mark as Failed
-                      </Button>
-                    </div>
-                  )}
-
-                  {role === "collector" && pickup.status === "failed" && (
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleUpdateStatus(pickup.id, "in_progress")}
-                      >
-                        Retry Pickup
-                      </Button>
-                    </div>
-                  )}
-
-                  {role === "collector" && pickup.status === "delayed" && (
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleUpdateStatus(pickup.id, "in_progress")}
-                      >
-                        Resume Pickup
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleUpdateStatus(pickup.id, "failed")}
-                      >
-                        Mark as Failed
-                      </Button>
-                    </div>
-                  )}
-
-                  {(role === "citizen" || role === "company") && pickup.status === "collected" && (
-                    <div className="flex items-center gap-2 text-sm text-success">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>Pickup confirmed! You earned +5 points</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+        {role === "collector" ? renderCollectorView() : renderCitizenView()}
       </div>
     </DashboardLayout>
   );

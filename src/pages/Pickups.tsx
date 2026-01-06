@@ -25,10 +25,18 @@ interface Pickup {
   user_name?: string;
 }
 
+interface PickupRequest {
+  id: string;
+  pickup_id: string;
+  status: string;
+  created_at: string;
+}
+
 const Pickups = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [pickups, setPickups] = useState<Pickup[]>([]);
   const [allPickups, setAllPickups] = useState<Pickup[]>([]);
+  const [myRequests, setMyRequests] = useState<PickupRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [requestingPickup, setRequestingPickup] = useState<string | null>(null);
@@ -81,6 +89,15 @@ const Pickups = () => {
 
         setPickups(addUserNames(assignedData || []));
         setAllPickups(addUserNames(allData || []));
+
+        // Fetch collector's pending requests
+        const { data: requestsData } = await supabase
+          .from("pickup_requests")
+          .select("*")
+          .eq("collector_id", user.id)
+          .order("created_at", { ascending: false });
+
+        setMyRequests(requestsData || []);
       } else {
         let query = supabase.from("waste_pickups").select("*");
 
@@ -178,10 +195,30 @@ const Pickups = () => {
   const handleRequestPickup = async (pickupId: string) => {
     try {
       setRequestingPickup(pickupId);
-      // This creates a notification for admins to assign the pickup
-      // For now, we'll just show a toast - in production this would create a request
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from("pickup_requests")
+        .insert({
+          pickup_id: pickupId,
+          collector_id: user.id,
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast.error("You've already requested this pickup");
+        } else {
+          throw error;
+        }
+        return;
+      }
+
       toast.success("Pickup request sent to admin for approval");
+      fetchPickups();
     } catch (error: any) {
+      console.error("Error requesting pickup:", error);
       toast.error("Failed to request pickup");
     } finally {
       setRequestingPickup(null);
@@ -395,16 +432,28 @@ const Pickups = () => {
                       </TableCell>
                       <TableCell>{format(new Date(pickup.created_at), "MMM dd, yyyy")}</TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={requestingPickup === pickup.id}
-                          onClick={() => handleRequestPickup(pickup.id)}
-                          className="flex items-center gap-2"
-                        >
-                          <Send className="w-3 h-3" />
-                          Request
-                        </Button>
+                        {(() => {
+                          const existingRequest = myRequests.find(r => r.pickup_id === pickup.id);
+                          if (existingRequest) {
+                            return (
+                              <Badge variant={existingRequest.status === 'pending' ? 'secondary' : existingRequest.status === 'approved' ? 'default' : 'destructive'}>
+                                {existingRequest.status === 'pending' ? 'Requested' : existingRequest.status}
+                              </Badge>
+                            );
+                          }
+                          return (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={requestingPickup === pickup.id}
+                              onClick={() => handleRequestPickup(pickup.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <Send className="w-3 h-3" />
+                              Request
+                            </Button>
+                          );
+                        })()}
                       </TableCell>
                     </TableRow>
                   ))}

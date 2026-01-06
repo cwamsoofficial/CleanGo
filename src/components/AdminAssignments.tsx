@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Package, AlertCircle, User, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Package, AlertCircle, User, Clock, CheckCircle, XCircle, Users, BarChart3 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 interface Collector {
   id: string;
@@ -189,6 +190,32 @@ export default function AdminAssignments() {
   const unassignedIssues = issues.filter((i) => !i.assigned_collector_id && i.status === "pending");
   const assignedIssues = issues.filter((i) => i.assigned_collector_id);
 
+  // Calculate workload per collector
+  const collectorWorkloads = collectors.map((collector) => {
+    const assignedPickupsCount = pickups.filter((p) => p.collector_id === collector.id).length;
+    const activePickupsCount = pickups.filter((p) => p.collector_id === collector.id && p.status === "in_progress").length;
+    const completedPickupsCount = pickups.filter((p) => p.collector_id === collector.id && p.status === "collected").length;
+    const assignedIssuesCount = issues.filter((i) => i.assigned_collector_id === collector.id).length;
+    const activeIssuesCount = issues.filter((i) => i.assigned_collector_id === collector.id && i.status === "in_progress").length;
+    const resolvedIssuesCount = issues.filter((i) => i.assigned_collector_id === collector.id && i.status === "resolved").length;
+    const totalActive = activePickupsCount + activeIssuesCount;
+    const totalAssigned = assignedPickupsCount + assignedIssuesCount;
+
+    return {
+      ...collector,
+      assignedPickups: assignedPickupsCount,
+      activePickups: activePickupsCount,
+      completedPickups: completedPickupsCount,
+      assignedIssues: assignedIssuesCount,
+      activeIssues: activeIssuesCount,
+      resolvedIssues: resolvedIssuesCount,
+      totalActive,
+      totalAssigned,
+    };
+  });
+
+  const maxWorkload = Math.max(...collectorWorkloads.map((c) => c.totalAssigned), 1);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -201,6 +228,10 @@ export default function AdminAssignments() {
     <div className="space-y-6">
       <Tabs defaultValue="pickups" className="w-full">
         <TabsList>
+          <TabsTrigger value="workload" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Workload
+          </TabsTrigger>
           <TabsTrigger value="pickups" className="flex items-center gap-2">
             <Package className="w-4 h-4" />
             Pickups
@@ -216,6 +247,96 @@ export default function AdminAssignments() {
             )}
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="workload" className="space-y-6 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Collector Workload Overview
+              </CardTitle>
+              <CardDescription>
+                View active assignments per collector
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {collectorWorkloads.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  No collectors available
+                </p>
+              ) : (
+                <div className="space-y-6">
+                  {collectorWorkloads.map((collector) => (
+                    <div key={collector.id} className="space-y-3 p-4 rounded-lg border">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">{collector.name}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {collector.totalActive} active · {collector.totalAssigned} total assigned
+                            </p>
+                          </div>
+                        </div>
+                        <Badge variant={collector.totalActive > 5 ? "destructive" : collector.totalActive > 2 ? "default" : "secondary"}>
+                          {collector.totalActive > 5 ? "High Load" : collector.totalActive > 2 ? "Moderate" : "Light"}
+                        </Badge>
+                      </div>
+                      
+                      <Progress value={(collector.totalAssigned / maxWorkload) * 100} className="h-2" />
+                      
+                      <div className="grid grid-cols-2 gap-4 pt-2">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <Package className="w-4 h-4" />
+                            Pickups
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-sm">
+                            <div className="flex flex-col items-center p-2 bg-muted/50 rounded">
+                              <span className="font-bold text-lg">{collector.activePickups}</span>
+                              <span className="text-xs text-muted-foreground">Active</span>
+                            </div>
+                            <div className="flex flex-col items-center p-2 bg-muted/50 rounded">
+                              <span className="font-bold text-lg">{collector.completedPickups}</span>
+                              <span className="text-xs text-muted-foreground">Done</span>
+                            </div>
+                            <div className="flex flex-col items-center p-2 bg-muted/50 rounded">
+                              <span className="font-bold text-lg">{collector.assignedPickups}</span>
+                              <span className="text-xs text-muted-foreground">Total</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <AlertCircle className="w-4 h-4" />
+                            Issues
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-sm">
+                            <div className="flex flex-col items-center p-2 bg-muted/50 rounded">
+                              <span className="font-bold text-lg">{collector.activeIssues}</span>
+                              <span className="text-xs text-muted-foreground">Active</span>
+                            </div>
+                            <div className="flex flex-col items-center p-2 bg-muted/50 rounded">
+                              <span className="font-bold text-lg">{collector.resolvedIssues}</span>
+                              <span className="text-xs text-muted-foreground">Done</span>
+                            </div>
+                            <div className="flex flex-col items-center p-2 bg-muted/50 rounded">
+                              <span className="font-bold text-lg">{collector.assignedIssues}</span>
+                              <span className="text-xs text-muted-foreground">Total</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="pickups" className="space-y-6 mt-4">
           {/* Unassigned Pickups */}

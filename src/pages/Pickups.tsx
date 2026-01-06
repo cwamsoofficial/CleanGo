@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User, ClipboardList, Send, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -225,6 +226,8 @@ const Pickups = () => {
     }
   };
 
+  const [cancelPickupRequestId, setCancelPickupRequestId] = useState<string | null>(null);
+
   const handleCancelPickupRequest = async (pickupId: string) => {
     try {
       setRequestingPickup(pickupId);
@@ -245,6 +248,7 @@ const Pickups = () => {
       toast.error("Failed to cancel request");
     } finally {
       setRequestingPickup(null);
+      setCancelPickupRequestId(null);
     }
   };
 
@@ -459,20 +463,38 @@ const Pickups = () => {
                           const existingRequest = myRequests.find(r => r.pickup_id === pickup.id);
                           if (existingRequest && existingRequest.status === 'pending') {
                             return (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={requestingPickup === pickup.id}
-                                onClick={() => handleCancelPickupRequest(pickup.id)}
-                                className="flex items-center gap-2"
-                              >
-                                {requestingPickup === pickup.id ? (
-                                  <Loader2 className="w-3 h-3 animate-spin" />
-                                ) : (
-                                  <X className="w-3 h-3" />
-                                )}
-                                Cancel Request
-                              </Button>
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={requestingPickup === pickup.id}
+                                  onClick={() => setCancelPickupRequestId(pickup.id)}
+                                  className="flex items-center gap-2"
+                                >
+                                  {requestingPickup === pickup.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    <X className="w-3 h-3" />
+                                  )}
+                                  Cancel Request
+                                </Button>
+                                <AlertDialog open={cancelPickupRequestId === pickup.id} onOpenChange={(open) => !open && setCancelPickupRequestId(null)}>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Cancel Request?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to cancel your pickup request? You can request it again later.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Keep Request</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleCancelPickupRequest(pickup.id)}>
+                                        Cancel Request
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </>
                             );
                           }
                           if (existingRequest) {

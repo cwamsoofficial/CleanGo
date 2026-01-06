@@ -198,6 +198,8 @@ export default function Issues() {
     }
   };
 
+  const [cancelRequestId, setCancelRequestId] = useState<string | null>(null);
+
   const handleCancelRequest = async (issueId: string) => {
     try {
       setRequestingIssue(issueId);
@@ -218,6 +220,7 @@ export default function Issues() {
       toast.error(error.message || 'Failed to cancel request');
     } finally {
       setRequestingIssue(null);
+      setCancelRequestId(null);
     }
   };
 
@@ -753,19 +756,37 @@ export default function Issues() {
                                     View
                                   </Button>
                                   {existingRequest ? (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => handleCancelRequest(issue.id)}
-                                      disabled={requestingIssue === issue.id}
-                                    >
-                                      {requestingIssue === issue.id ? (
-                                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                                      ) : (
-                                        <X className="w-4 h-4 mr-1" />
-                                      )}
-                                      Cancel Request
-                                    </Button>
+                                    <>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => setCancelRequestId(issue.id)}
+                                        disabled={requestingIssue === issue.id}
+                                      >
+                                        {requestingIssue === issue.id ? (
+                                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                                        ) : (
+                                          <X className="w-4 h-4 mr-1" />
+                                        )}
+                                        Cancel Request
+                                      </Button>
+                                      <AlertDialog open={cancelRequestId === issue.id} onOpenChange={(open) => !open && setCancelRequestId(null)}>
+                                        <AlertDialogContent>
+                                          <AlertDialogHeader>
+                                            <AlertDialogTitle>Cancel Request?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                              Are you sure you want to cancel your request for this issue? You can request it again later.
+                                            </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                            <AlertDialogCancel>Keep Request</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleCancelRequest(issue.id)}>
+                                              Cancel Request
+                                            </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                    </>
                                   ) : (
                                     <Button
                                       size="sm"

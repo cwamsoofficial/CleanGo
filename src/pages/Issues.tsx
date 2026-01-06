@@ -198,6 +198,29 @@ export default function Issues() {
     }
   };
 
+  const handleCancelRequest = async (issueId: string) => {
+    try {
+      setRequestingIssue(issueId);
+      const request = myRequests.find(r => r.issue_id === issueId);
+      if (!request) return;
+
+      const { error } = await supabase
+        .from('issue_requests')
+        .delete()
+        .eq('id', request.id);
+
+      if (error) throw error;
+
+      toast.success('Request cancelled');
+      fetchIssues();
+    } catch (error: any) {
+      console.error('Error cancelling request:', error);
+      toast.error(error.message || 'Failed to cancel request');
+    } finally {
+      setRequestingIssue(null);
+    }
+  };
+
   const handleStatusUpdate = async (issueId: string, newStatus: 'pending' | 'in_progress' | 'resolved') => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -730,7 +753,19 @@ export default function Issues() {
                                     View
                                   </Button>
                                   {existingRequest ? (
-                                    <Badge variant="outline">Request Pending</Badge>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleCancelRequest(issue.id)}
+                                      disabled={requestingIssue === issue.id}
+                                    >
+                                      {requestingIssue === issue.id ? (
+                                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                                      ) : (
+                                        <X className="w-4 h-4 mr-1" />
+                                      )}
+                                      Cancel Request
+                                    </Button>
                                   ) : (
                                     <Button
                                       size="sm"

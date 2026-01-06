@@ -59,6 +59,50 @@ export type Database = {
         }
         Relationships: []
       }
+      issue_requests: {
+        Row: {
+          admin_notes: string | null
+          collector_id: string
+          created_at: string
+          id: string
+          issue_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          collector_id: string
+          created_at?: string
+          id?: string
+          issue_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          collector_id?: string
+          created_at?: string
+          id?: string
+          issue_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issue_requests_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "issue_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_attempts: {
         Row: {
           created_at: string
@@ -405,6 +449,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_issue_request: {
+        Args: { _request_id: string }
+        Returns: undefined
+      }
       approve_pickup_request: {
         Args: { _request_id: string }
         Returns: undefined
@@ -446,6 +494,10 @@ export type Database = {
       is_account_locked: { Args: { user_email: string }; Returns: boolean }
       redeem_points: {
         Args: { _description: string; _points: number; _user_id: string }
+        Returns: undefined
+      }
+      reject_issue_request: {
+        Args: { _reason?: string; _request_id: string }
         Returns: undefined
       }
       reject_pickup_request: {

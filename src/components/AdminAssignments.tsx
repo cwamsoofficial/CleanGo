@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Package, AlertCircle, User, Clock, CheckCircle, XCircle, Users, BarChart3 } from "lucide-react";
+import { Package, AlertCircle, User, Clock, CheckCircle, XCircle, Users, BarChart3, Search, Filter } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 
 interface Collector {
   id: string;
@@ -43,6 +44,14 @@ export default function AdminAssignments() {
   const [pickups, setPickups] = useState<Pickup[]>([]);
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filter states
+  const [pickupSearch, setPickupSearch] = useState("");
+  const [pickupStatusFilter, setPickupStatusFilter] = useState<string>("all");
+  const [pickupCollectorFilter, setPickupCollectorFilter] = useState<string>("all");
+  const [issueSearch, setIssueSearch] = useState("");
+  const [issueStatusFilter, setIssueStatusFilter] = useState<string>("all");
+  const [issueCollectorFilter, setIssueCollectorFilter] = useState<string>("all");
 
   useEffect(() => {
     fetchData();
@@ -184,6 +193,30 @@ export default function AdminAssignments() {
       </Badge>
     );
   };
+
+  // Filter pickups
+  const filteredPickups = pickups.filter((pickup) => {
+    const matchesSearch = pickupSearch === "" || 
+      pickup.user_name?.toLowerCase().includes(pickupSearch.toLowerCase()) ||
+      pickup.location?.toLowerCase().includes(pickupSearch.toLowerCase()) ||
+      pickup.id.toLowerCase().includes(pickupSearch.toLowerCase());
+    const matchesStatus = pickupStatusFilter === "all" || pickup.status === pickupStatusFilter;
+    const matchesCollector = pickupCollectorFilter === "all" || 
+      (pickupCollectorFilter === "unassigned" ? !pickup.collector_id : pickup.collector_id === pickupCollectorFilter);
+    return matchesSearch && matchesStatus && matchesCollector;
+  });
+
+  // Filter issues
+  const filteredIssues = issues.filter((issue) => {
+    const matchesSearch = issueSearch === "" || 
+      issue.title.toLowerCase().includes(issueSearch.toLowerCase()) ||
+      issue.reporter_name?.toLowerCase().includes(issueSearch.toLowerCase()) ||
+      issue.location?.toLowerCase().includes(issueSearch.toLowerCase());
+    const matchesStatus = issueStatusFilter === "all" || issue.status === issueStatusFilter;
+    const matchesCollector = issueCollectorFilter === "all" || 
+      (issueCollectorFilter === "unassigned" ? !issue.assigned_collector_id : issue.assigned_collector_id === issueCollectorFilter);
+    return matchesSearch && matchesStatus && matchesCollector;
+  });
 
   const unassignedPickups = pickups.filter((p) => !p.collector_id && p.status === "pending");
   const assignedPickups = pickups.filter((p) => p.collector_id);
@@ -339,21 +372,80 @@ export default function AdminAssignments() {
         </TabsContent>
 
         <TabsContent value="pickups" className="space-y-6 mt-4">
-          {/* Unassigned Pickups */}
+          {/* Filter Controls */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-wrap gap-4">
+                <div className="flex-1 min-w-[200px]">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name, location, or ID..."
+                      value={pickupSearch}
+                      onChange={(e) => setPickupSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                <Select value={pickupStatusFilter} onValueChange={setPickupStatusFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="collected">Collected</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={pickupCollectorFilter} onValueChange={setPickupCollectorFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Collector" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Collectors</SelectItem>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {collectors.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {(pickupSearch || pickupStatusFilter !== "all" || pickupCollectorFilter !== "all") && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setPickupSearch("");
+                      setPickupStatusFilter("all");
+                      setPickupCollectorFilter("all");
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Filtered Pickups */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="w-5 h-5" />
-                Unassigned Pickups
+                Pickups
+                <Badge variant="secondary" className="ml-2">{filteredPickups.length}</Badge>
               </CardTitle>
               <CardDescription>
-                Assign collectors to pending pickup requests
+                {pickupSearch || pickupStatusFilter !== "all" || pickupCollectorFilter !== "all" 
+                  ? `Showing ${filteredPickups.length} of ${pickups.length} pickups`
+                  : "All pickup requests"}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {unassignedPickups.length === 0 ? (
+              {filteredPickups.length === 0 ? (
                 <p className="text-muted-foreground text-center py-4">
-                  No unassigned pickups
+                  No pickups match the current filters
                 </p>
               ) : (
                 <Table>
@@ -364,79 +456,12 @@ export default function AdminAssignments() {
                       <TableHead>Location</TableHead>
                       <TableHead>Scheduled</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Assign To</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {unassignedPickups.map((pickup) => (
-                      <TableRow key={pickup.id}>
-                        <TableCell className="font-mono text-xs">
-                          {pickup.id.slice(0, 8)}
-                        </TableCell>
-                        <TableCell>{pickup.user_name}</TableCell>
-                        <TableCell className="max-w-[200px] truncate">
-                          {pickup.location || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {pickup.scheduled_date
-                            ? format(new Date(pickup.scheduled_date), "MMM dd, yyyy")
-                            : "Not set"}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(pickup.status)}</TableCell>
-                        <TableCell>
-                          <Select
-                            onValueChange={(value) => handleAssignPickup(pickup.id, value)}
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Select collector" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {collectors.map((collector) => (
-                                <SelectItem key={collector.id} value={collector.id}>
-                                  <div className="flex items-center gap-2">
-                                    <User className="w-4 h-4" />
-                                    {collector.name}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Assigned Pickups */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Assigned Pickups</CardTitle>
-              <CardDescription>
-                Pickups currently assigned to collectors
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {assignedPickups.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">
-                  No assigned pickups
-                </p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Requested By</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Status</TableHead>
                       <TableHead>Assigned To</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {assignedPickups.map((pickup) => {
+                    {filteredPickups.map((pickup) => {
                       const collector = collectors.find((c) => c.id === pickup.collector_id);
                       return (
                         <TableRow key={pickup.id}>
@@ -447,12 +472,21 @@ export default function AdminAssignments() {
                           <TableCell className="max-w-[200px] truncate">
                             {pickup.location || "Not specified"}
                           </TableCell>
+                          <TableCell>
+                            {pickup.scheduled_date
+                              ? format(new Date(pickup.scheduled_date), "MMM dd, yyyy")
+                              : "Not set"}
+                          </TableCell>
                           <TableCell>{getStatusBadge(pickup.status)}</TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-muted-foreground" />
-                              {collector?.name || "Unknown"}
-                            </div>
+                            {collector ? (
+                              <div className="flex items-center gap-2">
+                                <User className="w-4 h-4 text-muted-foreground" />
+                                {collector.name}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">Unassigned</span>
+                            )}
                           </TableCell>
                           <TableCell>
                             <Select
@@ -461,13 +495,15 @@ export default function AdminAssignments() {
                                 handleAssignPickup(pickup.id, value === "unassign" ? null : value)
                               }
                             >
-                              <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Reassign" />
+                              <SelectTrigger className="w-[150px]">
+                                <SelectValue placeholder="Assign" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="unassign">
-                                  <span className="text-destructive">Unassign</span>
-                                </SelectItem>
+                                {pickup.collector_id && (
+                                  <SelectItem value="unassign">
+                                    <span className="text-destructive">Unassign</span>
+                                  </SelectItem>
+                                )}
                                 {collectors.map((c) => (
                                   <SelectItem key={c.id} value={c.id}>
                                     <div className="flex items-center gap-2">
@@ -490,21 +526,79 @@ export default function AdminAssignments() {
         </TabsContent>
 
         <TabsContent value="issues" className="space-y-6 mt-4">
-          {/* Unassigned Issues */}
+          {/* Filter Controls */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-wrap gap-4">
+                <div className="flex-1 min-w-[200px]">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by title, reporter, or location..."
+                      value={issueSearch}
+                      onChange={(e) => setIssueSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                <Select value={issueStatusFilter} onValueChange={setIssueStatusFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="resolved">Resolved</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={issueCollectorFilter} onValueChange={setIssueCollectorFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Collector" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Collectors</SelectItem>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {collectors.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {(issueSearch || issueStatusFilter !== "all" || issueCollectorFilter !== "all") && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setIssueSearch("");
+                      setIssueStatusFilter("all");
+                      setIssueCollectorFilter("all");
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Filtered Issues */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircle className="w-5 h-5" />
-                Unassigned Issues
+                Issues
+                <Badge variant="secondary" className="ml-2">{filteredIssues.length}</Badge>
               </CardTitle>
               <CardDescription>
-                Assign collectors to pending issue reports
+                {issueSearch || issueStatusFilter !== "all" || issueCollectorFilter !== "all" 
+                  ? `Showing ${filteredIssues.length} of ${issues.length} issues`
+                  : "All issue reports"}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {unassignedIssues.length === 0 ? (
+              {filteredIssues.length === 0 ? (
                 <p className="text-muted-foreground text-center py-4">
-                  No unassigned issues
+                  No issues match the current filters
                 </p>
               ) : (
                 <Table>
@@ -515,80 +609,13 @@ export default function AdminAssignments() {
                       <TableHead>Location</TableHead>
                       <TableHead>Created</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Assign To</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {unassignedIssues.map((issue) => (
-                      <TableRow key={issue.id}>
-                        <TableCell className="max-w-[200px] truncate font-medium">
-                          {issue.title}
-                        </TableCell>
-                        <TableCell>{issue.reporter_name}</TableCell>
-                        <TableCell className="max-w-[150px] truncate">
-                          {issue.location || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(issue.created_at), "MMM dd, yyyy")}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(issue.status)}</TableCell>
-                        <TableCell>
-                          <Select
-                            onValueChange={(value) => handleAssignIssue(issue.id, value)}
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Select collector" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {collectors.map((collector) => (
-                                <SelectItem key={collector.id} value={collector.id}>
-                                  <div className="flex items-center gap-2">
-                                    <User className="w-4 h-4" />
-                                    {collector.name}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Assigned Issues */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Assigned Issues</CardTitle>
-              <CardDescription>
-                Issues currently assigned to collectors
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {assignedIssues.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">
-                  No assigned issues
-                </p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Reported By</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Status</TableHead>
                       <TableHead>Assigned To</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {assignedIssues.map((issue) => {
-                      const collector = collectors.find(
-                        (c) => c.id === issue.assigned_collector_id
-                      );
+                    {filteredIssues.map((issue) => {
+                      const collector = collectors.find((c) => c.id === issue.assigned_collector_id);
                       return (
                         <TableRow key={issue.id}>
                           <TableCell className="max-w-[200px] truncate font-medium">
@@ -598,12 +625,19 @@ export default function AdminAssignments() {
                           <TableCell className="max-w-[150px] truncate">
                             {issue.location || "Not specified"}
                           </TableCell>
+                          <TableCell>
+                            {format(new Date(issue.created_at), "MMM dd, yyyy")}
+                          </TableCell>
                           <TableCell>{getStatusBadge(issue.status)}</TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-muted-foreground" />
-                              {collector?.name || "Unknown"}
-                            </div>
+                            {collector ? (
+                              <div className="flex items-center gap-2">
+                                <User className="w-4 h-4 text-muted-foreground" />
+                                {collector.name}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">Unassigned</span>
+                            )}
                           </TableCell>
                           <TableCell>
                             <Select
@@ -612,13 +646,15 @@ export default function AdminAssignments() {
                                 handleAssignIssue(issue.id, value === "unassign" ? null : value)
                               }
                             >
-                              <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Reassign" />
+                              <SelectTrigger className="w-[150px]">
+                                <SelectValue placeholder="Assign" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="unassign">
-                                  <span className="text-destructive">Unassign</span>
-                                </SelectItem>
+                                {issue.assigned_collector_id && (
+                                  <SelectItem value="unassign">
+                                    <span className="text-destructive">Unassign</span>
+                                  </SelectItem>
+                                )}
                                 {collectors.map((c) => (
                                   <SelectItem key={c.id} value={c.id}>
                                     <div className="flex items-center gap-2">

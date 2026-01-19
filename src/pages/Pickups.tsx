@@ -159,6 +159,11 @@ const Pickups = () => {
         updates.collector_id = user.id;
       }
 
+      // Set completed_at when marking as collected
+      if (newStatus === "collected") {
+        updates.completed_at = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from("waste_pickups")
         .update(updates)

@@ -24,6 +24,7 @@ interface Pickup {
   location: string | null;
   notes: string | null;
   created_at: string;
+  completed_at: string | null;
   collector_id: string | null;
   user_name?: string;
 }
@@ -805,6 +806,7 @@ export default function AdminAssignments() {
                       <TableHead>Location</TableHead>
                       <TableHead>Scheduled</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Completed At</TableHead>
                       <TableHead>Assigned To</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -827,6 +829,11 @@ export default function AdminAssignments() {
                               : "Not set"}
                           </TableCell>
                           <TableCell>{getStatusBadge(pickup.status)}</TableCell>
+                          <TableCell>
+                            {pickup.completed_at
+                              ? format(new Date(pickup.completed_at), "MMM dd, yyyy HH:mm")
+                              : "-"}
+                          </TableCell>
                           <TableCell>
                             {collector ? (
                               <div className="flex items-center gap-2">

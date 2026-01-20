@@ -10,6 +10,7 @@ import { Loader2, User, Mail, Phone, MapPin, RotateCcw } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { getUserRole } from "@/lib/supabase";
 import { useOnboarding } from "@/components/OnboardingTour";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import AvatarUpload from "@/components/AvatarUpload";
 
 const Settings = () => {
@@ -19,6 +20,7 @@ const Settings = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const { resetOnboarding } = useOnboarding();
+  const { updateAvatar, updateName } = useUserProfile();
   const [profile, setProfile] = useState({
     name: "",
     email: "",
@@ -99,6 +101,7 @@ const Settings = () => {
 
       if (error) throw error;
 
+      updateName(profile.name);
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       toast.error(error.message || "Failed to update profile");
@@ -138,7 +141,10 @@ const Settings = () => {
                   userId={userId}
                   avatarUrl={profile.avatar_url}
                   userName={profile.name}
-                  onAvatarChange={(url) => setProfile({ ...profile, avatar_url: url })}
+                  onAvatarChange={(url) => {
+                    setProfile({ ...profile, avatar_url: url });
+                    updateAvatar(url || null);
+                  }}
                 />
               </div>
             )}

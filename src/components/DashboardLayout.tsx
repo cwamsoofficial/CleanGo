@@ -2,6 +2,7 @@ import { ReactNode, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserRole, type UserRole } from "@/lib/supabase";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import {
   Sidebar,
   SidebarContent,
@@ -50,8 +51,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const [role, setRole] = useState<UserRole | null>(null);
-  const [userName, setUserName] = useState<string>("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const { profile: userProfile, updateAvatar, updateName } = useUserProfile();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -81,13 +81,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       setRole(userRole);
 
       if (profile) {
-        setUserName(profile.name);
-        setAvatarUrl(profile.avatar_url);
+        updateName(profile.name);
+        updateAvatar(profile.avatar_url);
       }
     };
 
     fetchUserData();
-  }, [navigate]);
+  }, [navigate, updateName, updateAvatar]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -189,13 +189,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   className="w-full justify-start px-2 h-auto py-2"
                 >
                   <Avatar className="w-8 h-8 mr-2">
-                    <AvatarImage src={avatarUrl || undefined} alt={userName} />
+                    <AvatarImage src={userProfile.avatarUrl || undefined} alt={userProfile.name} />
                     <AvatarFallback className="bg-primary text-primary-foreground">
-                      {userName.charAt(0).toUpperCase()}
+                      {userProfile.name.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start text-left">
-                    <span className="text-sm font-medium">{userName}</span>
+                    <span className="text-sm font-medium">{userProfile.name}</span>
                     <span className="text-xs text-muted-foreground capitalize">{role}</span>
                   </div>
                 </Button>
@@ -221,7 +221,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <header className="border-b border-border bg-card px-6 py-4 flex items-center">
             <SidebarTrigger className="mr-4" />
             <h1 className="text-xl font-semibold">
-              {userName ? `Welcome, ${userName}` : "Dashboard"}
+              {userProfile.name ? `Welcome, ${userProfile.name}` : "Dashboard"}
             </h1>
           </header>
           <div className="flex-1 p-6 bg-background overflow-auto">{children}</div>

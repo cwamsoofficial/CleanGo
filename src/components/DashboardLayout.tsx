@@ -120,10 +120,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         { icon: Package, label: "Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Issues", path: "/dashboard/issues" },
         { icon: History, label: "Activity History", path: "/dashboard/activity" },
-        { icon: CreditCard, label: "Payments", path: "/dashboard/billing" },
-        { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
-        { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },
-        { icon: Award, label: "Achievements", path: "/dashboard/achievements" },
       ],
       admin: [
         { icon: Shield, label: "Admin Dashboard", path: "/dashboard/admin" },

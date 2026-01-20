@@ -30,35 +30,35 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <UserProfileProvider>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          
-          <Route path="/admin/reset-password" element={<AdminResetPassword />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/admin" element={<AdminDashboard />} />
-          <Route path="/dashboard/pickups" element={<Pickups />} />
-          <Route path="/dashboard/report-issue" element={<ReportIssue />} />
-          <Route path="/dashboard/rewards" element={<Rewards />} />
-          <Route path="/dashboard/analytics" element={<Analytics />} />
-          <Route path="/dashboard/issues" element={<Issues />} />
-          <Route path="/dashboard/leaderboard" element={<Leaderboard />} />
-          <Route path="/dashboard/achievements" element={<Achievements />} />
-          <Route path="/dashboard/settings" element={<Settings />} />
-          <Route path="/dashboard/billing" element={<Billing />} />
-          <Route path="/dashboard/activity" element={<ActivityHistory />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            
+            <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/admin" element={<AdminDashboard />} />
+            <Route path="/dashboard/pickups" element={<Pickups />} />
+            <Route path="/dashboard/report-issue" element={<ReportIssue />} />
+            <Route path="/dashboard/rewards" element={<Rewards />} />
+            <Route path="/dashboard/analytics" element={<Analytics />} />
+            <Route path="/dashboard/issues" element={<Issues />} />
+            <Route path="/dashboard/leaderboard" element={<Leaderboard />} />
+            <Route path="/dashboard/achievements" element={<Achievements />} />
+            <Route path="/dashboard/settings" element={<Settings />} />
+            <Route path="/dashboard/billing" element={<Billing />} />
+            <Route path="/dashboard/activity" element={<ActivityHistory />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
     </UserProfileProvider>
   </QueryClientProvider>
 );

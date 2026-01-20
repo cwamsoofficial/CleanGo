@@ -17,7 +17,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,6 +51,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const [role, setRole] = useState<UserRole | null>(null);
   const [userName, setUserName] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -66,7 +67,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       // Check if user is banned
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name, banned, banned_reason")
+        .select("name, banned, banned_reason, avatar_url")
         .eq("id", user.id)
         .single();
 
@@ -81,6 +82,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
       if (profile) {
         setUserName(profile.name);
+        setAvatarUrl(profile.avatar_url);
       }
     };
 
@@ -187,6 +189,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   className="w-full justify-start px-2 h-auto py-2"
                 >
                   <Avatar className="w-8 h-8 mr-2">
+                    <AvatarImage src={avatarUrl || undefined} alt={userName} />
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       {userName.charAt(0).toUpperCase()}
                     </AvatarFallback>

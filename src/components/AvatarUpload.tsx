@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Camera, Loader2, Trash2 } from "lucide-react";
+import ImageCropDialog from "./ImageCropDialog";
 
 interface AvatarUploadProps {
   userId: string;
@@ -15,6 +16,8 @@ interface AvatarUploadProps {
 const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getInitials = (name: string) => {
@@ -26,7 +29,7 @@ const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUpl
       .slice(0, 2) || "U";
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -35,22 +38,42 @@ const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUpl
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image must be less than 2MB");
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
       return;
+    }
+
+    // Create object URL for the crop dialog
+    const imageUrl = URL.createObjectURL(file);
+    setSelectedImage(imageUrl);
+    setCropDialogOpen(true);
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    // Clean up the object URL
+    if (selectedImage) {
+      URL.revokeObjectURL(selectedImage);
+      setSelectedImage(null);
     }
 
     setUploading(true);
 
     try {
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${userId}/avatar.${fileExt}`;
+      const filePath = `${userId}/avatar.jpg`;
 
       await supabase.storage.from("avatars").remove([filePath]);
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, croppedBlob, { 
+          upsert: true,
+          contentType: "image/jpeg"
+        });
 
       if (uploadError) throw uploadError;
 
@@ -74,9 +97,6 @@ const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUpl
       toast.error(error.message || "Failed to upload image");
     } finally {
       setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
     }
   };
 
@@ -171,6 +191,14 @@ const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUpl
           </Button>
         )}
       </div>
+
+      <ImageCropDialog
+        open={cropDialogOpen}
+        onOpenChange={setCropDialogOpen}
+        imageSrc={selectedImage || ""}
+        onCropComplete={handleCropComplete}
+        aspect={1}
+      />
     </div>
   );
 };

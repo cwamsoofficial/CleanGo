@@ -213,6 +213,7 @@ export type Database = {
       profiles: {
         Row: {
           address: string | null
+          avatar_url: string | null
           banned: boolean
           banned_at: string | null
           banned_reason: string | null
@@ -228,6 +229,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          avatar_url?: string | null
           banned?: boolean
           banned_at?: string | null
           banned_reason?: string | null
@@ -243,6 +245,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          avatar_url?: string | null
           banned?: boolean
           banned_at?: string | null
           banned_reason?: string | null

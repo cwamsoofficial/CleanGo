@@ -10,18 +10,21 @@ import { Loader2, User, Mail, Phone, MapPin, RotateCcw } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { getUserRole } from "@/lib/supabase";
 import { useOnboarding } from "@/components/OnboardingTour";
+import AvatarUpload from "@/components/AvatarUpload";
 
 const Settings = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const { resetOnboarding } = useOnboarding();
   const [profile, setProfile] = useState({
     name: "",
     email: "",
     phone: "",
     address: "",
+    avatar_url: "",
   });
 
   const handleRestartTour = () => {
@@ -44,6 +47,8 @@ const Settings = () => {
         const role = await getUserRole(session.user.id);
         setUserRole(role);
 
+        setUserId(session.user.id);
+
         // Get profile data
         const { data: profileData, error } = await supabase
           .from("profiles")
@@ -58,6 +63,7 @@ const Settings = () => {
           email: session.user.email || "",
           phone: profileData.phone || "",
           address: profileData.address || "",
+          avatar_url: profileData.avatar_url || "",
         });
       } catch (error: any) {
         toast.error("Failed to load profile");
@@ -125,23 +131,35 @@ const Settings = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {userRole === "admin" && (
-                <div className="space-y-2">
-                  <Label htmlFor="name">Username</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      type="text"
-                      value={profile.name}
-                      onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                      className="pl-10"
-                      placeholder="Enter your username"
-                      required
-                    />
-                  </div>
+            {/* Avatar Upload Section */}
+            {userId && (
+              <div className="pb-4 border-b">
+                <AvatarUpload
+                  userId={userId}
+                  avatarUrl={profile.avatar_url}
+                  userName={profile.name}
+                  onAvatarChange={(url) => setProfile({ ...profile, avatar_url: url })}
+                />
+              </div>
+            )}
+
+            {userRole === "admin" && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Username</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="name"
+                    type="text"
+                    value={profile.name}
+                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                    className="pl-10"
+                    placeholder="Enter your username"
+                    required
+                  />
                 </div>
-              )}
+              </div>
+            )}
 
               {userRole !== "admin" && (
                 <div className="space-y-2">

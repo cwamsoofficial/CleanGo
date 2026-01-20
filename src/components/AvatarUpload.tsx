@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Camera, Loader2, User } from "lucide-react";
+import { Camera, Loader2, Trash2 } from "lucide-react";
 
 interface AvatarUploadProps {
   userId: string;
@@ -14,6 +14,7 @@ interface AvatarUploadProps {
 
 const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUploadProps) => {
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getInitials = (name: string) => {
@@ -29,13 +30,11 @@ const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUpl
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
     }
 
-    // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast.error("Image must be less than 2MB");
       return;
@@ -44,29 +43,23 @@ const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUpl
     setUploading(true);
 
     try {
-      // Create unique file path
       const fileExt = file.name.split(".").pop();
       const filePath = `${userId}/avatar.${fileExt}`;
 
-      // Delete existing avatar if exists
       await supabase.storage.from("avatars").remove([filePath]);
 
-      // Upload new avatar
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from("avatars")
         .getPublicUrl(filePath);
 
-      // Add cache buster to force reload
       const urlWithCacheBuster = `${publicUrl}?t=${Date.now()}`;
 
-      // Update profile with new avatar URL
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ avatar_url: urlWithCacheBuster })
@@ -81,10 +74,43 @@ const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUpl
       toast.error(error.message || "Failed to upload image");
     } finally {
       setUploading(false);
-      // Reset input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!avatarUrl) return;
+
+    setDeleting(true);
+
+    try {
+      // List all files in user's folder and delete them
+      const { data: files } = await supabase.storage
+        .from("avatars")
+        .list(userId);
+
+      if (files && files.length > 0) {
+        const filesToDelete = files.map((file) => `${userId}/${file.name}`);
+        await supabase.storage.from("avatars").remove(filesToDelete);
+      }
+
+      // Clear avatar URL in profile
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: null })
+        .eq("id", userId);
+
+      if (updateError) throw updateError;
+
+      onAvatarChange("");
+      toast.success("Profile picture removed!");
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast.error(error.message || "Failed to remove image");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -104,7 +130,7 @@ const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUpl
           variant="secondary"
           className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full shadow-md"
           onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
+          disabled={uploading || deleting}
         >
           {uploading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -122,9 +148,29 @@ const AvatarUpload = ({ userId, avatarUrl, userName, onAvatarChange }: AvatarUpl
         className="hidden"
       />
 
-      <p className="text-sm text-muted-foreground text-center">
-        Click the camera icon to upload a profile picture
-      </p>
+      <div className="flex flex-col items-center gap-2">
+        <p className="text-sm text-muted-foreground text-center">
+          Click the camera icon to upload a profile picture
+        </p>
+        
+        {avatarUrl && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={handleRemoveAvatar}
+            disabled={deleting || uploading}
+          >
+            {deleting ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Trash2 className="h-4 w-4 mr-2" />
+            )}
+            Remove picture
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

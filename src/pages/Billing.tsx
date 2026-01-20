@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getUserRole, type UserRole } from "@/lib/supabase";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard, Receipt, TrendingUp } from "lucide-react";
+import { CreditCard, TrendingUp } from "lucide-react";
 
 const Billing = () => {
   const [role, setRole] = useState<UserRole | null>(null);
@@ -20,19 +20,16 @@ const Billing = () => {
   }, []);
 
   const getTitle = () => {
-    if (role === "collector") return "Payments";
     if (role === "admin") return "Billing Activity";
     return "Billing & Payments";
   };
 
   const getDescription = () => {
-    if (role === "collector") return "View and confirm payment information";
     if (role === "admin") return "Monitor payment activities across the platform";
     return "Manage your waste service bills and payments";
   };
 
   const getIcon = () => {
-    if (role === "collector") return <Receipt className="h-12 w-12 text-muted-foreground/50" />;
     if (role === "admin") return <TrendingUp className="h-12 w-12 text-muted-foreground/50" />;
     return <CreditCard className="h-12 w-12 text-muted-foreground/50" />;
   };

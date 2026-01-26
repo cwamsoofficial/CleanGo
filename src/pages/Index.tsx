@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Recycle, Users, TrendingUp, Shield, Clock, Leaf } from "lucide-react";
+import { ArrowRight, Recycle, Users, TrendingUp, Shield, Clock, Leaf, UserPlus, CalendarCheck, Truck, Gift } from "lucide-react";
 import logo from "@/assets/cwamso-logo.png";
 import wasteBinsHero from "@/assets/waste-bins-hero.jpg";
 
@@ -118,6 +118,47 @@ const Index = () => {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-foreground mb-4">
+              How It Works
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Getting started with CWaMSo is simple. Follow these easy steps to join the movement.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <StepCard
+              step={1}
+              icon={UserPlus}
+              title="Sign Up"
+              description="Create your free account as a citizen, company, or collector in minutes"
+            />
+            <StepCard
+              step={2}
+              icon={CalendarCheck}
+              title="Request Pickup"
+              description="Schedule a waste pickup at your convenience or report an issue"
+            />
+            <StepCard
+              step={3}
+              icon={Truck}
+              title="Collection"
+              description="A verified collector arrives, collects your waste, and confirms completion"
+            />
+            <StepCard
+              step={4}
+              icon={Gift}
+              title="Earn Rewards"
+              description="Get points for every pickup and redeem them for exciting rewards"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary to-primary/80">
         <div className="container mx-auto px-4 text-center">
@@ -163,6 +204,28 @@ const FeatureCard = ({ icon: Icon, title, description }: FeatureCardProps) => {
   return (
     <div className="bg-background p-6 rounded-xl border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg">
       <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-xl mb-4">
+        <Icon className="w-6 h-6 text-primary" />
+      </div>
+      <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>
+      <p className="text-muted-foreground">{description}</p>
+    </div>
+  );
+};
+
+interface StepCardProps {
+  step: number;
+  icon: any;
+  title: string;
+  description: string;
+}
+
+const StepCard = ({ step, icon: Icon, title, description }: StepCardProps) => {
+  return (
+    <div className="relative text-center">
+      <div className="inline-flex items-center justify-center w-16 h-16 bg-primary text-primary-foreground rounded-full mb-4 text-2xl font-bold">
+        {step}
+      </div>
+      <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-xl mb-4 ml-2">
         <Icon className="w-6 h-6 text-primary" />
       </div>
       <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>

@@ -452,14 +452,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      approve_issue_request: {
-        Args: { _request_id: string }
-        Returns: undefined
-      }
-      approve_pickup_request: {
-        Args: { _request_id: string }
-        Returns: undefined
-      }
       award_points: {
         Args: { _description: string; _points: number; _user_id: string }
         Returns: undefined
@@ -514,14 +506,6 @@ export type Database = {
       is_account_locked: { Args: { user_email: string }; Returns: boolean }
       redeem_points: {
         Args: { _description: string; _points: number; _user_id: string }
-        Returns: undefined
-      }
-      reject_issue_request: {
-        Args: { _reason?: string; _request_id: string }
-        Returns: undefined
-      }
-      reject_pickup_request: {
-        Args: { _reason?: string; _request_id: string }
         Returns: undefined
       }
       unban_user: { Args: { _user_id: string }; Returns: undefined }

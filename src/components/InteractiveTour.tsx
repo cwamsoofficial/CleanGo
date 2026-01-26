@@ -28,37 +28,43 @@ const citizenTourSteps: TourStep[] = [
   {
     target: "[data-tour='request-pickup']",
     title: "Request a Pickup",
-    description: "Click here to schedule a waste collection. Enter your location and any special notes for the collector.",
+    description: "Click here to schedule a waste collection. Enter your location and preferred date for the collector.",
     position: "left"
   },
   {
     target: "[data-tour='report-issue']",
     title: "Report Issues",
     description: "See overflowing bins or illegal dumping? Report it here with photos and location details.",
-    position: "right"
+    position: "left"
   },
   {
     target: "[data-tour='nav-my-pickups']",
-    title: "Pickups Page",
-    description: "View all your scheduled and completed pickups. Track the status of each collection request.",
+    title: "My Pickups",
+    description: "View all your scheduled pickups. Request new collections and track the status of each pickup.",
     position: "right"
   },
   {
     target: "[data-tour='nav-report-issue']",
-    title: "Report Issues Page",
-    description: "View and manage all your reported issues. Check their status and see resolution updates.",
+    title: "Report Issue",
+    description: "Report waste management issues in your area with photos and location details.",
     position: "right"
   },
   {
     target: "[data-tour='nav-rewards']",
     title: "Rewards & Earnings",
-    description: "View your earnings, redeem rewards, and track your referral bonuses here. Earn ₦100 per completed pickup!",
+    description: "View your earnings, redeem rewards, and track your referral bonuses. Earn ₦100 per completed pickup!",
     position: "right"
   },
   {
     target: "[data-tour='nav-leaderboard']",
     title: "Community Leaderboard",
     description: "Compete with other community members! Top earners get special achievement badges.",
+    position: "right"
+  },
+  {
+    target: "[data-tour='nav-achievements']",
+    title: "Your Achievements",
+    description: "Track your badges and milestones. Complete challenges to unlock special rewards!",
     position: "right"
   }
 ];
@@ -67,58 +73,25 @@ const collectorTourSteps: TourStep[] = [
   {
     target: "[data-tour='dashboard-stats']",
     title: "Your Collection Stats",
-    description: "Track your assigned pickups, pending collections, and completed jobs here.",
+    description: "Track your assigned pickups, pending collections, completed jobs, and issues to resolve.",
     position: "bottom"
   },
   {
     target: "[data-tour='nav-pickups']",
     title: "Pickups Management",
-    description: "Access available and assigned pickups. View statistics, accept requests, and update pickup statuses.",
+    description: "View available and accepted pickups. Accept new requests, update status, and complete collections.",
     position: "right"
-  },
-  {
-    target: "[data-tour='pickup-stats']",
-    title: "Pickup Statistics",
-    description: "See total available pickups, your assigned pickups, and completed pickups for today at a glance.",
-    position: "bottom",
-    fallbackPosition: { top: 200, left: 400 }
-  },
-  {
-    target: "[data-tour='pickup-list']",
-    title: "Pickup List",
-    description: "Browse all pickups here. Accept unassigned ones, update status, or unassign yourself if needed.",
-    position: "bottom",
-    fallbackPosition: { top: 350, left: 400 }
   },
   {
     target: "[data-tour='nav-issues']",
     title: "Issues Management",
-    description: "View all reported issues. Accept, investigate, and resolve them to earn ₦50 per resolution!",
+    description: "View reported issues in your area. Accept, investigate, and resolve them to earn ₦50 per resolution!",
     position: "right"
   },
   {
-    target: "[data-tour='issue-list']",
-    title: "Issue List",
-    description: "See reported problems with photos and locations. Update status as you work on resolving them.",
-    position: "bottom",
-    fallbackPosition: { top: 350, left: 400 }
-  },
-  {
-    target: "[data-tour='nav-analytics']",
-    title: "Your Analytics",
-    description: "Track your performance, completion rates, and pickup trends over time.",
-    position: "right"
-  },
-  {
-    target: "[data-tour='nav-leaderboard']",
-    title: "Leaderboard",
-    description: "See how you rank among other collectors and compete for top spots!",
-    position: "right"
-  },
-  {
-    target: "[data-tour='nav-payments']",
-    title: "Your Earnings",
-    description: "View your total earnings, maintain streaks for bonuses, and withdraw your money!",
+    target: "[data-tour='nav-activity-history']",
+    title: "Activity History",
+    description: "View your complete collection and issue resolution history over time.",
     position: "right"
   }
 ];

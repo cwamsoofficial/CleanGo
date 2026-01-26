@@ -301,10 +301,13 @@ const Auth = () => {
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center mb-4">
-              <img src={logo} alt="CWaMSo Logo" className="h-20 w-auto" />
+            <div 
+              className="inline-flex flex-col items-center justify-center cursor-pointer"
+              onClick={() => navigate("/")}
+            >
+              <img src={logo} alt="CWaMSo Logo" className="h-20 w-auto mb-4" />
+              <h1 className="text-3xl font-bold text-foreground mb-2">CWaMSo</h1>
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">CWaMSo</h1>
             <p className="text-muted-foreground">Community Waste Management Software</p>
           </div>
 
@@ -357,10 +360,13 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center mb-4">
-            <img src={logo} alt="CWaMSo Logo" className="h-20 w-auto" />
+          <div 
+            className="inline-flex flex-col items-center justify-center cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            <img src={logo} alt="CWaMSo Logo" className="h-20 w-auto mb-4" />
+            <h1 className="text-3xl font-bold text-foreground mb-2">CWaMSo</h1>
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">CWaMSo</h1>
           <p className="text-muted-foreground">Community Waste Management Software</p>
         </div>
 

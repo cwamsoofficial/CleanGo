@@ -118,6 +118,41 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-foreground mb-4">
+              What Our Community Says
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Hear from citizens, collectors, and companies already transforming their communities
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <TestimonialCard
+              name="Adaora Eze"
+              role="Citizen, Lagos"
+              quote="CWaMSo has made waste disposal so convenient! I can request pickups with just a few taps and even earn rewards for being responsible."
+              avatar="AE"
+            />
+            <TestimonialCard
+              name="Emeka Okonkwo"
+              role="Waste Collector, Abuja"
+              quote="The real-time tracking and route optimization have doubled my efficiency. I can serve more households and earn more every day."
+              avatar="EO"
+            />
+            <TestimonialCard
+              name="Green Earth Ltd."
+              role="Waste Management Company"
+              quote="Managing our fleet and tracking performance metrics has never been easier. CWaMSo's analytics help us make data-driven decisions."
+              avatar="GE"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary to-primary/80">
         <div className="container mx-auto px-4 text-center">
@@ -171,5 +206,28 @@ const FeatureCard = ({ icon: Icon, title, description }: FeatureCardProps) => {
   );
 };
 
+interface TestimonialCardProps {
+  name: string;
+  role: string;
+  quote: string;
+  avatar: string;
+}
+
+const TestimonialCard = ({ name, role, quote, avatar }: TestimonialCardProps) => {
+  return (
+    <div className="bg-card p-6 rounded-xl border border-border hover:shadow-lg transition-all duration-300">
+      <div className="flex items-center gap-4 mb-4">
+        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+          {avatar}
+        </div>
+        <div>
+          <h4 className="font-semibold text-foreground">{name}</h4>
+          <p className="text-sm text-muted-foreground">{role}</p>
+        </div>
+      </div>
+      <p className="text-muted-foreground italic">"{quote}"</p>
+    </div>
+  );
+};
 
 export default Index;

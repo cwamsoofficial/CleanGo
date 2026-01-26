@@ -65,17 +65,17 @@ const Pickups = () => {
           .select("*")
           .order("created_at", { ascending: false });
 
-        // Get user names for pickups
-        const allUserIds = [...new Set([...(assignedData || []), ...(allData || [])].map(p => p.user_id))];
-        const { data: userProfiles } = await supabase
-          .from("profiles")
-          .select("id, name")
-          .in("id", allUserIds);
+        if (allError) throw allError;
+
+        // Get user names using secure function
+        const allPickupIds = [...new Set([...(assignedData || []), ...(allData || [])].map(p => p.id))];
+        const { data: requesterNames } = await supabase
+          .rpc("get_pickup_requester_names", { pickup_ids: allPickupIds });
 
         const addUserNames = (pickupsList: any[]) => 
           pickupsList.map(pickup => {
-            const profile = userProfiles?.find(p => p.id === pickup.user_id);
-            return { ...pickup, user_name: profile?.name || "Unknown" };
+            const nameData = requesterNames?.find((n: any) => n.pickup_id === pickup.id);
+            return { ...pickup, user_name: nameData?.user_name || "Unknown" };
           });
 
         setPickups(addUserNames(assignedData || []));

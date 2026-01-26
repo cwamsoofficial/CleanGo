@@ -59,50 +59,6 @@ export type Database = {
         }
         Relationships: []
       }
-      issue_requests: {
-        Row: {
-          admin_notes: string | null
-          collector_id: string
-          created_at: string
-          id: string
-          issue_id: string
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          admin_notes?: string | null
-          collector_id: string
-          created_at?: string
-          id?: string
-          issue_id: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          admin_notes?: string | null
-          collector_id?: string
-          created_at?: string
-          id?: string
-          issue_id?: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "issue_requests_issue_id_fkey"
-            columns: ["issue_id"]
-            isOneToOne: false
-            referencedRelation: "issue_reports"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       login_attempts: {
         Row: {
           created_at: string
@@ -165,50 +121,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      pickup_requests: {
-        Row: {
-          admin_notes: string | null
-          collector_id: string
-          created_at: string
-          id: string
-          pickup_id: string
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          admin_notes?: string | null
-          collector_id: string
-          created_at?: string
-          id?: string
-          pickup_id: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          admin_notes?: string | null
-          collector_id?: string
-          created_at?: string
-          id?: string
-          pickup_id?: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pickup_requests_pickup_id_fkey"
-            columns: ["pickup_id"]
-            isOneToOne: false
-            referencedRelation: "waste_pickups"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       profiles: {
         Row: {

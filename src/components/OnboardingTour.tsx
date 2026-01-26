@@ -39,14 +39,14 @@ const citizenSteps: OnboardingStep[] = [
   {
     id: "dashboard",
     title: "Your Dashboard",
-    description: "This is your home base. Here you can see an overview of your pickups, issues, and reward points at a glance.",
+    description: "This is your home base. View your pickups, pending requests, completed collections, and reward points at a glance.",
     icon: BarChart3,
     tip: "Check your dashboard regularly to stay updated on your waste management activities."
   },
   {
     id: "pickups",
     title: "Request Waste Pickups",
-    description: "Schedule waste collection from your location. Simply click 'Request Pickup', enter your details, and a collector will be assigned.",
+    description: "Schedule waste collection by clicking 'Request Pickup'. Enter your location, preferred date, and a collector will handle it.",
     icon: Package,
     tip: "You earn ₦100 for every completed pickup! The more you recycle, the more you earn."
   },
@@ -55,7 +55,7 @@ const citizenSteps: OnboardingStep[] = [
     title: "Report Issues",
     description: "See overflowing bins or illegal dumping? Report issues with photos and location. Collectors will be notified to resolve them.",
     icon: AlertCircle,
-    tip: "Reporting issues helps keep your community clean and collectors get rewarded for resolving them."
+    tip: "Reporting issues helps keep your community clean and earns you bonus points."
   },
   {
     id: "rewards",
@@ -76,7 +76,7 @@ const citizenSteps: OnboardingStep[] = [
     title: "You're All Set!",
     description: "You're ready to start making a difference in your community. Let's keep our environment clean together!",
     icon: CheckCircle,
-    tip: "Start by requesting your first pickup or exploring the dashboard."
+    tip: "Start by requesting your first pickup from the dashboard."
   }
 ];
 
@@ -91,65 +91,37 @@ const collectorSteps: OnboardingStep[] = [
   {
     id: "dashboard",
     title: "Your Collector Dashboard",
-    description: "Your dashboard shows assigned pickups, pending requests, and completed collections. Monitor your performance at a glance.",
+    description: "Your dashboard shows your assigned pickups, pending collections, completed jobs, and issues to resolve.",
     icon: BarChart3,
-    tip: "Check your dashboard frequently to see new pickup requests in your area."
+    tip: "Check your dashboard frequently to see your performance summary."
   },
   {
-    id: "pickups-list",
-    title: "View Available Pickups",
-    description: "Go to the Pickups page to see all available pickup requests. Unassigned pickups are marked and waiting for a collector.",
+    id: "pickups-available",
+    title: "Available Pickups",
+    description: "Go to Pickups to see requests waiting to be accepted. Accept pickups to assign them to yourself.",
     icon: Package,
     tip: "Accept pickups quickly - they're available on a first-come, first-served basis!"
   },
   {
     id: "accept-pickup",
-    title: "Accept & Manage Pickups",
-    description: "Click 'Accept Pickup' to assign yourself. Update status as you progress: In Progress → Collected. You can also mark as Delayed or Failed if needed.",
+    title: "Accept & Complete Pickups",
+    description: "Click 'Accept' on available pickups to claim them. Update status as you progress: In Progress → Collected.",
     icon: CheckCircle,
-    tip: "If you can't complete a pickup, use 'Unassign' to release it back to the available pool."
-  },
-  {
-    id: "pickup-stats",
-    title: "Track Your Statistics",
-    description: "At the top of the Pickups page, you'll see: Total Available, Assigned to You, and Completed Today. Use these to plan your routes.",
-    icon: Clock,
-    tip: "Completing more pickups means more earnings and higher rankings!"
+    tip: "If you can't complete a pickup, use 'Unassign' to release it back to available pickups."
   },
   {
     id: "issues",
     title: "Resolve Reported Issues",
-    description: "The Issues page shows problems reported by citizens. Accept issues, investigate, and mark them resolved to earn extra points.",
+    description: "The Issues page shows problems reported by citizens. Accept and resolve issues to earn extra points.",
     icon: AlertCircle,
     tip: "Resolving issues earns you ₦50 per resolution - a great way to boost your income!"
-  },
-  {
-    id: "locations",
-    title: "Location Information",
-    description: "Each pickup shows the user's location. Use this to plan efficient collection routes and minimize travel time.",
-    icon: MapPin,
-    tip: "Group nearby pickups together to save time and complete more collections per day."
-  },
-  {
-    id: "earnings",
-    title: "Earn While You Collect",
-    description: "You earn ₦100 for every completed pickup and ₦50 for resolved issues. Build streaks for bonus rewards!",
-    icon: DollarSign,
-    tip: "Maintain a 14-day streak for ₦3,000 bonus, 30-day streak for ₦10,000 bonus!"
-  },
-  {
-    id: "analytics",
-    title: "View Your Analytics",
-    description: "The Analytics page shows your performance trends, completion rates, and pickup history. Use insights to improve your efficiency.",
-    icon: BarChart3,
-    tip: "Track your weekly trends to identify your most productive days and times."
   },
   {
     id: "complete",
     title: "Ready to Collect!",
     description: "You're all set to start collecting waste and earning money. Head to Pickups to accept your first collection!",
     icon: CheckCircle,
-    tip: "Start by checking available pickups and accepting ones in your area."
+    tip: "Check the Available Pickups tab to find new pickup requests in your area."
   }
 ];
 

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Package, AlertCircle, CheckCircle, Clock, TrendingUp, FileText, MapPin, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { RequestPickupDialog } from "@/components/RequestPickupDialog";
-import { RecentIssues } from "@/components/RecentIssues";
+
 import { useNavigate } from "react-router-dom";
 import { OnboardingTour, useOnboarding } from "@/components/OnboardingTour";
 import { InteractiveTour } from "@/components/InteractiveTour";
@@ -276,8 +276,6 @@ const Dashboard = () => {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-tour="dashboard-stats">{getStatsCards()}</div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {(role === "citizen" || role === "company") && <RecentIssues />}
-          
           <Card>
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>

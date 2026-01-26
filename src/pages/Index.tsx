@@ -145,7 +145,7 @@ const Index = () => {
             <img src={logo} alt="CWaMSo Logo" className="h-8 w-auto" />
           </div>
           <p className="text-muted-foreground">
-            © 2024 CWaMSo. All rights reserved. Building sustainable communities together.
+            © 2026 CWaMSo. All rights reserved. Building sustainable communities together.
           </p>
         </div>
       </footer>

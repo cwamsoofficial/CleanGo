@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { AlertCircle, CheckCircle, Clock, Download, Edit, Eye, Hand, Loader2, Trash2, X, ZoomIn } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, Download, Edit, Eye, Loader2, Trash2, X, ZoomIn } from "lucide-react";
 
 interface Issue {
   id: string;
@@ -37,12 +37,6 @@ interface IssueStats {
   resolved: number;
 }
 
-interface IssueRequest {
-  id: string;
-  issue_id: string;
-  collector_id: string;
-  status: string;
-}
 
 export default function Issues() {
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -57,8 +51,7 @@ export default function Issues() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editForm, setEditForm] = useState({ title: '', description: '', location: '' });
-  const [myRequests, setMyRequests] = useState<IssueRequest[]>([]);
-  const [requestingIssue, setRequestingIssue] = useState<string | null>(null);
+  const [acceptingIssue, setAcceptingIssue] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUserRole();
@@ -135,15 +128,6 @@ export default function Issues() {
         if (availableError) throw availableError;
         setAvailableIssues(availableData || []);
 
-        // Fetch collector's requests
-        const { data: requestsData } = await supabase
-          .from('issue_requests')
-          .select('*')
-          .eq('collector_id', user.id)
-          .eq('status', 'pending');
-
-        setMyRequests(requestsData || []);
-
         const total = assignedData?.length || 0;
         const pending = assignedData?.filter(i => i.status === 'pending').length || 0;
         const in_progress = assignedData?.filter(i => i.status === 'in_progress').length || 0;
@@ -173,54 +157,29 @@ export default function Issues() {
     }
   };
 
-  const handleRequestIssue = async (issueId: string) => {
+  const handleAcceptIssue = async (issueId: string) => {
     try {
-      setRequestingIssue(issueId);
+      setAcceptingIssue(issueId);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { error } = await supabase
-        .from('issue_requests')
-        .insert({
-          issue_id: issueId,
-          collector_id: user.id,
-        });
+        .from('issue_reports')
+        .update({
+          assigned_collector_id: user.id,
+          status: 'in_progress',
+        })
+        .eq('id', issueId);
 
       if (error) throw error;
 
-      toast.success('Request submitted! Waiting for admin approval.');
+      toast.success('Issue accepted successfully!');
       fetchIssues();
     } catch (error: any) {
-      console.error('Error requesting issue:', error);
-      toast.error(error.message || 'Failed to request issue');
+      console.error('Error accepting issue:', error);
+      toast.error(error.message || 'Failed to accept issue');
     } finally {
-      setRequestingIssue(null);
-    }
-  };
-
-  const [cancelRequestId, setCancelRequestId] = useState<string | null>(null);
-
-  const handleCancelRequest = async (issueId: string) => {
-    try {
-      setRequestingIssue(issueId);
-      const request = myRequests.find(r => r.issue_id === issueId);
-      if (!request) return;
-
-      const { error } = await supabase
-        .from('issue_requests')
-        .delete()
-        .eq('id', request.id);
-
-      if (error) throw error;
-
-      toast.success('Request cancelled');
-      fetchIssues();
-    } catch (error: any) {
-      console.error('Error cancelling request:', error);
-      toast.error(error.message || 'Failed to cancel request');
-    } finally {
-      setRequestingIssue(null);
-      setCancelRequestId(null);
+      setAcceptingIssue(null);
     }
   };
 
@@ -711,8 +670,8 @@ export default function Issues() {
             <TabsContent value="available">
               <Card>
                 <CardHeader>
-                  <CardTitle>Available Issues</CardTitle>
-                  <CardDescription>Request to be assigned to unassigned issues</CardDescription>
+                    <CardTitle>Available Issues</CardTitle>
+                    <CardDescription>Unassigned issues you can accept</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
@@ -730,82 +689,45 @@ export default function Issues() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {availableIssues.map((issue) => {
-                          const existingRequest = myRequests.find(r => r.issue_id === issue.id);
-                          return (
-                            <TableRow key={issue.id}>
-                              <TableCell>
-                                <div>
-                                  <div className="font-medium">{issue.title}</div>
-                                  <div className="text-sm text-muted-foreground line-clamp-1">{issue.description}</div>
-                                </div>
-                              </TableCell>
-                              <TableCell>{issue.location || 'N/A'}</TableCell>
-                              <TableCell>{format(new Date(issue.created_at), 'MMM dd, yyyy')}</TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                      setSelectedIssue(issue);
-                                      setIsDialogOpen(true);
-                                    }}
-                                  >
-                                    <Eye className="w-4 h-4 mr-1" />
-                                    View
-                                  </Button>
-                                  {existingRequest ? (
-                                    <>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => setCancelRequestId(issue.id)}
-                                        disabled={requestingIssue === issue.id}
-                                      >
-                                        {requestingIssue === issue.id ? (
-                                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                                        ) : (
-                                          <X className="w-4 h-4 mr-1" />
-                                        )}
-                                        Cancel Request
-                                      </Button>
-                                      <AlertDialog open={cancelRequestId === issue.id} onOpenChange={(open) => !open && setCancelRequestId(null)}>
-                                        <AlertDialogContent>
-                                          <AlertDialogHeader>
-                                            <AlertDialogTitle>Cancel Request?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                              Are you sure you want to cancel your request for this issue? You can request it again later.
-                                            </AlertDialogDescription>
-                                          </AlertDialogHeader>
-                                          <AlertDialogFooter>
-                                            <AlertDialogCancel>Keep Request</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleCancelRequest(issue.id)}>
-                                              Cancel Request
-                                            </AlertDialogAction>
-                                          </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                      </AlertDialog>
-                                    </>
+                        {availableIssues.map((issue) => (
+                          <TableRow key={issue.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{issue.title}</div>
+                                <div className="text-sm text-muted-foreground line-clamp-1">{issue.description}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{issue.location || 'N/A'}</TableCell>
+                            <TableCell>{format(new Date(issue.created_at), 'MMM dd, yyyy')}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedIssue(issue);
+                                    setIsDialogOpen(true);
+                                  }}
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleAcceptIssue(issue.id)}
+                                  disabled={acceptingIssue === issue.id}
+                                >
+                                  {acceptingIssue === issue.id ? (
+                                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
                                   ) : (
-                                    <Button
-                                      size="sm"
-                                      onClick={() => handleRequestIssue(issue.id)}
-                                      disabled={requestingIssue === issue.id}
-                                    >
-                                      {requestingIssue === issue.id ? (
-                                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                                      ) : (
-                                        <Hand className="w-4 h-4 mr-1" />
-                                      )}
-                                      Request
-                                    </Button>
+                                    <CheckCircle className="w-4 h-4 mr-1" />
                                   )}
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
+                                  Accept
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                       </TableBody>
                     </Table>
                   )}

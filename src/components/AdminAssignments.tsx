@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -55,11 +54,7 @@ export default function AdminAssignments() {
   const [issueStatusFilter, setIssueStatusFilter] = useState<string>("all");
   const [issueCollectorFilter, setIssueCollectorFilter] = useState<string>("all");
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchDataCallback = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -131,7 +126,42 @@ export default function AdminAssignments() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchDataCallback();
+
+    // Subscribe to real-time updates for pickups and issues
+    const channel = supabase
+      .channel('admin-assignments')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'waste_pickups',
+        },
+        () => {
+          fetchDataCallback();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'issue_reports',
+        },
+        () => {
+          fetchDataCallback();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchDataCallback]);
 
   const handleAssignPickup = async (pickupId: string, collectorId: string | null) => {
     try {
@@ -147,7 +177,7 @@ export default function AdminAssignments() {
       if (error) throw error;
 
       toast.success(collectorId ? "Pickup assigned successfully" : "Pickup unassigned");
-      fetchData();
+      fetchDataCallback();
     } catch (error) {
       console.error("Error assigning pickup:", error);
       toast.error("Failed to assign pickup");
@@ -168,7 +198,7 @@ export default function AdminAssignments() {
       if (error) throw error;
 
       toast.success(collectorId ? "Issue assigned successfully" : "Issue unassigned");
-      fetchData();
+      fetchDataCallback();
     } catch (error) {
       console.error("Error assigning issue:", error);
       toast.error("Failed to assign issue");

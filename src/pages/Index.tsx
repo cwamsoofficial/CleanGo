@@ -44,7 +44,7 @@ const Index = () => {
                 A Smart Digital Solution for Cleaner Communities in Nigeria
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                CWaMSo connects citizens, collectors, and authorities through a digital platform that ensures smarter, cleaner communities.
+                CWaMSo connects citizens, collectors, and companies through a digital platform that ensures smarter, cleaner communities.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" onClick={() => navigate("/auth?view=signup")} className="text-lg gap-2 rounded-full px-8">

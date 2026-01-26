@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User, ClipboardList, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { RequestPickupDialog } from "@/components/RequestPickupDialog";
 
 interface Pickup {
   id: string;
@@ -540,6 +541,7 @@ const Pickups = () => {
               {role === "collector" ? "View and manage pickup requests" : "View and track your waste collections"}
             </p>
           </div>
+          {(role === "citizen" || role === "company") && <RequestPickupDialog />}
         </div>
 
         {getPickupStats()}

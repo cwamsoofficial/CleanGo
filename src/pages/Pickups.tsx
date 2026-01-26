@@ -321,8 +321,8 @@ const Pickups = () => {
       <TabsContent value="assigned" className="mt-6">
         <Card>
           <CardHeader>
-            <CardTitle>Your Assigned Pickups</CardTitle>
-            <CardDescription>Pickups you're currently working on</CardDescription>
+            <CardTitle>Accepted/Pending Pickups</CardTitle>
+            <CardDescription>Pickups you've accepted and are working on</CardDescription>
           </CardHeader>
           <CardContent>
             {assignedPickups.length === 0 ? (
@@ -388,8 +388,8 @@ const Pickups = () => {
       <TabsContent value="unassigned" className="mt-6">
         <Card>
           <CardHeader>
-            <CardTitle>Unassigned Pickups</CardTitle>
-            <CardDescription>Available pickups you can accept</CardDescription>
+            <CardTitle>Available Pickups</CardTitle>
+            <CardDescription>New pickups waiting to be accepted</CardDescription>
           </CardHeader>
           <CardContent>
             {unassignedPickups.length === 0 ? (

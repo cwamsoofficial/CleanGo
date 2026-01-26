@@ -384,6 +384,13 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_pickup_requester_names: {
+        Args: { pickup_ids: string[] }
+        Returns: {
+          pickup_id: string
+          user_name: string
+        }[]
+      }
       get_public_profile: {
         Args: { profile_id: string }
         Returns: {

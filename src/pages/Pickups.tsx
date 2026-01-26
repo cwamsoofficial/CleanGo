@@ -299,14 +299,14 @@ const Pickups = () => {
       <TabsList>
         <TabsTrigger value="assigned" className="flex items-center gap-2">
           <ClipboardList className="w-4 h-4" />
-          Assigned
+          Accepted/Pending Pickups
           {assignedPickups.length > 0 && (
             <Badge variant="default" className="ml-1">{assignedPickups.length}</Badge>
           )}
         </TabsTrigger>
         <TabsTrigger value="unassigned" className="flex items-center gap-2">
           <Package className="w-4 h-4" />
-          Unassigned
+          Available Pickups
           {unassignedPickups.length > 0 && (
             <Badge variant="secondary" className="ml-1">{unassignedPickups.length}</Badge>
           )}

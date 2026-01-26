@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Recycle, Users, TrendingUp, Shield, Clock, Leaf, UserPlus, CalendarCheck, Truck, Gift } from "lucide-react";
+import { ArrowRight, Recycle, Users, TrendingUp, Shield, Clock, Leaf, UserPlus, CalendarCheck, Truck, Gift, ChevronRight } from "lucide-react";
 import logo from "@/assets/cwamso-logo.png";
 import wasteBinsHero from "@/assets/waste-bins-hero.jpg";
 
@@ -130,30 +130,34 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-0">
             <StepCard
               step={1}
               icon={UserPlus}
               title="Sign Up"
               description="Create your free account as a citizen, company, or collector in minutes"
+              isLast={false}
             />
             <StepCard
               step={2}
               icon={CalendarCheck}
               title="Request Pickup"
               description="Schedule a waste pickup at your convenience or report an issue"
+              isLast={false}
             />
             <StepCard
               step={3}
               icon={Truck}
               title="Collection"
               description="A verified collector arrives, collects your waste, and confirms completion"
+              isLast={false}
             />
             <StepCard
               step={4}
               icon={Gift}
               title="Earn Rewards"
               description="Get points for every pickup and redeem them for exciting rewards"
+              isLast={true}
             />
           </div>
         </div>
@@ -217,19 +221,34 @@ interface StepCardProps {
   icon: any;
   title: string;
   description: string;
+  isLast: boolean;
 }
 
-const StepCard = ({ step, icon: Icon, title, description }: StepCardProps) => {
+const StepCard = ({ step, icon: Icon, title, description, isLast }: StepCardProps) => {
   return (
-    <div className="relative text-center">
-      <div className="inline-flex items-center justify-center w-16 h-16 bg-primary text-primary-foreground rounded-full mb-4 text-2xl font-bold">
-        {step}
+    <div className="relative text-center px-4">
+      {/* Connecting arrow - hidden on mobile, shown on lg screens */}
+      {!isLast && (
+        <div className="hidden lg:flex absolute top-8 -right-2 z-10 items-center justify-center">
+          <ChevronRight className="w-8 h-8 text-primary" />
+        </div>
+      )}
+      
+      {/* Connecting line - hidden on mobile, shown on lg screens */}
+      {!isLast && (
+        <div className="hidden lg:block absolute top-8 left-1/2 w-full h-0.5 bg-gradient-to-r from-primary/50 to-primary/20" />
+      )}
+      
+      <div className="relative z-20 bg-background">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary text-primary-foreground rounded-full mb-4 text-2xl font-bold shadow-lg">
+          {step}
+        </div>
+        <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-xl mb-4 ml-2">
+          <Icon className="w-6 h-6 text-primary" />
+        </div>
+        <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>
+        <p className="text-muted-foreground">{description}</p>
       </div>
-      <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-xl mb-4 ml-2">
-        <Icon className="w-6 h-6 text-primary" />
-      </div>
-      <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
     </div>
   );
 };

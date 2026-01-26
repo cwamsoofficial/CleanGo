@@ -146,7 +146,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="flex min-h-screen w-full">
         <Sidebar>
           <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
-            <div className="flex items-center gap-3">
+            <div 
+              className="flex items-center gap-3 cursor-pointer" 
+              onClick={() => navigate("/dashboard")}
+            >
               <img src={logo} alt="CWaMSo Logo" className="h-10 w-auto" />
               <div>
                 <h2 className="font-semibold text-sidebar-foreground">CWaMSo</h2>

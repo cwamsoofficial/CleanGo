@@ -23,7 +23,10 @@ const Index = () => {
       <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div 
+              className="flex items-center gap-3 cursor-pointer" 
+              onClick={() => navigate("/")}
+            >
               <img src={logo} alt="CWaMSo Logo" className="h-12 w-auto" />
               <span className="text-2xl font-bold text-foreground">CWaMSo</span>
             </div>

@@ -7,8 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User, ClipboardList, Send, X, Loader2 } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User, ClipboardList, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -26,21 +25,13 @@ interface Pickup {
   user_name?: string;
 }
 
-interface PickupRequest {
-  id: string;
-  pickup_id: string;
-  status: string;
-  created_at: string;
-}
-
 const Pickups = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [pickups, setPickups] = useState<Pickup[]>([]);
   const [allPickups, setAllPickups] = useState<Pickup[]>([]);
-  const [myRequests, setMyRequests] = useState<PickupRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
-  const [requestingPickup, setRequestingPickup] = useState<string | null>(null);
+  const [acceptingPickup, setAcceptingPickup] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPickups();
@@ -68,8 +59,7 @@ const Pickups = () => {
 
         if (assignedError) throw assignedError;
 
-        // Fetch all pickups to get unassigned ones (admin RLS allows this)
-        // We'll need to use a different approach - fetch unassigned separately
+        // Fetch all pickups to get unassigned ones
         const { data: allData, error: allError } = await supabase
           .from("waste_pickups")
           .select("*")
@@ -90,15 +80,6 @@ const Pickups = () => {
 
         setPickups(addUserNames(assignedData || []));
         setAllPickups(addUserNames(allData || []));
-
-        // Fetch collector's pending requests
-        const { data: requestsData } = await supabase
-          .from("pickup_requests")
-          .select("*")
-          .eq("collector_id", user.id)
-          .order("created_at", { ascending: false });
-
-        setMyRequests(requestsData || []);
       } else {
         let query = supabase.from("waste_pickups").select("*");
 
@@ -178,6 +159,34 @@ const Pickups = () => {
     }
   };
 
+  const handleAcceptPickup = async (pickupId: string) => {
+    try {
+      setAcceptingPickup(pickupId);
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from("waste_pickups")
+        .update({
+          collector_id: user.id,
+          status: "in_progress",
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", pickupId);
+
+      if (error) throw error;
+
+      toast.success("Pickup accepted successfully!");
+      fetchPickups();
+    } catch (error: any) {
+      console.error("Error accepting pickup:", error);
+      toast.error("Failed to accept pickup");
+    } finally {
+      setAcceptingPickup(null);
+    }
+  };
+
   const handleUnassign = async (pickupId: string) => {
     try {
       const { error } = await supabase
@@ -195,65 +204,6 @@ const Pickups = () => {
       fetchPickups();
     } catch (error: any) {
       toast.error("Failed to unassign pickup");
-    }
-  };
-
-  const handleRequestPickup = async (pickupId: string) => {
-    try {
-      setRequestingPickup(pickupId);
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { error } = await supabase
-        .from("pickup_requests")
-        .insert({
-          pickup_id: pickupId,
-          collector_id: user.id,
-        });
-
-      if (error) {
-        if (error.code === '23505') {
-          toast.error("You've already requested this pickup");
-        } else {
-          throw error;
-        }
-        return;
-      }
-
-      toast.success("Pickup request sent to admin for approval");
-      fetchPickups();
-    } catch (error: any) {
-      console.error("Error requesting pickup:", error);
-      toast.error("Failed to request pickup");
-    } finally {
-      setRequestingPickup(null);
-    }
-  };
-
-  const [cancelPickupRequestId, setCancelPickupRequestId] = useState<string | null>(null);
-
-  const handleCancelPickupRequest = async (pickupId: string) => {
-    try {
-      setRequestingPickup(pickupId);
-      const request = myRequests.find(r => r.pickup_id === pickupId && r.status === 'pending');
-      if (!request) return;
-
-      const { error } = await supabase
-        .from("pickup_requests")
-        .delete()
-        .eq("id", request.id);
-
-      if (error) throw error;
-
-      toast.success("Request cancelled");
-      fetchPickups();
-    } catch (error: any) {
-      console.error("Error cancelling request:", error);
-      toast.error("Failed to cancel request");
-    } finally {
-      setRequestingPickup(null);
-      setCancelPickupRequestId(null);
     }
   };
 
@@ -354,9 +304,9 @@ const Pickups = () => {
             <Badge variant="default" className="ml-1">{assignedPickups.length}</Badge>
           )}
         </TabsTrigger>
-        <TabsTrigger value="available" className="flex items-center gap-2">
+        <TabsTrigger value="unassigned" className="flex items-center gap-2">
           <Package className="w-4 h-4" />
-          Available
+          Unassigned
           {unassignedPickups.length > 0 && (
             <Badge variant="secondary" className="ml-1">{unassignedPickups.length}</Badge>
           )}
@@ -372,7 +322,7 @@ const Pickups = () => {
         <Card>
           <CardHeader>
             <CardTitle>Your Assigned Pickups</CardTitle>
-            <CardDescription>Pickups assigned to you by admin</CardDescription>
+            <CardDescription>Pickups you're currently working on</CardDescription>
           </CardHeader>
           <CardContent>
             {assignedPickups.length === 0 ? (
@@ -409,6 +359,9 @@ const Pickups = () => {
                               <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(pickup.id, "delayed")}>
                                 Delay
                               </Button>
+                              <Button size="sm" variant="ghost" onClick={() => handleUnassign(pickup.id)}>
+                                Unassign
+                              </Button>
                             </>
                           )}
                           {pickup.status === "pending" && (
@@ -432,15 +385,15 @@ const Pickups = () => {
         </Card>
       </TabsContent>
 
-      <TabsContent value="available" className="mt-6">
+      <TabsContent value="unassigned" className="mt-6">
         <Card>
           <CardHeader>
-            <CardTitle>Available Pickups</CardTitle>
-            <CardDescription>Unassigned pickups you can request</CardDescription>
+            <CardTitle>Unassigned Pickups</CardTitle>
+            <CardDescription>Available pickups you can accept</CardDescription>
           </CardHeader>
           <CardContent>
             {unassignedPickups.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">No available pickups at the moment</p>
+              <p className="text-muted-foreground text-center py-8">No unassigned pickups at the moment</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -464,68 +417,19 @@ const Pickups = () => {
                       </TableCell>
                       <TableCell>{format(new Date(pickup.created_at), "MMM dd, yyyy")}</TableCell>
                       <TableCell>
-                        {(() => {
-                          const existingRequest = myRequests.find(r => r.pickup_id === pickup.id);
-                          if (existingRequest && existingRequest.status === 'pending') {
-                            return (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={requestingPickup === pickup.id}
-                                  onClick={() => setCancelPickupRequestId(pickup.id)}
-                                  className="flex items-center gap-2"
-                                >
-                                  {requestingPickup === pickup.id ? (
-                                    <Loader2 className="w-3 h-3 animate-spin" />
-                                  ) : (
-                                    <X className="w-3 h-3" />
-                                  )}
-                                  Cancel Request
-                                </Button>
-                                <AlertDialog open={cancelPickupRequestId === pickup.id} onOpenChange={(open) => !open && setCancelPickupRequestId(null)}>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Cancel Request?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to cancel your pickup request? You can request it again later.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Keep Request</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleCancelPickupRequest(pickup.id)}>
-                                        Cancel Request
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </>
-                            );
-                          }
-                          if (existingRequest) {
-                            return (
-                              <Badge variant={existingRequest.status === 'approved' ? 'default' : 'destructive'}>
-                                {existingRequest.status}
-                              </Badge>
-                            );
-                          }
-                          return (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={requestingPickup === pickup.id}
-                              onClick={() => handleRequestPickup(pickup.id)}
-                              className="flex items-center gap-2"
-                            >
-                              {requestingPickup === pickup.id ? (
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                              ) : (
-                                <Send className="w-3 h-3" />
-                              )}
-                              Request
-                            </Button>
-                          );
-                        })()}
+                        <Button
+                          size="sm"
+                          disabled={acceptingPickup === pickup.id}
+                          onClick={() => handleAcceptPickup(pickup.id)}
+                          className="flex items-center gap-2"
+                        >
+                          {acceptingPickup === pickup.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <CheckCircle className="w-3 h-3" />
+                          )}
+                          Accept
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

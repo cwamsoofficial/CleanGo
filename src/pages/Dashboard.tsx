@@ -33,8 +33,14 @@ const Dashboard = () => {
     points: 0,
   });
   const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [activityFilter, setActivityFilter] = useState<"all" | "pickup" | "issue">("all");
   
   const { showOnboarding, hasChecked, completeOnboarding, skipOnboarding } = useOnboarding();
+  
+  const filteredActivity = recentActivity.filter(activity => {
+    if (activityFilter === "all") return true;
+    return activity.type === activityFilter;
+  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -277,18 +283,52 @@ const Dashboard = () => {
 
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Your latest waste management activities</CardDescription>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Recent Activity</CardTitle>
+                  <CardDescription>Your latest waste management activities</CardDescription>
+                </div>
+              </div>
+              <div className="flex gap-1 pt-2">
+                <Button
+                  variant={activityFilter === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActivityFilter("all")}
+                  className="text-xs h-7"
+                >
+                  All
+                </Button>
+                <Button
+                  variant={activityFilter === "pickup" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActivityFilter("pickup")}
+                  className="text-xs h-7"
+                >
+                  <Package className="w-3 h-3 mr-1" />
+                  Pickups
+                </Button>
+                <Button
+                  variant={activityFilter === "issue" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActivityFilter("issue")}
+                  className="text-xs h-7"
+                >
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Issues
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              {recentActivity.length === 0 ? (
+              {filteredActivity.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No recent activity. Start by scheduling a pickup or reporting an issue.
+                  {activityFilter === "all" 
+                    ? "No recent activity. Start by scheduling a pickup or reporting an issue."
+                    : `No recent ${activityFilter === "pickup" ? "pickups" : "issues"} found.`}
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {recentActivity.map((activity) => (
+                  {filteredActivity.map((activity) => (
                     <div 
                       key={activity.id} 
                       className="flex items-start gap-3 p-2 rounded-lg border bg-card cursor-pointer hover:bg-accent/50 transition-colors"

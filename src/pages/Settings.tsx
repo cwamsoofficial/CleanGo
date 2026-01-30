@@ -251,7 +251,7 @@ const Settings = () => {
           <CardHeader>
             <CardTitle>Help & Tour</CardTitle>
             <CardDescription>
-              Need a refresher on how to use CWaMSo?
+              Need a refresher on how to use CleanGo?
             </CardDescription>
           </CardHeader>
           <CardContent>

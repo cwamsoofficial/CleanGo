@@ -31,7 +31,7 @@ interface OnboardingStep {
 const citizenSteps: OnboardingStep[] = [
   {
     id: "welcome",
-    title: "Welcome to CWaMSo!",
+    title: "Welcome to CleanGo!",
     description: "Your community waste management platform. Let's take a quick tour to help you get started.",
     icon: Sparkles,
     tip: "This tour will only take a minute and will help you understand all the features available to you."
@@ -84,7 +84,7 @@ const collectorSteps: OnboardingStep[] = [
   {
     id: "welcome",
     title: "Welcome, Collector!",
-    description: "You're now part of the CWaMSo waste collection team. Let's show you how to manage pickups efficiently.",
+    description: "You're now part of the CleanGo waste collection team. Let's show you how to manage pickups efficiently.",
     icon: Truck,
     tip: "This quick tour will help you understand your role and maximize your earnings."
   },
@@ -261,7 +261,7 @@ export const useOnboarding = () => {
   const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
-    const completed = localStorage.getItem("cwamso_onboarding_completed");
+    const completed = localStorage.getItem("cleango_onboarding_completed");
     if (!completed) {
       setShowOnboarding(true);
     }
@@ -269,17 +269,17 @@ export const useOnboarding = () => {
   }, []);
 
   const completeOnboarding = () => {
-    localStorage.setItem("cwamso_onboarding_completed", "true");
+    localStorage.setItem("cleango_onboarding_completed", "true");
     setShowOnboarding(false);
   };
 
   const skipOnboarding = () => {
-    localStorage.setItem("cwamso_onboarding_completed", "true");
+    localStorage.setItem("cleango_onboarding_completed", "true");
     setShowOnboarding(false);
   };
 
   const resetOnboarding = () => {
-    localStorage.removeItem("cwamso_onboarding_completed");
+    localStorage.removeItem("cleango_onboarding_completed");
     setShowOnboarding(true);
   };
 

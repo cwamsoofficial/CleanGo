@@ -305,8 +305,8 @@ const Auth = () => {
               className="inline-flex flex-col items-center justify-center cursor-pointer"
               onClick={() => navigate("/")}
             >
-              <img src={logo} alt="CWaMSo Logo" className="h-20 w-auto mb-4" />
-              <h1 className="text-3xl font-bold text-foreground mb-2">CWaMSo</h1>
+              <img src={logo} alt="CleanGo Logo" className="h-20 w-auto mb-4" />
+              <h1 className="text-3xl font-bold text-foreground mb-2">CleanGo</h1>
             </div>
             <p className="text-muted-foreground">Community Waste Management Software</p>
           </div>
@@ -364,8 +364,8 @@ const Auth = () => {
             className="inline-flex flex-col items-center justify-center cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <img src={logo} alt="CWaMSo Logo" className="h-20 w-auto mb-4" />
-            <h1 className="text-3xl font-bold text-foreground mb-2">CWaMSo</h1>
+            <img src={logo} alt="CleanGo Logo" className="h-20 w-auto mb-4" />
+            <h1 className="text-3xl font-bold text-foreground mb-2">CleanGo</h1>
           </div>
           <p className="text-muted-foreground">Community Waste Management Software</p>
         </div>
@@ -438,7 +438,7 @@ const Auth = () => {
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">
-                New to CWaMSo?{" "}
+                New to CleanGo?{" "}
                 <button
                   type="button"
                   onClick={() => switchView("signup")}
@@ -456,7 +456,7 @@ const Auth = () => {
           <Card className="animate-fade-in" key="signup">
             <CardHeader>
               <CardTitle>Create your account</CardTitle>
-              <CardDescription>Join CWaMSo to manage waste efficiently</CardDescription>
+              <CardDescription>Join CleanGo to manage waste efficiently</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <form onSubmit={handleSignUp} className="space-y-4">

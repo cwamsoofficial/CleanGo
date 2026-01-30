@@ -384,6 +384,20 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_own_profile: {
+        Args: never
+        Returns: {
+          address: string
+          avatar_url: string
+          banned: boolean
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          referral_code: string
+          updated_at: string
+        }[]
+      }
       get_pickup_requester_names: {
         Args: { pickup_ids: string[] }
         Returns: {

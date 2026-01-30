@@ -43,10 +43,10 @@ const Index = () => {
             {/* Left Content */}
             <div className="space-y-8">
               <h1 className="text-5xl md:text-6xl font-bold text-foreground leading-tight">
-                A Smart Digital Solution for Cleaner Communities in Nigeria
+                Fixing last-mile waste collection in Nigerian communities
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                CleanGo connects citizens, collectors, and companies through a digital platform that ensures smarter, cleaner communities.
+                CleanGo helps residents request waste pickups, collectors manage jobs, and communities stay clean — all with real-time tracking and accountability.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" onClick={() => navigate("/auth?view=signup")} className="text-lg gap-2 rounded-full px-8">

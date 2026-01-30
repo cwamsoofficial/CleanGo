@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/cwamso-logo.png";
+import logo from "@/assets/cleango-logo.png";
 
 const Terms = () => {
   return (
@@ -10,7 +10,6 @@ const Terms = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <img src={logo} alt="CleanGo Logo" className="h-10 w-auto" />
-            <span className="font-bold text-xl text-foreground">CleanGo</span>
           </Link>
           <Button variant="ghost" asChild>
             <Link to="/auth">

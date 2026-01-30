@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Loader2, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
-import logo from "@/assets/cwamso-logo.png";
+import logo from "@/assets/cleango-logo.png";
 
 type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
 type AuthView = "signin" | "signup" | "reset";
@@ -305,8 +305,7 @@ const Auth = () => {
               className="inline-flex flex-col items-center justify-center cursor-pointer"
               onClick={() => navigate("/")}
             >
-              <img src={logo} alt="CleanGo Logo" className="h-20 w-auto mb-4" />
-              <h1 className="text-3xl font-bold text-foreground mb-2">CleanGo</h1>
+              <img src={logo} alt="CleanGo Logo" className="h-24 w-auto mb-4" />
             </div>
             <p className="text-muted-foreground">Community Waste Management Software</p>
           </div>
@@ -364,8 +363,7 @@ const Auth = () => {
             className="inline-flex flex-col items-center justify-center cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <img src={logo} alt="CleanGo Logo" className="h-20 w-auto mb-4" />
-            <h1 className="text-3xl font-bold text-foreground mb-2">CleanGo</h1>
+            <img src={logo} alt="CleanGo Logo" className="h-24 w-auto mb-4" />
           </div>
           <p className="text-muted-foreground">Community Waste Management Software</p>
         </div>

@@ -42,7 +42,7 @@ import {
   CreditCard,
   History,
 } from "lucide-react";
-import logo from "@/assets/cwamso-logo.png";
+import logo from "@/assets/cleango-logo.png";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -152,7 +152,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             >
               <img src={logo} alt="CleanGo Logo" className="h-10 w-auto" />
               <div>
-                <h2 className="font-semibold text-sidebar-foreground">CleanGo</h2>
                 <p className="text-xs text-sidebar-foreground/70 capitalize">{role} Portal</p>
               </div>
             </div>

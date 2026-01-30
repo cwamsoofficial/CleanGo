@@ -46,7 +46,7 @@ const Index = () => {
                 Fixing last-mile waste collection in Nigerian communities
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                CleanGo helps residents request waste pickups, collectors manage jobs, and communities stay clean — all with real-time tracking and accountability.
+                CleanGo helps residents request waste pickups, collectors manage jobs, and communities stay clean all with real-time tracking and accountability.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" onClick={() => navigate("/auth?view=signup")} className="text-lg gap-2 rounded-full px-8">

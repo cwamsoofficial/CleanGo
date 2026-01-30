@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Recycle, Users, TrendingUp, Shield, Clock, Leaf, UserPlus, CalendarCheck, Truck, Gift, ChevronRight } from "lucide-react";
-import logo from "@/assets/cwamso-logo.png";
+import logo from "@/assets/cleango-logo.png";
 import wasteBinsHero from "@/assets/waste-bins-hero.jpg";
 
 const Index = () => {
@@ -27,8 +27,7 @@ const Index = () => {
               className="flex items-center gap-3 cursor-pointer" 
               onClick={() => navigate("/")}
             >
-              <img src={logo} alt="CWaMSo Logo" className="h-12 w-auto" />
-              <span className="text-2xl font-bold text-foreground">CleanGo</span>
+              <img src={logo} alt="CleanGo Logo" className="h-12 w-auto" />
             </div>
             <Button onClick={() => navigate("/auth")} size="lg" className="rounded-full px-8">
               Login
@@ -190,7 +189,7 @@ const Index = () => {
       <footer className="bg-card border-t border-border py-8">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <img src={logo} alt="CWaMSo Logo" className="h-8 w-auto" />
+            <img src={logo} alt="CleanGo Logo" className="h-10 w-auto" />
           </div>
           <p className="text-muted-foreground">
             © 2026 CleanGo. All rights reserved. Building sustainable communities together.

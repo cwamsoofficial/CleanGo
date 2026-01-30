@@ -43,10 +43,10 @@ const Index = () => {
             {/* Left Content */}
             <div className="space-y-8">
               <h1 className="text-5xl md:text-6xl font-bold text-foreground leading-tight">
-                Fixing last-mile waste collection in Nigerian communities
+                Fixing last-mile waste collection in Kano State communities
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                CleanGo helps residents request waste pickups, collectors manage jobs, and communities stay clean with real-time tracking and accountability.
+                CleanGo connects estates, local collectors, and residents across Kano State to coordinate waste pickups with real-time tracking and accountability.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" onClick={() => navigate("/auth?view=signup")} className="text-lg gap-2 rounded-full px-8">

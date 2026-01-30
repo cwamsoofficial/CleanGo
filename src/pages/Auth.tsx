@@ -60,6 +60,7 @@ const Auth = () => {
   const [referralCode, setReferralCode] = useState(searchParams.get("ref") || "");
   const initialView = searchParams.get("view") === "signup" ? "signup" : "signin";
   const [authView, setAuthView] = useState<AuthView>(initialView);
+  const initialRole = searchParams.get("role") === "collector" ? "collector" : "citizen";
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value;
@@ -498,7 +499,7 @@ const Auth = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-role">Role</Label>
-                  <Select name="role" defaultValue="citizen" required>
+                  <Select name="role" defaultValue={initialRole} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>

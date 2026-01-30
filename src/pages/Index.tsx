@@ -49,7 +49,7 @@ const Index = () => {
                 CleanGo connects estates, local collectors, and residents across Kano State to coordinate waste pickups with real-time tracking and accountability.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" onClick={() => navigate("/auth?view=signup")} className="text-lg gap-2 rounded-full px-8">
+                <Button size="lg" onClick={() => navigate("/auth?view=signup&role=citizen")} className="text-lg gap-2 rounded-full px-8">
                   Get Started
                   <ArrowRight className="h-5 w-5" />
                 </Button>
@@ -178,7 +178,7 @@ const Index = () => {
             <Button
               size="lg"
               variant="secondary"
-              onClick={() => navigate("/auth?view=signup")}
+              onClick={() => navigate("/auth?view=signup&role=citizen")}
               className="text-lg"
             >
               Request a Pickup
@@ -186,7 +186,7 @@ const Index = () => {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => navigate("/auth?view=signup")}
+              onClick={() => navigate("/auth?view=signup&role=collector")}
               className="text-lg bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
             >
               Join as a Collector

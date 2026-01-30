@@ -174,14 +174,24 @@ const Index = () => {
           <p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
             Join thousands of communities already benefiting from efficient, transparent waste management
           </p>
-          <Button
-            size="lg"
-            variant="secondary"
-            onClick={() => navigate("/auth?view=signup")}
-            className="text-lg"
-          >
-            Start Your Journey
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={() => navigate("/auth?view=signup")}
+              className="text-lg"
+            >
+              Request a Pickup
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => navigate("/auth?view=signup")}
+              className="text-lg bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
+            >
+              Join as a Collector
+            </Button>
+          </div>
         </div>
       </section>
 

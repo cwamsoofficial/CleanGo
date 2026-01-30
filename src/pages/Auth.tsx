@@ -308,7 +308,7 @@ const Auth = () => {
             >
               <img src={logo} alt="CleanGo Logo" className="h-24 w-auto mb-4" />
             </div>
-            <p className="text-muted-foreground">Community Waste Management Software</p>
+            <p className="text-muted-foreground">Community Waste Management</p>
           </div>
 
           <Card>
@@ -366,7 +366,7 @@ const Auth = () => {
           >
             <img src={logo} alt="CleanGo Logo" className="h-24 w-auto mb-4" />
           </div>
-          <p className="text-muted-foreground">Community Waste Management Software</p>
+          <p className="text-muted-foreground">Community Waste Management</p>
         </div>
 
         {/* Sign In View */}

@@ -9,8 +9,8 @@ const Privacy = () => {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="CWaMSo Logo" className="h-10 w-auto" />
-            <span className="font-bold text-xl text-foreground">CWaMSo</span>
+            <img src={logo} alt="CleanGo Logo" className="h-10 w-auto" />
+            <span className="font-bold text-xl text-foreground">CleanGo</span>
           </Link>
           <Button variant="ghost" asChild>
             <Link to="/auth">
@@ -29,7 +29,7 @@ const Privacy = () => {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">1. Introduction</h2>
             <p className="text-muted-foreground leading-relaxed">
-              CWaMSo (&quot;Community Waste Management Software&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our waste management platform and services.
+              CleanGo (&quot;Community Waste Management Software&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our waste management platform and services.
             </p>
             <p className="text-muted-foreground leading-relaxed mt-4">
               We comply with the General Data Protection Regulation (GDPR) and other applicable data protection laws. By using our services, you agree to the collection and use of information in accordance with this policy.
@@ -114,7 +114,7 @@ const Privacy = () => {
               <li><strong>Withdraw Consent:</strong> Withdraw consent at any time</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-4">
-              To exercise these rights, contact us at cwamsoofficial@gmail.com or through your account settings.
+              To exercise these rights, contact us at cleango@gmail.com or through your account settings.
             </p>
           </section>
 
@@ -166,8 +166,8 @@ const Privacy = () => {
               For privacy-related inquiries or to exercise your rights:
             </p>
             <ul className="list-none text-muted-foreground mt-2 space-y-1">
-              <li><strong>Email:</strong> cwamsoofficial@gmail.com</li>
-              <li><strong>Address:</strong> CWaMSo Headquarters, Kano State, Nigeria</li>
+              <li><strong>Email:</strong> cleango@gmail.com</li>
+              <li><strong>Address:</strong> CleanGo Headquarters, Kano State, Nigeria</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-4">
               You have the right to lodge a complaint with a supervisory authority if you believe your data protection rights have been violated.
@@ -178,7 +178,7 @@ const Privacy = () => {
 
       <footer className="border-t mt-12">
         <div className="container mx-auto px-4 py-6 text-center text-muted-foreground text-sm">
-          © {new Date().getFullYear()} CWaMSo. All rights reserved.
+          © {new Date().getFullYear()} CleanGo. All rights reserved.
         </div>
       </footer>
     </div>

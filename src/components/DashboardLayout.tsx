@@ -150,9 +150,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               className="flex items-center gap-3 cursor-pointer" 
               onClick={() => navigate("/dashboard")}
             >
-              <img src={logo} alt="CWaMSo Logo" className="h-10 w-auto" />
+              <img src={logo} alt="CleanGo Logo" className="h-10 w-auto" />
               <div>
-                <h2 className="font-semibold text-sidebar-foreground">CWaMSo</h2>
+                <h2 className="font-semibold text-sidebar-foreground">CleanGo</h2>
                 <p className="text-xs text-sidebar-foreground/70 capitalize">{role} Portal</p>
               </div>
             </div>

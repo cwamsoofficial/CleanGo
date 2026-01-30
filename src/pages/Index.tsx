@@ -28,7 +28,7 @@ const Index = () => {
               onClick={() => navigate("/")}
             >
               <img src={logo} alt="CWaMSo Logo" className="h-12 w-auto" />
-              <span className="text-2xl font-bold text-foreground">CWaMSo</span>
+              <span className="text-2xl font-bold text-foreground">CleanGo</span>
             </div>
             <Button onClick={() => navigate("/auth")} size="lg" className="rounded-full px-8">
               Login
@@ -47,7 +47,7 @@ const Index = () => {
                 A Smart Digital Solution for Cleaner Communities in Nigeria
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                CWaMSo connects citizens, collectors, and companies through a digital platform that ensures smarter, cleaner communities.
+                CleanGo connects citizens, collectors, and companies through a digital platform that ensures smarter, cleaner communities.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" onClick={() => navigate("/auth?view=signup")} className="text-lg gap-2 rounded-full px-8">
@@ -79,7 +79,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">
-              Why Choose CWaMSo?
+              Why Choose CleanGo?
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               A comprehensive platform designed to revolutionize waste management in your community
@@ -129,7 +129,7 @@ const Index = () => {
               How It Works
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Getting started with CWaMSo is simple. Follow these easy steps to join the movement.
+              Getting started with CleanGo is simple. Follow these easy steps to join the movement.
             </p>
           </div>
 
@@ -193,7 +193,7 @@ const Index = () => {
             <img src={logo} alt="CWaMSo Logo" className="h-8 w-auto" />
           </div>
           <p className="text-muted-foreground">
-            © 2026 CWaMSo. All rights reserved. Building sustainable communities together.
+            © 2026 CleanGo. All rights reserved. Building sustainable communities together.
           </p>
         </div>
       </footer>

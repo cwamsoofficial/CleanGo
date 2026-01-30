@@ -499,15 +499,10 @@ const Auth = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-role">Role</Label>
-                  <Select name="role" defaultValue={initialRole} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="citizen">Citizen</SelectItem>
-                      <SelectItem value="collector">Waste Collector</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <input type="hidden" name="role" value={initialRole} />
+                  <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm">
+                    {initialRole === "collector" ? "Waste Collector" : "Citizen"}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>

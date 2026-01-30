@@ -28,7 +28,7 @@ const Privacy = () => {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">1. Introduction</h2>
             <p className="text-muted-foreground leading-relaxed">
-              CleanGo (&quot;Community Waste Management Software&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our waste management platform and services.
+              CleanGo (&quot;Community Waste Management&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our waste management platform and services.
             </p>
             <p className="text-muted-foreground leading-relaxed mt-4">
               We comply with the General Data Protection Regulation (GDPR) and other applicable data protection laws. By using our services, you agree to the collection and use of information in accordance with this policy.

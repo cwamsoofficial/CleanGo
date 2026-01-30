@@ -28,7 +28,7 @@ const Terms = () => {
           <section>
             <h2 className="text-2xl font-semibold text-foreground mb-4">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground leading-relaxed">
-              By accessing or using CleanGo (&quot;Community Waste Management Software&quot;), you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access our services.
+              By accessing or using CleanGo (&quot;Community Waste Management&quot;), you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access our services.
             </p>
             <p className="text-muted-foreground leading-relaxed mt-4">
               These terms apply to all users of the platform, including citizens, companies, waste collectors, recyclers, and administrators.

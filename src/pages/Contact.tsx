@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Mail, MapPin, Phone, Send } from "lucide-react";
 import { z } from "zod";
 import logo from "@/assets/cleango-logo.png";
+import { supabase } from "@/integrations/supabase/client";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
@@ -55,8 +56,25 @@ const Contact = () => {
       return;
     }
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Save to database
+    const { error } = await supabase
+      .from("contact_submissions")
+      .insert({
+        name: result.data.name,
+        email: result.data.email,
+        subject: result.data.subject,
+        message: result.data.message,
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
     toast({
       title: "Message Sent!",

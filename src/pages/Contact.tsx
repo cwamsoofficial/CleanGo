@@ -57,7 +57,7 @@ const Contact = () => {
     }
 
     // Save to database
-    const { error } = await supabase
+    const { error: dbError } = await supabase
       .from("contact_submissions")
       .insert({
         name: result.data.name,
@@ -66,7 +66,8 @@ const Contact = () => {
         message: result.data.message,
       });
 
-    if (error) {
+    if (dbError) {
+      console.error("Database error:", dbError);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
@@ -74,6 +75,26 @@ const Contact = () => {
       });
       setIsSubmitting(false);
       return;
+    }
+
+    // Send email notification
+    try {
+      const emailResponse = await supabase.functions.invoke("send-contact-email", {
+        body: {
+          name: result.data.name,
+          email: result.data.email,
+          subject: result.data.subject,
+          message: result.data.message,
+        },
+      });
+
+      if (emailResponse.error) {
+        console.error("Email error:", emailResponse.error);
+        // Don't fail the submission if email fails - form is still saved
+      }
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      // Don't fail the submission if email fails - form is still saved
     }
 
     toast({

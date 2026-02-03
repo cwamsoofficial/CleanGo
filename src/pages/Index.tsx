@@ -201,6 +201,28 @@ const Index = () => {
           <div className="flex items-center justify-center gap-2 mb-4">
             <img src={logo} alt="CleanGo Logo" className="h-10 w-auto" />
           </div>
+          <div className="flex items-center justify-center gap-4 mb-4 text-sm">
+            <button
+              onClick={() => navigate("/contact")}
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Contact
+            </button>
+            <span className="text-muted-foreground">•</span>
+            <button
+              onClick={() => navigate("/privacy")}
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Privacy
+            </button>
+            <span className="text-muted-foreground">•</span>
+            <button
+              onClick={() => navigate("/terms")}
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Terms
+            </button>
+          </div>
           <p className="text-muted-foreground">
             © 2026 CleanGo. All rights reserved. Building sustainable communities together.
           </p>

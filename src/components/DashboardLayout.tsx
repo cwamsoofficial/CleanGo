@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserRole, type UserRole } from "@/lib/supabase";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import {
   Sidebar,
   SidebarContent,
@@ -41,7 +42,9 @@ import {
   Shield,
   CreditCard,
   History,
+  Crown,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/cleango-logo.png";
 
 interface DashboardLayoutProps {
@@ -51,6 +54,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const [role, setRole] = useState<UserRole | null>(null);
+  const { isSubscribed, tier } = useSubscription();
   const { profile: userProfile, updateAvatar, updateName } = useUserProfile();
 
   useEffect(() => {
@@ -151,8 +155,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               onClick={() => navigate("/dashboard")}
             >
               <img src={logo} alt="CleanGo Logo" className="h-10 w-auto" />
-              <div>
-                <p className="text-xs text-sidebar-foreground/70 capitalize">{role} Portal</p>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-sidebar-foreground/70 capitalize">{role} Portal</p>
+                  {isSubscribed && (role === "citizen" || role === "company") && (
+                    <Badge className="h-5 px-1.5 text-[10px] bg-primary text-primary-foreground border-0">
+                      <Crown className="h-3 w-3 mr-0.5" />
+                      {tier === "pro" ? "PRO" : "PREMIUM"}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           </SidebarHeader>

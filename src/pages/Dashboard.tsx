@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserRole, type UserRole } from "@/lib/supabase";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, AlertCircle, CheckCircle, Clock, TrendingUp, FileText, MapPin, Calendar } from "lucide-react";
+import { Package, AlertCircle, CheckCircle, Clock, TrendingUp, FileText, MapPin, Calendar, Crown, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { RequestPickupDialog } from "@/components/RequestPickupDialog";
 
@@ -36,6 +37,7 @@ const Dashboard = () => {
   const [activityFilter, setActivityFilter] = useState<"all" | "pickup" | "issue">("all");
   
   const { showOnboarding, hasChecked, completeOnboarding, skipOnboarding } = useOnboarding();
+  const { isSubscribed, tier } = useSubscription();
   
   const filteredActivity = recentActivity.filter(activity => {
     if (activityFilter === "all") return true;
@@ -229,6 +231,8 @@ const Dashboard = () => {
     }
 
     // Citizen or Company
+    const bonusText = tier === "pro" ? "+25%" : tier === "basic" ? "+10%" : null;
+    
     return (
       <>
         <StatsCard
@@ -249,12 +253,30 @@ const Dashboard = () => {
           icon={CheckCircle}
           description="Successfully collected"
         />
-        <StatsCard
-          title="Reward Points"
-          value={stats.points}
-          icon={TrendingUp}
-          description="Total earned"
-        />
+        <Card className={isSubscribed ? "border-primary/50 bg-primary/5" : ""}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Reward Points</CardTitle>
+            {isSubscribed ? (
+              <Crown className="h-4 w-4 text-primary" />
+            ) : (
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            )}
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold">{stats.points}</span>
+              {bonusText && (
+                <Badge variant="secondary" className="text-xs">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  {bonusText} bonus
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {isSubscribed ? "Premium rewards active" : "Total earned"}
+            </p>
+          </CardContent>
+        </Card>
       </>
     );
   };

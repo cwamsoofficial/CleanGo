@@ -19,65 +19,78 @@ const Rewards = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Premium Upsell Banner for non-subscribed users */}
-        {!isSubscribed && (
-          <Alert className="border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
-            <Crown className="h-5 w-5 text-primary" />
-            <AlertTitle className="text-lg font-semibold flex items-center gap-2">
-              Boost Your Rewards with Premium
-              <Sparkles className="h-4 w-4 text-primary" />
-            </AlertTitle>
-            <AlertDescription className="mt-2">
-              <p className="text-muted-foreground mb-3">
-                Upgrade to Premium and earn <span className="font-semibold text-primary">up to 25% bonus</span> on all your pickups and activities!
-              </p>
-              <div className="flex flex-wrap gap-4 mb-4">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                  <span>Premium Basic: <span className="font-medium">+10% bonus rewards</span></span>
+        {/* Non-subscribed users see upsell */}
+        {!isSubscribed ? (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Card className="w-full max-w-lg text-center border-primary/20">
+              <CardContent className="pt-12 pb-12 space-y-6">
+                <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Crown className="h-10 w-10 text-primary" />
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                  <span>Premium Pro: <span className="font-medium">+25% bonus rewards</span></span>
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
+                    Boost Your Rewards with Premium
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Upgrade to Premium and earn <span className="font-semibold text-primary">up to 25% bonus</span> on all your pickups and activities!
+                  </p>
                 </div>
-              </div>
-              <Button onClick={() => navigate("/dashboard/billing")} className="gap-2">
-                Upgrade Now
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+                
+                <div className="flex flex-col gap-3 text-left bg-muted/50 rounded-lg p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-3 w-3 rounded-full bg-primary" />
+                    <span className="text-sm">
+                      <span className="font-semibold">Premium Basic:</span> +10% bonus rewards
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-3 w-3 rounded-full bg-primary" />
+                    <span className="text-sm">
+                      <span className="font-semibold">Premium Pro:</span> +25% bonus rewards
+                    </span>
+                  </div>
+                </div>
 
-        {/* Premium subscriber badge */}
-        {isSubscribed && (
-          <Alert className="border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <AlertTitle className="text-lg font-semibold flex items-center gap-2">
-              Premium Member Benefits Active
-              <Crown className="h-4 w-4 text-primary" />
-            </AlertTitle>
-            <AlertDescription className="mt-1">
-              <p className="text-muted-foreground">
-                You're earning <span className="font-semibold text-primary">{getBonusText()} bonus</span> on all your rewards with your {tier === "pro" ? PREMIUM_TIERS.pro.name : PREMIUM_TIERS.basic.name} subscription!
-              </p>
-            </AlertDescription>
-          </Alert>
-        )}
+                <Button onClick={() => navigate("/dashboard/billing")} size="lg" className="gap-2 w-full sm:w-auto">
+                  Upgrade Now to Earn Rewards
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <>
+            {/* Premium subscriber banner */}
+            <Alert className="border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <AlertTitle className="text-lg font-semibold flex items-center gap-2">
+                Premium Member Benefits Active
+                <Crown className="h-4 w-4 text-primary" />
+              </AlertTitle>
+              <AlertDescription className="mt-1">
+                <p className="text-muted-foreground">
+                  You're earning <span className="font-semibold text-primary">{getBonusText()} bonus</span> on all your rewards with your {tier === "pro" ? PREMIUM_TIERS.pro.name : PREMIUM_TIERS.basic.name} subscription!
+                </p>
+              </AlertDescription>
+            </Alert>
 
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <Card className="w-full max-w-md text-center">
-            <CardContent className="pt-12 pb-12 space-y-4">
-              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Construction className="h-8 w-8 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold">In Progress</h2>
-              <p className="text-muted-foreground">
-                The Rewards feature is currently under development. Check back soon!
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+            {/* Rewards feature in progress for premium users */}
+            <div className="flex items-center justify-center min-h-[50vh]">
+              <Card className="w-full max-w-md text-center">
+                <CardContent className="pt-12 pb-12 space-y-4">
+                  <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Construction className="h-8 w-8 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-bold">Coming Soon</h2>
+                  <p className="text-muted-foreground">
+                    Your premium rewards dashboard is under development. Check back soon!
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

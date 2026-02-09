@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,8 @@ import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 
 const Settings = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const defaultTab = (location.state as any)?.tab === "subscription" ? "subscription" : "profile";
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -127,7 +129,7 @@ const Settings = () => {
   return (
     <DashboardLayout>
       <div className="container max-w-2xl mx-auto py-8 px-4 space-y-6">
-        <Tabs defaultValue="profile" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="subscription" className="gap-1.5">

@@ -136,6 +136,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         { icon: Package, label: "All Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Issues", path: "/dashboard/issues" },
         { icon: History, label: "Activity History", path: "/dashboard/activity" },
+        { icon: Sparkles, label: "Subscriptions", path: "/dashboard/subscriptions" },
         { icon: CreditCard, label: "Billing Activity", path: "/dashboard/billing" },
         { icon: BarChart3, label: "Analytics", path: "/dashboard/analytics" },
         { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },

@@ -45,6 +45,7 @@ import {
   Crown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import logo from "@/assets/cleango-logo.png";
 
 interface DashboardLayoutProps {
@@ -232,11 +233,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </Sidebar>
 
         <main className="flex-1 flex flex-col">
-          <header className="border-b border-border bg-card px-6 py-4 flex items-center">
-            <SidebarTrigger className="mr-4" />
-            <h1 className="text-xl font-semibold">
-              {userProfile.name ? `Welcome, ${userProfile.name}` : "Dashboard"}
-            </h1>
+          <header className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center">
+              <SidebarTrigger className="mr-4" />
+              <h1 className="text-xl font-semibold">
+                {userProfile.name ? `Welcome, ${userProfile.name}` : "Dashboard"}
+              </h1>
+            </div>
+            <ThemeToggle />
           </header>
           <div className="flex-1 p-6 bg-background overflow-auto">{children}</div>
         </main>

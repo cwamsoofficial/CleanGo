@@ -43,6 +43,7 @@ import {
   CreditCard,
   History,
   Crown,
+  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -109,6 +110,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         { icon: Package, label: "My Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Report Issue", path: "/dashboard/report-issue" },
         { icon: History, label: "Activity History", path: "/dashboard/activity" },
+        { icon: Sparkles, label: "Subscriptions", path: "/dashboard/subscriptions" },
         { icon: CreditCard, label: "Billing", path: "/dashboard/billing" },
         { icon: Gift, label: "Rewards", path: "/dashboard/rewards" },
         { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },
@@ -118,6 +120,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         { icon: Package, label: "Pickups", path: "/dashboard/pickups" },
         { icon: AlertCircle, label: "Report Issue", path: "/dashboard/report-issue" },
         { icon: History, label: "Activity History", path: "/dashboard/activity" },
+        { icon: Sparkles, label: "Subscriptions", path: "/dashboard/subscriptions" },
         { icon: CreditCard, label: "Billing", path: "/dashboard/billing" },
         { icon: Gift, label: "Rewards", path: "/dashboard/rewards" },
         { icon: Trophy, label: "Leaderboard", path: "/dashboard/leaderboard" },

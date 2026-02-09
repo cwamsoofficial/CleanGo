@@ -76,6 +76,33 @@ serve(async (req) => {
       logStep("No active subscription found");
     }
 
+    // Determine tier from price/product IDs
+    // These should match the PREMIUM_TIERS config in the frontend
+    let tier: string | null = null;
+    if (hasActiveSub && priceId) {
+      // Check price IDs first, then product IDs
+      if (priceId === "price_premium_basic_placeholder" || productId === "prod_premium_basic_placeholder") {
+        tier = "basic";
+      } else if (priceId === "price_premium_pro_placeholder" || productId === "prod_premium_pro_placeholder") {
+        tier = "pro";
+      } else {
+        // Default: if subscribed but tier unknown, treat as basic
+        tier = "basic";
+      }
+    }
+
+    // Sync subscription tier to profiles table
+    const { error: updateError } = await supabaseClient
+      .from("profiles")
+      .update({ subscription_tier: tier })
+      .eq("id", user.id);
+    
+    if (updateError) {
+      logStep("Warning: failed to sync subscription tier", { error: updateError.message });
+    } else {
+      logStep("Subscription tier synced to profile", { tier });
+    }
+
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       price_id: priceId,

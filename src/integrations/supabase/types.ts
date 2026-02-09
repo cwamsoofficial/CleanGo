@@ -170,6 +170,7 @@ export type Database = {
           name: string
           phone: string | null
           referral_code: string | null
+          subscription_tier: string | null
           updated_at: string
         }
         Insert: {
@@ -186,6 +187,7 @@ export type Database = {
           name: string
           phone?: string | null
           referral_code?: string | null
+          subscription_tier?: string | null
           updated_at?: string
         }
         Update: {
@@ -202,6 +204,7 @@ export type Database = {
           name?: string
           phone?: string | null
           referral_code?: string | null
+          subscription_tier?: string | null
           updated_at?: string
         }
         Relationships: []

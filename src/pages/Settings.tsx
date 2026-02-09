@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, User, Mail, Phone, MapPin, RotateCcw } from "lucide-react";
+import { Loader2, User, Mail, Phone, MapPin, RotateCcw, CreditCard } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { getUserRole } from "@/lib/supabase";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import AvatarUpload from "@/components/AvatarUpload";
+import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -125,150 +127,153 @@ const Settings = () => {
   return (
     <DashboardLayout>
       <div className="container max-w-2xl mx-auto py-8 px-4 space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
-            <CardDescription>
-              Update your profile information
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Avatar Upload Section */}
-            {userId && (
-              <div className="pb-4 border-b">
-                <AvatarUpload
-                  userId={userId}
-                  avatarUrl={profile.avatar_url}
-                  userName={profile.name}
-                  onAvatarChange={(url) => {
-                    setProfile({ ...profile, avatar_url: url });
-                    updateAvatar(url || null);
-                  }}
-                />
-              </div>
-            )}
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="subscription" className="gap-1.5">
+              <CreditCard className="h-3.5 w-3.5" />
+              Subscription
+            </TabsTrigger>
+          </TabsList>
 
-            {userRole === "admin" && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Username</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    type="text"
-                    value={profile.name}
-                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                    className="pl-10"
-                    placeholder="Enter your username"
-                    required
-                  />
-                </div>
-              </div>
-            )}
+          <TabsContent value="profile" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile Settings</CardTitle>
+                <CardDescription>Update your profile information</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {userId && (
+                    <div className="pb-4 border-b">
+                      <AvatarUpload
+                        userId={userId}
+                        avatarUrl={profile.avatar_url}
+                        userName={profile.name}
+                        onAvatarChange={(url) => {
+                          setProfile({ ...profile, avatar_url: url });
+                          updateAvatar(url || null);
+                        }}
+                      />
+                    </div>
+                  )}
 
-              {userRole !== "admin" && (
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      type="text"
-                      value={profile.name}
-                      onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                      className="pl-10"
-                      placeholder="Enter your name"
-                      required
-                    />
+                  {userRole === "admin" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Username</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="name"
+                          type="text"
+                          value={profile.name}
+                          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                          className="pl-10"
+                          placeholder="Enter your username"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {userRole !== "admin" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="name"
+                          type="text"
+                          value={profile.name}
+                          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                          className="pl-10"
+                          placeholder="Enter your name"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="current-email">Current Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="current-email"
+                        type="email"
+                        value={profile.email}
+                        className="pl-10 bg-muted"
+                        disabled
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Your current email address</p>
                   </div>
-                </div>
-              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="current-email">Current Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="current-email"
-                    type="email"
-                    value={profile.email}
-                    className="pl-10 bg-muted"
-                    disabled
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Your current email address
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={profile.phone}
+                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                        className="pl-10"
+                        placeholder="Enter your phone number"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Address</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="address"
+                        type="text"
+                        value={profile.address}
+                        onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+                        className="pl-10"
+                        placeholder="Enter your address"
+                      />
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={saving}>
+                    {saving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Help & Tour</CardTitle>
+                <CardDescription>Need a refresher on how to use CleanGo?</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button variant="outline" onClick={handleRestartTour} className="gap-2">
+                  <RotateCcw className="h-4 w-4" />
+                  Restart Onboarding Tour
+                </Button>
+                <p className="text-sm text-muted-foreground mt-2">
+                  This will replay the interactive tour to help you navigate the platform.
                 </p>
-              </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={profile.phone}
-                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                    className="pl-10"
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="address"
-                    type="text"
-                    value={profile.address}
-                    onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                    className="pl-10"
-                    placeholder="Enter your address"
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full" disabled={saving}>
-                {saving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Help & Tour Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Help & Tour</CardTitle>
-            <CardDescription>
-              Need a refresher on how to use CleanGo?
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              variant="outline" 
-              onClick={handleRestartTour}
-              className="gap-2"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Restart Onboarding Tour
-            </Button>
-            <p className="text-sm text-muted-foreground mt-2">
-              This will replay the interactive tour to help you navigate the platform.
-            </p>
-          </CardContent>
-        </Card>
-
+          <TabsContent value="subscription" className="mt-6">
+            <SubscriptionTab />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

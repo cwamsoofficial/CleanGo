@@ -178,9 +178,26 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isSubscribed) fetchLeaderboard();
-    else setLoading(false);
+    checkAccessAndFetch();
   }, [isSubscribed]);
+
+  const checkAccessAndFetch = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: role } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const admin = role?.role === "admin";
+      setIsAdmin(admin);
+      if (isSubscribed || admin) {
+        fetchLeaderboard();
+        return;
+      }
+    }
+    setLoading(false);
+  };
 
   const fetchLeaderboard = async () => {
     try {
@@ -217,7 +234,7 @@ export default function Leaderboard() {
     }
   };
 
-  if (!isSubscribed) {
+  if (!isSubscribed && !isAdmin) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">

@@ -33,10 +33,24 @@ export default function Achievements() {
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    fetchUserStats();
+    checkAccess();
   }, []);
+
+  const checkAccess = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: role } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setIsAdmin(role?.role === "admin");
+    }
+    fetchUserStats();
+  };
 
   const fetchUserStats = async () => {
     try {
@@ -196,7 +210,7 @@ export default function Achievements() {
     }
   };
 
-  if (!isSubscribed) {
+  if (!isSubscribed && !isAdmin) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">

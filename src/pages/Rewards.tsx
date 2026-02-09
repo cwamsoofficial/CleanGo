@@ -29,11 +29,11 @@ const Rewards = () => {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
-                    Boost Your Rewards with Premium
+                    Earn Rewards with Premium
                     <Sparkles className="h-5 w-5 text-primary" />
                   </h2>
                   <p className="text-muted-foreground">
-                    Upgrade to Premium and earn <span className="font-semibold text-primary">up to 25% bonus</span> on all your pickups and activities!
+                    Upgrade to Premium and earn <span className="font-semibold text-primary">up to 10% bonus</span> on all your pickups and activities!
                   </p>
                 </div>
                 
@@ -41,13 +41,13 @@ const Rewards = () => {
                   <div className="flex items-center gap-3">
                     <div className="h-3 w-3 rounded-full bg-primary" />
                     <span className="text-sm">
-                      <span className="font-semibold">Premium Basic:</span> +10% bonus rewards
+                      <span className="font-semibold">Premium Basic:</span> earn rewards
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="h-3 w-3 rounded-full bg-primary" />
                     <span className="text-sm">
-                      <span className="font-semibold">Premium Pro:</span> +25% bonus rewards
+                      <span className="font-semibold">Premium Pro:</span> +10% bonus rewards
                     </span>
                   </div>
                 </div>

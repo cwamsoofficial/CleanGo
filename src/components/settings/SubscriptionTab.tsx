@@ -1,17 +1,32 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, Sparkles, Loader2, Settings, ArrowRight } from "lucide-react";
+import { Check, Crown, Sparkles, Loader2, Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription, PREMIUM_TIERS } from "@/contexts/SubscriptionContext";
-import { useState } from "react";
 
 export const SubscriptionTab = () => {
-  const navigate = useNavigate();
   const { isSubscribed, tier, subscriptionEnd, isLoading } = useSubscription();
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState<string | null>(null);
   const [isPortalLoading, setIsPortalLoading] = useState(false);
+
+  const handleSubscribe = async (tierKey: "basic" | "pro") => {
+    setIsCheckoutLoading(tierKey);
+    try {
+      const priceId = PREMIUM_TIERS[tierKey].priceId;
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch {
+      toast.error("Failed to start checkout. Please try again.");
+    } finally {
+      setIsCheckoutLoading(null);
+    }
+  };
 
   const handleManageSubscription = async () => {
     setIsPortalLoading(true);
@@ -33,6 +48,13 @@ export const SubscriptionTab = () => {
       day: "numeric",
     });
 
+  const formatPrice = (amount: number) =>
+    new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+    }).format(amount);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -41,9 +63,10 @@ export const SubscriptionTab = () => {
     );
   }
 
-  if (isSubscribed) {
-    return (
-      <div className="space-y-6">
+  return (
+    <div className="space-y-6">
+      {/* Current subscription status for premium users */}
+      {isSubscribed && (
         <Card className="border-primary bg-primary/5">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -56,26 +79,13 @@ export const SubscriptionTab = () => {
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Your subscription renews on{" "}
-                <span className="font-medium text-foreground">
-                  {subscriptionEnd ? formatDate(subscriptionEnd) : "N/A"}
-                </span>
-              </p>
-            </div>
-            <div className="border-t pt-4">
-              <p className="text-sm font-medium mb-2">Your plan includes:</p>
-              <ul className="space-y-2 text-sm">
-                {PREMIUM_TIERS[tier === "pro" ? "pro" : "basic"].features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Your subscription renews on{" "}
+              <span className="font-medium text-foreground">
+                {subscriptionEnd ? formatDate(subscriptionEnd) : "N/A"}
+              </span>
+            </p>
           </CardContent>
           <CardFooter>
             <Button
@@ -87,81 +97,163 @@ export const SubscriptionTab = () => {
               {isPortalLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
-                <Settings className="h-4 w-4 mr-2" />
+                <SettingsIcon className="h-4 w-4 mr-2" />
               )}
               Manage Subscription
             </Button>
           </CardFooter>
         </Card>
+      )}
+
+      {/* Normal plan info for non-subscribers */}
+      {!isSubscribed && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Normal Plan</CardTitle>
+            <CardDescription>You're currently on the Normal Plan</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4" />
+                Basic pickup scheduling
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4" />
+                Monthly pickup only
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4" />
+                Standard rewards on pickups
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4" />
+                Community support
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pricing Cards */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Basic Tier */}
+        <Card className={`relative ${tier === "basic" ? "border-primary ring-2 ring-primary" : ""}`}>
+          {tier === "basic" && (
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <Badge className="bg-primary">Your Plan</Badge>
+            </div>
+          )}
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <CardTitle>{PREMIUM_TIERS.basic.name}</CardTitle>
+            </div>
+            <CardDescription>Perfect for regular users</CardDescription>
+            <div className="mt-4">
+              <span className="text-4xl font-bold">{formatPrice(PREMIUM_TIERS.basic.price)}</span>
+              <span className="text-muted-foreground">/month</span>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3">
+              {PREMIUM_TIERS.basic.features.map((feature, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+          <CardFooter>
+            {tier === "basic" ? (
+              <Button className="w-full" variant="outline" disabled>
+                Current Plan
+              </Button>
+            ) : tier === "pro" ? (
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={handleManageSubscription}
+                disabled={isPortalLoading}
+              >
+                Downgrade
+              </Button>
+            ) : (
+              <Button
+                className="w-full"
+                onClick={() => handleSubscribe("basic")}
+                disabled={isCheckoutLoading !== null || isLoading}
+              >
+                {isCheckoutLoading === "basic" ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Subscribe
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
+
+        {/* Pro Tier */}
+        <Card className={`relative ${tier === "pro" ? "border-primary ring-2 ring-primary" : "border-primary/50"}`}>
+          {tier === "pro" ? (
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <Badge className="bg-primary">Your Plan</Badge>
+            </div>
+          ) : (
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <Badge variant="secondary">Most Popular</Badge>
+            </div>
+          )}
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-primary" />
+              <CardTitle>{PREMIUM_TIERS.pro.name}</CardTitle>
+            </div>
+            <CardDescription>For power users who want it all</CardDescription>
+            <div className="mt-4">
+              <span className="text-4xl font-bold">{formatPrice(PREMIUM_TIERS.pro.price)}</span>
+              <span className="text-muted-foreground">/month</span>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3">
+              {PREMIUM_TIERS.pro.features.map((feature, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+          <CardFooter>
+            {tier === "pro" ? (
+              <Button className="w-full" variant="outline" disabled>
+                Current Plan
+              </Button>
+            ) : tier === "basic" ? (
+              <Button
+                className="w-full"
+                onClick={handleManageSubscription}
+                disabled={isPortalLoading}
+              >
+                Upgrade
+              </Button>
+            ) : (
+              <Button
+                className="w-full"
+                onClick={() => handleSubscribe("pro")}
+                disabled={isCheckoutLoading !== null || isLoading}
+              >
+                {isCheckoutLoading === "pro" ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Subscribe
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
       </div>
-    );
-  }
-
-  // Free user view
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Normal Plan</CardTitle>
-          <CardDescription>You're currently on the Normal Plan</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2">
-              <Check className="h-4 w-4" />
-              Basic pickup scheduling
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="h-4 w-4" />
-              Monthly pickup only
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="h-4 w-4" />
-              Standard rewards on pickups
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="h-4 w-4" />
-              Community support
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
-
-      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Upgrade to Premium</CardTitle>
-          </div>
-          <CardDescription>Unlock priority pickups, bonus rewards, and more</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-primary" />
-              Bi-weekly or Monthly pickup options
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-primary" />
-              Priority pickup scheduling
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-primary" />
-              Bonus rewards on every pickup
-            </li>
-            <li className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-primary" />
-              Priority support
-            </li>
-          </ul>
-        </CardContent>
-        <CardFooter>
-          <Button className="w-full gap-2" onClick={() => navigate("/dashboard/billing")}>
-            View Plans & Upgrade
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </CardFooter>
-      </Card>
     </div>
   );
 };

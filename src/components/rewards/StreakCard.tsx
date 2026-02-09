@@ -48,8 +48,8 @@ export const StreakCard = ({ streak }: StreakCardProps) => (
                 : "border-border"
             }`}
           >
-             <div className="font-medium">14 days</div>
-            <div className="text-muted-foreground">100 pts bonus</div>
+            <div className="font-medium">14 days</div>
+            <div className="text-muted-foreground">100 pts (₦1,500)</div>
           </div>
           <div
             className={`p-2 rounded border ${
@@ -59,7 +59,7 @@ export const StreakCard = ({ streak }: StreakCardProps) => (
             }`}
           >
             <div className="font-medium">30 days</div>
-            <div className="text-muted-foreground">200 pts bonus</div>
+            <div className="text-muted-foreground">200 pts (₦3,000)</div>
           </div>
         </div>
         <p className="text-xs text-muted-foreground mt-2">

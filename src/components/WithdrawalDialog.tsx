@@ -34,7 +34,7 @@ export const WithdrawalDialog = ({
       return;
     }
 
-    const points = Math.floor(nairaAmount / 10);
+    const points = Math.floor(nairaAmount / 15);
     
     setLoading(true);
     try {

@@ -76,6 +76,7 @@ export const SubscriptionTab = () => {
               </div>
               <Badge variant="default" className="bg-primary flex items-center gap-1">
                 {tier === "basic" && <Sparkles className="h-3 w-3 text-emerald-300" />}
+                {tier === "pro" && <Crown className="h-3 w-3 text-emerald-300" />}
                 {tier === "pro" ? PREMIUM_TIERS.pro.name : PREMIUM_TIERS.basic.name}
               </Badge>
             </div>
@@ -202,7 +203,10 @@ export const SubscriptionTab = () => {
         <Card className={`relative ${tier === "pro" ? "border-primary ring-2 ring-primary" : "border-primary/50"}`}>
           {tier === "pro" ? (
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-primary">Your Plan</Badge>
+              <Badge className="bg-primary flex items-center gap-1">
+                <Crown className="h-3 w-3 text-emerald-300" />
+                Your Plan
+              </Badge>
             </div>
           ) : (
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -211,7 +215,7 @@ export const SubscriptionTab = () => {
           )}
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Crown className="h-5 w-5 text-primary" />
+              <Crown className="h-5 w-5 text-emerald-500" />
               <CardTitle>{PREMIUM_TIERS.pro.name}</CardTitle>
             </div>
             <CardDescription>For power users who want it all</CardDescription>

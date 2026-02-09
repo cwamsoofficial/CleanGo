@@ -48,8 +48,8 @@ export const StreakCard = ({ streak }: StreakCardProps) => (
                 : "border-border"
             }`}
           >
-            <div className="font-medium">14 days</div>
-            <div className="text-muted-foreground">₦3,000 bonus</div>
+             <div className="font-medium">14 days</div>
+            <div className="text-muted-foreground">100 pts bonus</div>
           </div>
           <div
             className={`p-2 rounded border ${
@@ -59,11 +59,11 @@ export const StreakCard = ({ streak }: StreakCardProps) => (
             }`}
           >
             <div className="font-medium">30 days</div>
-            <div className="text-muted-foreground">₦10,000 bonus</div>
+            <div className="text-muted-foreground">200 pts bonus</div>
           </div>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          💰 Earn ₦100 for each pickup + milestone bonuses!
+          💰 Basic: 1 pt/pickup · Pro: 3 pts/pickup + milestone bonuses!
         </p>
       </div>
     </CardContent>

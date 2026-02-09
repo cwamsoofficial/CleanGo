@@ -9,8 +9,15 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { UserX, UserCheck, Trash2, Search, Shield, Ban } from "lucide-react";
+import { UserX, UserCheck, Trash2, Search, Shield, Ban, Crown } from "lucide-react";
 import { toast } from "sonner";
+import { PREMIUM_TIERS, type PremiumTier } from "@/contexts/SubscriptionContext";
+
+interface UserSubscription {
+  subscribed: boolean;
+  tier: string | null;
+  end: string | null;
+}
 
 interface UserData {
   id: string;
@@ -21,6 +28,7 @@ interface UserData {
   banned_at: string | null;
   banned_reason: string | null;
   created_at: string;
+  subscription?: UserSubscription;
 }
 
 const UserManagement = () => {
@@ -39,35 +47,31 @@ const UserManagement = () => {
     try {
       setLoading(true);
 
-      // Fetch profiles with user roles
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // Fetch profiles, roles, and subscription status in parallel
+      const [profilesResult, rolesResult, subsResult] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+        supabase.from("user_roles").select("*"),
+        supabase.functions.invoke("admin-check-subscriptions"),
+      ]);
 
-      if (profilesError) throw profilesError;
+      if (profilesResult.error) throw profilesResult.error;
+      if (rolesResult.error) throw rolesResult.error;
 
-      // Fetch user roles
-      const { data: roles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("*");
+      const subscriptions: Record<string, UserSubscription> = subsResult.data || {};
 
-      if (rolesError) throw rolesError;
-
-      // Combine data - Note: emails are not directly accessible from client
-      // You would need to store emails in profiles table or use an edge function
-      const usersData = profiles?.map((profile) => {
-        const role = roles?.find((r) => r.user_id === profile.id);
+      const usersData = profilesResult.data?.map((profile) => {
+        const role = rolesResult.data?.find((r) => r.user_id === profile.id);
 
         return {
           id: profile.id,
-          email: profile.id.slice(0, 8), // User ID prefix - emails are not accessible via public schema
+          email: profile.id.slice(0, 8),
           name: profile.name,
           role: role?.role || "citizen",
           banned: profile.banned || false,
           banned_at: profile.banned_at,
           banned_reason: profile.banned_reason,
           created_at: profile.created_at,
+          subscription: subscriptions[profile.id] || { subscribed: false, tier: null, end: null },
         };
       }) || [];
 
@@ -152,6 +156,18 @@ const UserManagement = () => {
     }
   };
 
+  const getPlanLabel = (user: UserData): { label: string; isPremium: boolean } => {
+    if (!user.subscription?.subscribed) return { label: "Free", isPremium: false };
+    const tier = user.subscription.tier;
+    if (tier === PREMIUM_TIERS.basic.priceId || tier === PREMIUM_TIERS.basic.productId) {
+      return { label: "Premium Basic", isPremium: true };
+    }
+    if (tier === PREMIUM_TIERS.pro.priceId || tier === PREMIUM_TIERS.pro.productId) {
+      return { label: "Premium Pro", isPremium: true };
+    }
+    return { label: "Premium", isPremium: true };
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -187,13 +203,16 @@ const UserManagement = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Plan</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
+                {filteredUsers.map((user) => {
+                  const plan = getPlanLabel(user);
+                  return (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
@@ -202,6 +221,18 @@ const UserManagement = () => {
                         {user.role === "admin" && <Shield className="w-3 h-3 mr-1" />}
                         {user.role}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {plan.isPremium ? (
+                        <Badge className="gap-1 bg-amber-500 hover:bg-amber-600 text-white border-amber-500">
+                          <Crown className="w-3 h-3" />
+                          {plan.label}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="gap-1 text-muted-foreground">
+                          {plan.label}
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       {user.banned ? (
@@ -380,7 +411,8 @@ const UserManagement = () => {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

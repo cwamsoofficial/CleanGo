@@ -5,20 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, User, Mail, Phone, MapPin, RotateCcw, CreditCard } from "lucide-react";
+import { Loader2, User, Mail, Phone, MapPin, RotateCcw } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { getUserRole } from "@/lib/supabase";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import AvatarUpload from "@/components/AvatarUpload";
-import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
-
 const Settings = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const defaultTab = (location.state as any)?.tab === "subscription" ? "subscription" : "profile";
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -129,16 +125,6 @@ const Settings = () => {
   return (
     <DashboardLayout>
       <div className="container max-w-2xl mx-auto py-8 px-4 space-y-6">
-        <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="subscription" className="gap-1.5">
-              <CreditCard className="h-3.5 w-3.5" />
-              Subscription
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="profile" className="space-y-6 mt-6">
             <Card>
               <CardHeader>
                 <CardTitle>Profile Settings</CardTitle>
@@ -270,12 +256,6 @@ const Settings = () => {
                 </p>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="subscription" className="mt-6">
-            <SubscriptionTab />
-          </TabsContent>
-        </Tabs>
       </div>
     </DashboardLayout>
   );

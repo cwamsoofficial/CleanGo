@@ -26,6 +26,7 @@ import Achievements from "./pages/Achievements";
 import Settings from "./pages/Settings";
 import Billing from "./pages/Billing";
 import ActivityHistory from "./pages/ActivityHistory";
+import Subscriptions from "./pages/Subscriptions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/dashboard/leaderboard" element={<Leaderboard />} />
               <Route path="/dashboard/achievements" element={<Achievements />} />
               <Route path="/dashboard/settings" element={<Settings />} />
+              <Route path="/dashboard/subscriptions" element={<Subscriptions />} />
               <Route path="/dashboard/billing" element={<Billing />} />
               <Route path="/dashboard/activity" element={<ActivityHistory />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

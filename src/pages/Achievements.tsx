@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Star, Flame, Crown, Zap, Award, Sparkles, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Trophy, Star, Flame, Crown, Zap, Award, Sparkles, Lock, ArrowRight } from "lucide-react";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 
 interface UserStats {
   rank: number;
@@ -25,6 +28,8 @@ interface Achievement {
 }
 
 export default function Achievements() {
+  const navigate = useNavigate();
+  const { isSubscribed } = useSubscription();
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -190,6 +195,51 @@ export default function Achievements() {
         return '';
     }
   };
+
+  if (!isSubscribed) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-lg text-center border-primary/20">
+            <CardContent className="pt-12 pb-12 space-y-6">
+              <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <Trophy className="h-10 w-10 text-primary" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
+                  Unlock Achievements
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </h2>
+                <p className="text-muted-foreground">
+                  Upgrade to Premium to track your progress and unlock exclusive badges!
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 text-left bg-muted/50 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-3 w-3 rounded-full bg-primary" />
+                  <span className="text-sm">
+                    <span className="font-semibold">Premium Basic:</span> Track achievements & progress
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-3 w-3 rounded-full bg-primary" />
+                  <span className="text-sm">
+                    <span className="font-semibold">Premium Pro:</span> Exclusive badges + bonus rewards
+                  </span>
+                </div>
+              </div>
+
+              <Button onClick={() => navigate("/dashboard/billing")} size="lg" className="gap-2 w-full sm:w-auto">
+                Upgrade Now to Unlock Achievements
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (loading) {
     return (

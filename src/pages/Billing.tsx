@@ -200,7 +200,7 @@ const Billing = () => {
         )}
 
         {/* Pricing Cards */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div data-pricing className="grid gap-6 md:grid-cols-2">
           {/* Basic Tier */}
           <Card className={`relative ${tier === "basic" ? "border-primary ring-2 ring-primary" : ""}`}>
             {tier === "basic" && (
@@ -319,30 +319,78 @@ const Billing = () => {
           </Card>
         </div>
 
-        {/* Free Tier Info */}
+        {/* Free Plan + Upgrade cards for non-subscribers */}
         {!isSubscribed && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Free Plan</CardTitle>
-              <CardDescription>You're currently on the free plan</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4" />
-                  Basic pickup scheduling
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4" />
-                  Standard rewards on pickups
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4" />
-                  Community support
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Free Plan</CardTitle>
+                <CardDescription>You're currently on the Free Plan</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4" />
+                    Basic pickup scheduling
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4" />
+                    Monthly pickup only
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4" />
+                    Standard rewards on pickups
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4" />
+                    Community support
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">Upgrade Plan (Paid)</CardTitle>
+                </div>
+                <CardDescription>Choose a pickup schedule that works for you</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    Bi-weekly or Monthly pickup options
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    Priority pickup scheduling
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    Bonus rewards on every pickup
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    Priority support
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    const pricingSection = document.querySelector('[data-pricing]');
+                    pricingSection?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Upgrade &amp; Choose Plan
+                </Button>
+              </CardFooter>
+            </Card>
+          </>
         )}
       </div>
     </DashboardLayout>

@@ -126,7 +126,7 @@ export const SubscriptionTab = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4" />
-                Standard rewards on pickups
+                No reward points on pickups
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4" />

@@ -324,8 +324,8 @@ const Billing = () => {
           <>
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Free Plan</CardTitle>
-                <CardDescription>You're currently on the Free Plan</CardDescription>
+                <CardTitle className="text-lg">Normal Plan</CardTitle>
+                <CardDescription>You're currently on the Normal Plan</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm text-muted-foreground">

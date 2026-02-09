@@ -10,7 +10,7 @@ export const PREMIUM_TIERS = {
     price: 1999, // ₦1,999/month
     features: [
       "Priority pickup scheduling",
-      "10% bonus rewards on all pickups",
+      "Earn rewards on all pickups",
       "Email support",
       "Monthly activity reports",
     ],
@@ -22,7 +22,7 @@ export const PREMIUM_TIERS = {
     price: 4999, // ₦4,999/month
     features: [
       "All Basic features",
-      "25% bonus rewards on all pickups",
+      "10% bonus rewards on all pickups",
       "Priority customer support",
       "Weekly activity reports",
       "Exclusive member rewards",

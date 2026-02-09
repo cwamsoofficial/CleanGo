@@ -33,10 +33,10 @@ interface AvailableRewardsProps {
 }
 
 const REWARDS = [
-  { title: "₦1,000 Airtime Credit", description: "Mobile airtime top-up", cost: 100 },
-  { title: "₦2,000 Airtime Credit", description: "Mobile airtime top-up", cost: 200 },
-  { title: "₦5,000 Airtime Credit", description: "Mobile airtime top-up", cost: 500 },
-  { title: "Community Hero Badge", description: "Special recognition in the community", cost: 1000 },
+  { title: "₦1,000 Airtime Credit", description: "Mobile airtime top-up", cost: 67 },
+  { title: "₦2,000 Airtime Credit", description: "Mobile airtime top-up", cost: 134 },
+  { title: "₦5,000 Airtime Credit", description: "Mobile airtime top-up", cost: 334 },
+  { title: "Community Hero Badge", description: "Special recognition in the community", cost: 500 },
 ];
 
 export const AvailableRewards = ({ userPoints, pointsToNaira, onRedeem }: AvailableRewardsProps) => (

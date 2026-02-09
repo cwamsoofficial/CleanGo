@@ -22,8 +22,8 @@ interface StreakData {
   last_activity_date: string | null;
 }
 
-// 1 point = ₦10
-const pointsToNaira = (points: number) => points * 10;
+// 1 point = ₦15
+const pointsToNaira = (points: number) => points * 15;
 
 export const useRewardsData = () => {
   const [rewards, setRewards] = useState<RewardData | null>(null);

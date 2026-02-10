@@ -15,9 +15,9 @@ export const SubscriptionTab = () => {
   const handleSubscribe = async (tierKey: "basic" | "pro") => {
     setIsCheckoutLoading(tierKey);
     try {
-      const priceId = PREMIUM_TIERS[tierKey].priceId;
+      const { planCode, amountKobo } = PREMIUM_TIERS[tierKey];
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
+        body: { planCode, amount: amountKobo },
       });
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
@@ -33,7 +33,11 @@ export const SubscriptionTab = () => {
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
       if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      } else {
+        toast.info("Subscription management is not available right now. Please contact support.");
+      }
     } catch {
       toast.error("Failed to open subscription management.");
     } finally {

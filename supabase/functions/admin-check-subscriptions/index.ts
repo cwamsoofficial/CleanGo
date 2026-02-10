@@ -1,10 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+const PLAN_TIER_MAP: Record<string, string> = {
+  "PLN_premium_basic_placeholder": "basic",
+  "PLN_premium_pro_placeholder": "pro",
 };
 
 serve(async (req) => {
@@ -19,8 +23,8 @@ serve(async (req) => {
   );
 
   try {
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+    const paystackKey = Deno.env.get("PAYSTACK_SECRET_KEY");
+    if (!paystackKey) throw new Error("PAYSTACK_SECRET_KEY is not set");
 
     // Verify caller is admin
     const authHeader = req.headers.get("Authorization");
@@ -40,40 +44,41 @@ serve(async (req) => {
       throw new Error("Admin access required");
     }
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-
-    // Get all active subscriptions from Stripe
-    const subscriptions: Record<string, { tier: string; end: string }> = {};
+    // Fetch all active subscriptions from Paystack
+    const subscriptionsByEmail: Record<string, { tier: string; end: string }> = {};
+    let page = 1;
     let hasMore = true;
-    let startingAfter: string | undefined;
 
     while (hasMore) {
-      const params: Stripe.SubscriptionListParams = { status: "active", limit: 100, expand: ["data.customer"] };
-      if (startingAfter) params.starting_after = startingAfter;
+      const res = await fetch(
+        `https://api.paystack.co/subscription?perPage=100&page=${page}&status=active`,
+        { headers: { Authorization: `Bearer ${paystackKey}` } }
+      );
+      const data = await res.json();
 
-      const subs = await stripe.subscriptions.list(params);
+      if (!data.status || !data.data?.length) {
+        hasMore = false;
+        break;
+      }
 
-      for (const sub of subs.data) {
-        const customer = sub.customer as Stripe.Customer;
-        if (!customer.email) continue;
+      for (const sub of data.data) {
+        const email = sub.customer?.email?.toLowerCase();
+        if (!email) continue;
 
-        const priceId = sub.items.data[0]?.price.id;
-        const productId = sub.items.data[0]?.price.product as string;
-        const end = new Date(sub.current_period_end * 1000).toISOString();
+        const planCode = sub.plan?.plan_code || "";
+        const tier = PLAN_TIER_MAP[planCode] || "basic";
 
-        subscriptions[customer.email.toLowerCase()] = {
-          tier: priceId || productId || "premium",
-          end,
+        subscriptionsByEmail[email] = {
+          tier,
+          end: sub.next_payment_date || "",
         };
       }
 
-      hasMore = subs.has_more;
-      if (subs.data.length > 0) {
-        startingAfter = subs.data[subs.data.length - 1].id;
-      }
+      hasMore = data.data.length === 100;
+      page++;
     }
 
-    // Get all user emails from auth (admin has service role access)
+    // Get all user emails from auth
     const { data: authUsers } = await supabaseClient.auth.admin.listUsers({ perPage: 1000 });
 
     // Map user IDs to subscription status
@@ -81,11 +86,11 @@ serve(async (req) => {
 
     for (const user of authUsers?.users || []) {
       const email = user.email?.toLowerCase();
-      if (email && subscriptions[email]) {
+      if (email && subscriptionsByEmail[email]) {
         userSubscriptions[user.id] = {
           subscribed: true,
-          tier: subscriptions[email].tier,
-          end: subscriptions[email].end,
+          tier: subscriptionsByEmail[email].tier,
+          end: subscriptionsByEmail[email].end,
         };
       } else {
         userSubscriptions[user.id] = { subscribed: false, tier: null, end: null };

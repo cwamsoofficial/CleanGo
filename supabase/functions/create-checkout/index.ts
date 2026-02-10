@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
@@ -25,53 +24,61 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
+    const paystackKey = Deno.env.get("PAYSTACK_SECRET_KEY");
+    if (!paystackKey) throw new Error("PAYSTACK_SECRET_KEY is not set");
+    logStep("Paystack key verified");
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
-    
+
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId } = await req.json();
-    if (!priceId) throw new Error("Price ID is required");
-    logStep("Price ID received", { priceId });
-
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    
-    // Check if customer exists
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Existing customer found", { customerId });
-    }
+    const { planCode, amount } = await req.json();
+    if (!planCode && !amount) throw new Error("Plan code or amount is required");
+    logStep("Request received", { planCode, amount });
 
     const origin = req.headers.get("origin") || "https://cwamso.lovable.app";
-    
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      customer_email: customerId ? undefined : user.email,
-      client_reference_id: user.id,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
-      success_url: `${origin}/dashboard/billing?success=true`,
-      cancel_url: `${origin}/dashboard/billing?canceled=true`,
+
+    // Build Paystack transaction initialization payload
+    const payload: Record<string, unknown> = {
+      email: user.email,
+      callback_url: `${origin}/dashboard/billing?success=true`,
+      metadata: {
+        user_id: user.id,
+        cancel_action: `${origin}/dashboard/billing?canceled=true`,
+      },
+    };
+
+    // If a plan code is provided, initialize as a subscription
+    if (planCode) {
+      payload.plan = planCode;
+      payload.amount = amount; // Paystack requires amount even with plan
+    } else {
+      payload.amount = amount;
+      payload.currency = "NGN";
+    }
+
+    const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${paystackKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
     });
 
-    logStep("Checkout session created", { sessionId: session.id });
+    const paystackData = await paystackRes.json();
+    logStep("Paystack response", { status: paystackData.status, message: paystackData.message });
 
-    return new Response(JSON.stringify({ url: session.url }), {
+    if (!paystackData.status) {
+      throw new Error(paystackData.message || "Failed to initialize Paystack transaction");
+    }
+
+    return new Response(JSON.stringify({ url: paystackData.data.authorization_url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

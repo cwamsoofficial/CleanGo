@@ -156,7 +156,7 @@ const Billing = () => {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Crown className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">Upgrade Plan (Paid)</CardTitle>
+                  <CardTitle className="text-lg">Upgrade Plan</CardTitle>
                 </div>
                 <CardDescription>Choose a pickup schedule that works for you</CardDescription>
               </CardHeader>

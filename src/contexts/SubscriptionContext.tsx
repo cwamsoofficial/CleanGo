@@ -1,13 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Premium tier configuration - UPDATE THESE WITH REAL STRIPE PRICE/PRODUCT IDs
+// Premium tier configuration - UPDATE THESE WITH REAL PAYSTACK PLAN CODES
 export const PREMIUM_TIERS = {
   basic: {
     name: "Premium Basic",
-    priceId: "price_premium_basic_placeholder", // Replace with real Stripe price ID
-    productId: "prod_premium_basic_placeholder", // Replace with real Stripe product ID
+    planCode: "PLN_premium_basic_placeholder", // Replace with real Paystack plan code
     price: 1999, // ₦1,999/month
+    amountKobo: 199900, // Amount in kobo for Paystack
     features: [
       "Priority pickup scheduling",
       "Earn 1 point per completed pickup (₦15 value)",
@@ -17,9 +17,9 @@ export const PREMIUM_TIERS = {
   },
   pro: {
     name: "Premium Pro",
-    priceId: "price_premium_pro_placeholder", // Replace with real Stripe price ID
-    productId: "prod_premium_pro_placeholder", // Replace with real Stripe product ID
+    planCode: "PLN_premium_pro_placeholder", // Replace with real Paystack plan code
     price: 4999, // ₦4,999/month
+    amountKobo: 499900, // Amount in kobo for Paystack
     features: [
       "All Basic features",
       "Earn 3 points per pickup (₦20 value each)",
@@ -37,14 +37,13 @@ interface SubscriptionState {
   isLoading: boolean;
   isSubscribed: boolean;
   tier: PremiumTier;
-  priceId: string | null;
-  productId: string | null;
+  planCode: string | null;
   subscriptionEnd: string | null;
 }
 
 interface SubscriptionContextType extends SubscriptionState {
   checkSubscription: () => Promise<void>;
-  getTierFromPriceId: (priceId: string) => PremiumTier;
+  getTierFromPlanCode: (planCode: string) => PremiumTier;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
@@ -54,17 +53,13 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
     isLoading: true,
     isSubscribed: false,
     tier: null,
-    priceId: null,
-    productId: null,
+    planCode: null,
     subscriptionEnd: null,
   });
 
-  const getTierFromPriceId = useCallback((priceId: string): PremiumTier => {
-    if (priceId === PREMIUM_TIERS.basic.priceId) return "basic";
-    if (priceId === PREMIUM_TIERS.pro.priceId) return "pro";
-    // Also check product IDs
-    if (priceId === PREMIUM_TIERS.basic.productId) return "basic";
-    if (priceId === PREMIUM_TIERS.pro.productId) return "pro";
+  const getTierFromPlanCode = useCallback((planCode: string): PremiumTier => {
+    if (planCode === PREMIUM_TIERS.basic.planCode) return "basic";
+    if (planCode === PREMIUM_TIERS.pro.planCode) return "pro";
     return null;
   }, []);
 
@@ -76,8 +71,7 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
           isLoading: false,
           isSubscribed: false,
           tier: null,
-          priceId: null,
-          productId: null,
+          planCode: null,
           subscriptionEnd: null,
         });
         return;
@@ -91,22 +85,20 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      const tier = data.price_id ? getTierFromPriceId(data.price_id) : 
-                   data.product_id ? getTierFromPriceId(data.product_id) : null;
+      const tier = data.plan_code ? getTierFromPlanCode(data.plan_code) : null;
 
       setState({
         isLoading: false,
         isSubscribed: data.subscribed || false,
         tier,
-        priceId: data.price_id || null,
-        productId: data.product_id || null,
+        planCode: data.plan_code || null,
         subscriptionEnd: data.subscription_end || null,
       });
     } catch (error) {
       console.error("Error checking subscription:", error);
       setState(prev => ({ ...prev, isLoading: false }));
     }
-  }, [getTierFromPriceId]);
+  }, [getTierFromPlanCode]);
 
   useEffect(() => {
     checkSubscription();
@@ -126,7 +118,7 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
   }, [checkSubscription]);
 
   return (
-    <SubscriptionContext.Provider value={{ ...state, checkSubscription, getTierFromPriceId }}>
+    <SubscriptionContext.Provider value={{ ...state, checkSubscription, getTierFromPlanCode }}>
       {children}
     </SubscriptionContext.Provider>
   );

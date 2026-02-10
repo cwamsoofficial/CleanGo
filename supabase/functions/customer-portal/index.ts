@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
@@ -20,9 +19,9 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
+    const paystackKey = Deno.env.get("PAYSTACK_SECRET_KEY");
+    if (!paystackKey) throw new Error("PAYSTACK_SECRET_KEY is not set");
+    logStep("Paystack key verified");
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -41,22 +40,44 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    if (customers.data.length === 0) {
-      throw new Error("No Stripe customer found for this user");
+    // Get the subscription code and token for this user
+    const subsRes = await fetch(
+      `https://api.paystack.co/subscription?customer=${encodeURIComponent(user.email)}`,
+      {
+        headers: { Authorization: `Bearer ${paystackKey}` },
+      }
+    );
+    const subsData = await subsRes.json();
+
+    if (!subsData.status || !subsData.data?.length) {
+      throw new Error("No active subscription found for this user");
     }
-    const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
 
-    const origin = req.headers.get("origin") || "https://cwamso.lovable.app";
-    const portalSession = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: `${origin}/dashboard/billing`,
+    const activeSub = subsData.data.find(
+      (sub: any) => sub.status === "active" || sub.status === "non-renewing"
+    );
+
+    if (!activeSub) {
+      throw new Error("No active subscription found for this user");
+    }
+
+    // Generate a manage subscription link using Paystack's subscription endpoint
+    const manageLink = activeSub.email_token
+      ? `https://paystack.com/manage/subscriptions?email_token=${activeSub.email_token}`
+      : null;
+
+    // If no manage link available, provide subscription details for the frontend to handle
+    logStep("Subscription found", {
+      subscriptionCode: activeSub.subscription_code,
+      status: activeSub.status,
     });
-    logStep("Customer portal session created", { sessionId: portalSession.id });
 
-    return new Response(JSON.stringify({ url: portalSession.url }), {
+    return new Response(JSON.stringify({
+      url: manageLink,
+      subscription_code: activeSub.subscription_code,
+      status: activeSub.status,
+      next_payment_date: activeSub.next_payment_date,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

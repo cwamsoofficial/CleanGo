@@ -159,10 +159,10 @@ const UserManagement = () => {
   const getPlanLabel = (user: UserData): { label: string; isPremium: boolean } => {
     if (!user.subscription?.subscribed) return { label: "Free", isPremium: false };
     const tier = user.subscription.tier;
-    if (tier === PREMIUM_TIERS.basic.priceId || tier === PREMIUM_TIERS.basic.productId) {
+    if (tier === PREMIUM_TIERS.basic.planCode || tier === "basic") {
       return { label: "Premium Basic", isPremium: true };
     }
-    if (tier === PREMIUM_TIERS.pro.priceId || tier === PREMIUM_TIERS.pro.productId) {
+    if (tier === PREMIUM_TIERS.pro.planCode || tier === "pro") {
       return { label: "Premium Pro", isPremium: true };
     }
     return { label: "Premium", isPremium: true };

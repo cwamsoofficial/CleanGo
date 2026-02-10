@@ -14,6 +14,25 @@ const Billing = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [searchParams] = useSearchParams();
   const { isSubscribed, tier, checkSubscription } = useSubscription();
+  const [payingBill, setPayingBill] = useState(false);
+
+  const handlePayBill = async () => {
+    setPayingBill(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: "price_monthly_pickup_bill", mode: "subscription" },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (error: any) {
+      console.error("Error creating checkout:", error);
+      toast.error("Failed to start payment. Please try again.");
+    } finally {
+      setPayingBill(false);
+    }
+  };
 
   useEffect(() => {
     const fetchRole = async () => {
@@ -149,6 +168,24 @@ const Billing = () => {
                     Community support
                   </li>
                 </ul>
+                <div className="mt-4 pt-4 border-t">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Monthly Pickup Bill</p>
+                      <p className="text-xs text-muted-foreground">Recurring monthly charge</p>
+                    </div>
+                    <p className="text-lg font-bold text-foreground">₦3,000<span className="text-xs font-normal text-muted-foreground">/mo</span></p>
+                  </div>
+                  <Button
+                    className="w-full gap-2"
+                    variant="outline"
+                    disabled={payingBill}
+                    onClick={handlePayBill}
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    {payingBill ? "Processing..." : "Pay Monthly Bill"}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 

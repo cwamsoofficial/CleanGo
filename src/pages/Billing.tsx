@@ -220,7 +220,7 @@ const Billing = () => {
               <CardFooter>
                 <Button
                   className="w-full gap-2"
-                  onClick={() => navigate("/dashboard/settings", { state: { tab: "subscription" } })}
+                  onClick={() => navigate("/dashboard/subscriptions")}
                 >
                   <Sparkles className="h-4 w-4" />
                   Upgrade &amp; Choose Plan

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -255,33 +256,70 @@ export const OnboardingTour = ({ onComplete, onSkip, role = "citizen" }: Onboard
   );
 };
 
-// Hook to manage onboarding state
+// Hook to manage onboarding state - persists per user to avoid re-showing
 export const useOnboarding = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasChecked, setHasChecked] = useState(false);
+  const userIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const completed = localStorage.getItem("cleango_onboarding_completed");
-    if (!completed) {
-      setShowOnboarding(true);
-    }
-    setHasChecked(true);
+    let cancelled = false;
+
+    const checkOnboarding = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (cancelled || !user) {
+          if (!cancelled) setHasChecked(true);
+          return;
+        }
+
+        userIdRef.current = user.id;
+        const key = `cleango_onboarding_completed_${user.id}`;
+        // Also check legacy key for backwards compat
+        const completed = localStorage.getItem(key) || localStorage.getItem("cleango_onboarding_completed");
+        
+        if (!completed) {
+          setShowOnboarding(true);
+        } else {
+          // Migrate legacy key to per-user key
+          if (!localStorage.getItem(key)) {
+            localStorage.setItem(key, "true");
+          }
+          setShowOnboarding(false);
+        }
+        setHasChecked(true);
+      } catch {
+        if (!cancelled) setHasChecked(true);
+      }
+    };
+
+    checkOnboarding();
+    return () => { cancelled = true; };
   }, []);
 
-  const completeOnboarding = () => {
+  const completeOnboarding = useCallback(() => {
+    if (userIdRef.current) {
+      localStorage.setItem(`cleango_onboarding_completed_${userIdRef.current}`, "true");
+    }
     localStorage.setItem("cleango_onboarding_completed", "true");
     setShowOnboarding(false);
-  };
+  }, []);
 
-  const skipOnboarding = () => {
+  const skipOnboarding = useCallback(() => {
+    if (userIdRef.current) {
+      localStorage.setItem(`cleango_onboarding_completed_${userIdRef.current}`, "true");
+    }
     localStorage.setItem("cleango_onboarding_completed", "true");
     setShowOnboarding(false);
-  };
+  }, []);
 
-  const resetOnboarding = () => {
+  const resetOnboarding = useCallback(() => {
+    if (userIdRef.current) {
+      localStorage.removeItem(`cleango_onboarding_completed_${userIdRef.current}`);
+    }
     localStorage.removeItem("cleango_onboarding_completed");
     setShowOnboarding(true);
-  };
+  }, []);
 
   return {
     showOnboarding,

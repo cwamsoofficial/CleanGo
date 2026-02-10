@@ -19,8 +19,8 @@ const Billing = () => {
   const handlePayBill = async () => {
     setPayingBill(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId: "price_monthly_pickup_bill", mode: "subscription" },
+      const { data, error } = await supabase.functions.invoke("create-paystack-checkout", {
+        body: { amount: 300000, plan: "monthly_pickup" },
       });
       if (error) throw error;
       if (data?.url) {

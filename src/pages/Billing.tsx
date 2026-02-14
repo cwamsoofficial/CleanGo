@@ -20,7 +20,7 @@ const Billing = () => {
     setPayingBill(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-paystack-checkout", {
-        body: { amount: 300000, plan: "monthly_pickup" },
+        body: { amount: 200000, plan: "biweekly_pickup" },
       });
       if (error) throw error;
       if (data?.url) {
@@ -157,7 +157,7 @@ const Billing = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4" />
-                    Monthly pickup only
+                    Bi-weekly pickup only
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4" />
@@ -171,10 +171,10 @@ const Billing = () => {
                 <div className="mt-4 pt-4 border-t">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <p className="text-sm font-medium text-foreground">Monthly Pickup Bill</p>
-                      <p className="text-xs text-muted-foreground">Recurring monthly charge</p>
+                      <p className="text-sm font-medium text-foreground">Bi-weekly Pickup Bill</p>
+                      <p className="text-xs text-muted-foreground">Recurring bi-weekly charge</p>
                     </div>
-                    <p className="text-lg font-bold text-foreground">₦3,000<span className="text-xs font-normal text-muted-foreground">/mo</span></p>
+                    <p className="text-lg font-bold text-foreground">₦2,000<span className="text-xs font-normal text-muted-foreground">/mo</span></p>
                   </div>
                   <Button
                     className="w-full gap-2"

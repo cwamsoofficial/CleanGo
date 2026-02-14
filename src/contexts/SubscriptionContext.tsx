@@ -6,8 +6,8 @@ export const PREMIUM_TIERS = {
   basic: {
     name: "Premium Basic",
     planCode: "PLN_premium_basic_placeholder", // Replace with real Paystack plan code
-    price: 1999, // ₦1,999/month
-    amountKobo: 199900, // Amount in kobo for Paystack
+    price: 999, // ₦999/month
+    amountKobo: 99900, // Amount in kobo for Paystack
     features: [
       "Priority pickup scheduling",
       "Earn 1 point per completed pickup (₦15 value)",
@@ -18,8 +18,8 @@ export const PREMIUM_TIERS = {
   pro: {
     name: "Premium Pro",
     planCode: "PLN_premium_pro_placeholder", // Replace with real Paystack plan code
-    price: 4999, // ₦4,999/month
-    amountKobo: 499900, // Amount in kobo for Paystack
+    price: 2999, // ₦2,999/month
+    amountKobo: 299900, // Amount in kobo for Paystack
     features: [
       "All Basic features",
       "Earn 3 points per pickup (₦20 value each)",

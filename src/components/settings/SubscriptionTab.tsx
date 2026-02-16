@@ -126,7 +126,7 @@ export const SubscriptionTab = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4" />
-                Monthly pickup only
+                Bi-weekly pickup only
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4" />

@@ -154,13 +154,18 @@ const Index = () => {
               description="A verified collector arrives, collects your waste, and confirms completion"
               isLast={false}
             />
-            <StepCard
-              step={4}
-              icon={Gift}
-              title="Earn Rewards"
-              description="Get points for every pickup and redeem them for exciting rewards"
-              isLast={true}
-            />
+            <div className="relative text-center px-4 opacity-70">
+              <div className="relative z-20 bg-background">
+                <div className="inline-flex items-center justify-center w-10 h-10 bg-muted text-muted-foreground rounded-full mb-3 text-lg font-semibold">
+                  {4}
+                </div>
+                <div className="inline-flex items-center justify-center w-8 h-8 bg-muted/50 rounded-lg mb-3 ml-2">
+                  <Gift className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <h3 className="text-base font-medium text-muted-foreground mb-1">Earn Rewards</h3>
+                <p className="text-sm text-muted-foreground/80">Optionally earn points for consistent participation, redeemable for small incentives</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

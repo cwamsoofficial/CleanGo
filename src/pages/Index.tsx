@@ -81,7 +81,7 @@ const Index = () => {
               Why Choose CleanGo?
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              A comprehensive platform designed to revolutionize waste management in your community
+              Designed for the realities of waste collection in Kano State.
             </p>
           </div>
 

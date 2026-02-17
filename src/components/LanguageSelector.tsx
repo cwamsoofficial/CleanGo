@@ -14,14 +14,15 @@ interface LanguageSelectorProps {
 
 const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [widgetReady, setWidgetReady] = useState(false);
+  const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
 
   useEffect(() => {
     const containerId = `google-translate-${variant}-${Math.random().toString(36).slice(2, 8)}`;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let checkIntervalId: ReturnType<typeof setInterval>;
 
     const initWidget = () => {
       if (!containerRef.current || !window.google?.translate?.TranslateElement) return;
-      // Clear any previous widget content
       containerRef.current.innerHTML = "";
       containerRef.current.id = containerId;
       try {
@@ -34,56 +35,69 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
           },
           containerId
         );
-        setWidgetReady(true);
+        // Check if the select element actually rendered
+        checkIntervalId = setInterval(() => {
+          const select = containerRef.current?.querySelector("select");
+          if (select) {
+            setStatus("ready");
+            clearInterval(checkIntervalId);
+          }
+        }, 300);
       } catch (e) {
         console.warn("Google Translate init failed:", e);
+        setStatus("failed");
       }
     };
 
-    // If google translate is already loaded, init immediately
+    // Timeout: if widget doesn't render in 6s, show fallback
+    timeoutId = setTimeout(() => {
+      if (status === "loading") setStatus("failed");
+      clearInterval(checkIntervalId);
+    }, 6000);
+
     if (window.google?.translate?.TranslateElement) {
       initWidget();
-      return;
-    }
+    } else {
+      const prevInit = window.googleTranslateElementInit;
+      window.googleTranslateElementInit = () => {
+        prevInit?.();
+        initWidget();
+      };
 
-    // Set up the global callback
-    const prevInit = window.googleTranslateElementInit;
-    window.googleTranslateElementInit = () => {
-      prevInit?.();
-      initWidget();
-    };
-
-    // Add script if not already present
-    if (!document.getElementById("google-translate-script")) {
-      const script = document.createElement("script");
-      script.id = "google-translate-script";
-      script.src =
-        "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-      script.async = true;
-      document.body.appendChild(script);
+      if (!document.getElementById("google-translate-script")) {
+        const script = document.createElement("script");
+        script.id = "google-translate-script";
+        script.src =
+          "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+        script.async = true;
+        script.onerror = () => setStatus("failed");
+        document.body.appendChild(script);
+      }
     }
 
     return () => {
-      // Restore previous init if needed
-      if (window.googleTranslateElementInit === initWidget) {
-        window.googleTranslateElementInit = prevInit!;
-      }
+      clearTimeout(timeoutId);
+      clearInterval(checkIntervalId);
     };
   }, [variant]);
 
   return (
     <div className="flex items-center gap-2">
-      {variant === "full" && (
+      {variant === "full" && status === "ready" && (
         <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
       )}
       <div
         ref={containerRef}
-        className="google-translate-container"
+        className={`google-translate-container ${status === "ready" ? "" : "hidden"}`}
       />
-      {!widgetReady && (
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+      {status !== "ready" && (
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground border border-border rounded-md px-3 py-1.5">
           <Globe className="h-4 w-4" />
-          <span>Translate</span>
+          {status === "failed" ? (
+            <span>Translation available after publish</span>
+          ) : (
+            <span>Loading…</span>
+          )}
         </div>
       )}
     </div>

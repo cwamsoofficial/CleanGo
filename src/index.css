@@ -127,3 +127,36 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Google Translate widget styling */
+.google-translate-container .goog-te-gadget {
+  font-family: inherit !important;
+  font-size: 0 !important;
+}
+
+.google-translate-container .goog-te-gadget .goog-te-combo {
+  font-size: 14px !important;
+  font-family: inherit !important;
+  padding: 6px 8px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  outline: none;
+  cursor: pointer;
+}
+
+.google-translate-container .goog-te-gadget .goog-te-combo:focus {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+}
+
+/* Hide Google Translate top bar */
+.goog-te-banner-frame,
+.skiptranslate {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}

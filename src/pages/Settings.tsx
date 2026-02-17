@@ -12,6 +12,8 @@ import { getUserRole } from "@/lib/supabase";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import AvatarUpload from "@/components/AvatarUpload";
+import LanguageSelector from "@/components/LanguageSelector";
+import { Globe } from "lucide-react";
 const Settings = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -253,6 +255,22 @@ const Settings = () => {
                 </Button>
                 <p className="text-sm text-muted-foreground mt-2">
                   This will replay the interactive tour to help you navigate the platform.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Language
+                </CardTitle>
+                <CardDescription>Translate the app into your preferred language</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <LanguageSelector variant="full" />
+                <p className="text-sm text-muted-foreground mt-2">
+                  Select a language to translate the entire app. Powered by Google Translate.
                 </p>
               </CardContent>
             </Card>

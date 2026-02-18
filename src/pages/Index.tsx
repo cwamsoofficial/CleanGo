@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Recycle, Users, TrendingUp, Shield, Clock, Leaf, UserPlus, CalendarCheck, Truck, Gift, ChevronRight } from "lucide-react";
 import logo from "@/assets/cleango-logo.png";
 import wasteBinsHero from "@/assets/waste-bins-hero.jpg";
-import { Globe } from "lucide-react";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -24,22 +24,14 @@ const Index = () => {
       <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div 
-              className="flex items-center gap-3 cursor-pointer" 
+            <div
+              className="flex items-center gap-3 cursor-pointer"
               onClick={() => navigate("/")}
             >
               <img src={logo} alt="CleanGo Logo" className="h-12 w-auto" />
             </div>
             <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full text-muted-foreground hover:text-foreground"
-                onClick={() => navigate("/settings")}
-                aria-label="Change language"
-              >
-                <Globe className="h-5 w-5" />
-              </Button>
+              <LanguageSelector variant="compact" />
               <Button onClick={() => navigate("/auth")} size="lg" className="rounded-full px-8">
                 Login
               </Button>
@@ -284,12 +276,12 @@ const StepCard = ({ step, icon: Icon, title, description, isLast }: StepCardProp
           <ChevronRight className="w-8 h-8 text-primary" />
         </div>
       )}
-      
+
       {/* Connecting line - hidden on mobile, shown on lg screens */}
       {!isLast && (
         <div className="hidden lg:block absolute top-8 left-1/2 w-full h-0.5 bg-gradient-to-r from-primary/50 to-primary/20" />
       )}
-      
+
       <div className="relative z-20 bg-background">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-primary text-primary-foreground rounded-full mb-4 text-2xl font-bold shadow-lg">
           {step}

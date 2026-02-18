@@ -90,7 +90,7 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
         ref={containerRef}
         className={`google-translate-container ${status === "ready" ? "" : "hidden"}`}
       />
-      {status !== "ready" && (
+      {status !== "ready" && variant === "full" && (
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground border border-border rounded-md px-3 py-1.5">
           <Globe className="h-4 w-4" />
           {status === "failed" ? (

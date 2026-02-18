@@ -94,7 +94,24 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground border border-border rounded-md px-3 py-1.5">
           <Globe className="h-4 w-4" />
           {status === "failed" ? (
-            <span>Translation available after publish</span>
+            <button
+              onClick={() => {
+                setStatus("loading");
+                // Remove old script and re-add
+                const oldScript = document.getElementById("google-translate-script");
+                if (oldScript) oldScript.remove();
+                const script = document.createElement("script");
+                script.id = "google-translate-script";
+                script.src =
+                  "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+                script.async = true;
+                script.onerror = () => setStatus("failed");
+                document.body.appendChild(script);
+              }}
+              className="underline hover:text-foreground transition-colors"
+            >
+              Translation failed to load — tap to retry
+            </button>
           ) : (
             <span>Loading…</span>
           )}

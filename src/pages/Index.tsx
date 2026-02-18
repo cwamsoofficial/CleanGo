@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Recycle, Users, TrendingUp, Shield, Clock, Leaf, UserPlus, CalendarCheck, Truck, Gift, ChevronRight } from "lucide-react";
 import logo from "@/assets/cleango-logo.png";
 import wasteBinsHero from "@/assets/waste-bins-hero.jpg";
-import LanguageSelector from "@/components/LanguageSelector";
+import { Globe } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -31,7 +31,15 @@ const Index = () => {
               <img src={logo} alt="CleanGo Logo" className="h-12 w-auto" />
             </div>
             <div className="flex items-center gap-3">
-              <LanguageSelector variant="compact" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full text-muted-foreground hover:text-foreground"
+                onClick={() => navigate("/settings")}
+                aria-label="Change language"
+              >
+                <Globe className="h-5 w-5" />
+              </Button>
               <Button onClick={() => navigate("/auth")} size="lg" className="rounded-full px-8">
                 Login
               </Button>

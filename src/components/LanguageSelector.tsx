@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Globe } from "lucide-react";
 
 declare global {
@@ -15,6 +15,13 @@ interface LanguageSelectorProps {
 const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
+  const statusRef = useRef<"loading" | "ready" | "failed">("loading");
+
+  // Keep ref in sync with state so timeouts/intervals can read the latest value
+  const updateStatus = useCallback((newStatus: "loading" | "ready" | "failed") => {
+    statusRef.current = newStatus;
+    setStatus(newStatus);
+  }, []);
 
   useEffect(() => {
     const containerId = `google-translate-${variant}-${Math.random().toString(36).slice(2, 8)}`;
@@ -39,19 +46,19 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
         checkIntervalId = setInterval(() => {
           const select = containerRef.current?.querySelector("select");
           if (select) {
-            setStatus("ready");
+            updateStatus("ready");
             clearInterval(checkIntervalId);
           }
         }, 300);
       } catch (e) {
         console.warn("Google Translate init failed:", e);
-        setStatus("failed");
+        updateStatus("failed");
       }
     };
 
     // Timeout: if widget doesn't render in 6s, show fallback
     timeoutId = setTimeout(() => {
-      if (status === "loading") setStatus("failed");
+      if (statusRef.current === "loading") updateStatus("failed");
       clearInterval(checkIntervalId);
     }, 6000);
 
@@ -70,7 +77,7 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
         script.src =
           "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
         script.async = true;
-        script.onerror = () => setStatus("failed");
+        script.onerror = () => updateStatus("failed");
         document.body.appendChild(script);
       }
     }
@@ -79,7 +86,7 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
       clearTimeout(timeoutId);
       clearInterval(checkIntervalId);
     };
-  }, [variant]);
+  }, [variant, updateStatus]);
 
   return (
     <div className="flex items-center gap-2">
@@ -105,3 +112,4 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
 };
 
 export default LanguageSelector;
+

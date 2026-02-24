@@ -157,7 +157,9 @@ All colors MUST be HSL.
 }
 
 body > .skiptranslate {
-  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
 }
 
 body {

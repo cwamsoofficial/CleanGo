@@ -27,11 +27,24 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
     const containerId = `google-translate-${variant}-${Math.random().toString(36).slice(2, 8)}`;
     let timeoutId: ReturnType<typeof setTimeout>;
     let checkIntervalId: ReturnType<typeof setInterval>;
+    let observer: MutationObserver | null = null;
+
+    const markReadyIfRendered = () => {
+      const hasWidget = Boolean(
+        containerRef.current?.querySelector("select, .goog-te-combo, .goog-te-gadget, iframe")
+      );
+      if (hasWidget) {
+        updateStatus("ready");
+        return true;
+      }
+      return false;
+    };
 
     const initWidget = () => {
       if (!containerRef.current || !window.google?.translate?.TranslateElement) return;
       containerRef.current.innerHTML = "";
       containerRef.current.id = containerId;
+
       try {
         new window.google.translate.TranslateElement(
           {
@@ -42,25 +55,30 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
           },
           containerId
         );
-        // Check if the select element actually rendered
+
         checkIntervalId = setInterval(() => {
-          const select = containerRef.current?.querySelector("select");
-          if (select) {
-            updateStatus("ready");
-            clearInterval(checkIntervalId);
+          if (markReadyIfRendered()) clearInterval(checkIntervalId);
+        }, 250);
+
+        observer = new MutationObserver(() => {
+          if (markReadyIfRendered() && observer) {
+            observer.disconnect();
+            observer = null;
           }
-        }, 300);
+        });
+
+        observer.observe(containerRef.current, { childList: true, subtree: true });
       } catch (e) {
         console.warn("Google Translate init failed:", e);
         updateStatus("failed");
       }
     };
 
-    // Timeout: if widget doesn't render in 6s, show fallback
     timeoutId = setTimeout(() => {
       if (statusRef.current === "loading") updateStatus("failed");
       clearInterval(checkIntervalId);
-    }, 6000);
+      observer?.disconnect();
+    }, 10000);
 
     if (window.google?.translate?.TranslateElement) {
       initWidget();
@@ -71,20 +89,29 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
         initWidget();
       };
 
-      if (!document.getElementById("google-translate-script")) {
+      const existingScript = document.getElementById("google-translate-script") as HTMLScriptElement | null;
+
+      if (!existingScript) {
         const script = document.createElement("script");
         script.id = "google-translate-script";
         script.src =
           "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
         script.async = true;
         script.onerror = () => updateStatus("failed");
+        script.onload = () => {
+          script.dataset.loaded = "true";
+        };
         document.body.appendChild(script);
+      } else {
+        existingScript.addEventListener("load", initWidget, { once: true });
+        if (existingScript.dataset.loaded === "true") initWidget();
       }
     }
 
     return () => {
       clearTimeout(timeoutId);
       clearInterval(checkIntervalId);
+      observer?.disconnect();
     };
   }, [variant, updateStatus]);
 
@@ -103,7 +130,7 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
           {status === "failed" ? (
             <button
               onClick={() => {
-                setStatus("loading");
+                updateStatus("loading");
                 // Remove old script and re-add
                 const oldScript = document.getElementById("google-translate-script");
                 if (oldScript) oldScript.remove();
@@ -112,7 +139,10 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
                 script.src =
                   "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
                 script.async = true;
-                script.onerror = () => setStatus("failed");
+                script.onerror = () => updateStatus("failed");
+                script.onload = () => {
+                  script.dataset.loaded = "true";
+                };
                 document.body.appendChild(script);
               }}
               className="underline hover:text-foreground transition-colors"

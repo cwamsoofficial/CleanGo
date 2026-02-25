@@ -49,7 +49,7 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
         new window.google.translate.TranslateElement(
           {
             pageLanguage: "en",
-            includedLanguages: "en,ha,yo,ig,fr,ar,es,pt,de,zh-CN",
+            includedLanguages: "en,ha,yo,ig,fr,ar,es,pt,de,zh-CN,zh-TW,hi,bn,ur,sw,am,zu,af,nl,it,ru,ja,ko,tr,pl,vi,th,id,ms,tl,he,fa,uk,ro,el,cs,hu,sv,da,no,fi",
             layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
             autoDisplay: false,
           },

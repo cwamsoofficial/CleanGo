@@ -159,7 +159,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               className="flex items-center gap-3 cursor-pointer" 
               onClick={() => navigate("/dashboard")}
             >
-              <img src={logo} alt="CleanGo Logo" className="h-10 w-auto" />
+              <img src={logo} alt="CleanGo Logo" className="h-10 w-10 rounded-full object-contain bg-white p-1" />
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <p className="text-xs text-sidebar-foreground/70 capitalize">{role} Portal</p>

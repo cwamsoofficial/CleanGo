@@ -306,7 +306,7 @@ const Auth = () => {
               className="inline-flex flex-col items-center justify-center cursor-pointer"
               onClick={() => navigate("/")}
             >
-              <img src={logo} alt="CleanGo Logo" className="h-24 w-auto mb-4" />
+              <img src={logo} alt="CleanGo Logo" className="h-24 w-24 rounded-full object-contain bg-white p-2 mb-4" />
             </div>
             <p className="text-muted-foreground">Community Waste Management</p>
           </div>
@@ -364,7 +364,7 @@ const Auth = () => {
             className="inline-flex flex-col items-center justify-center cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <img src={logo} alt="CleanGo Logo" className="h-24 w-auto mb-4" />
+            <img src={logo} alt="CleanGo Logo" className="h-24 w-24 rounded-full object-contain bg-white p-2 mb-4" />
           </div>
           <p className="text-muted-foreground">Community Waste Management</p>
         </div>

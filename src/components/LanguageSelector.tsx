@@ -66,7 +66,16 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
   const statusRef = useRef<"loading" | "ready" | "failed">("loading");
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState("en");
+  const [selectedLang, setSelectedLang] = useState(() => {
+    const browserLang = navigator.language || (navigator as any).userLanguage || "en";
+    // Try exact match first (e.g. "zh-CN"), then base language (e.g. "fr" from "fr-FR")
+    const exact = LANGUAGES.find((l) => l.code === browserLang);
+    if (exact) return exact.code;
+    const base = browserLang.split("-")[0];
+    const partial = LANGUAGES.find((l) => l.code === base);
+    return partial ? partial.code : "en";
+  });
+  const autoDetectedRef = useRef(false);
 
   const updateStatus = useCallback((newStatus: "loading" | "ready" | "failed") => {
     statusRef.current = newStatus;
@@ -91,6 +100,15 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
       );
       if (hasWidget) {
         updateStatus("ready");
+        // Auto-apply browser language on first load
+        if (!autoDetectedRef.current && selectedLang !== "en") {
+          autoDetectedRef.current = true;
+          const combo = containerRef.current?.querySelector<HTMLSelectElement>(".goog-te-combo");
+          if (combo) {
+            combo.value = selectedLang;
+            combo.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        }
         return true;
       }
       return false;

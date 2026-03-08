@@ -100,6 +100,15 @@ const LanguageSelector = ({ variant = "compact" }: LanguageSelectorProps) => {
       );
       if (hasWidget) {
         updateStatus("ready");
+        // Auto-apply browser language on first load
+        if (!autoDetectedRef.current && selectedLang !== "en") {
+          autoDetectedRef.current = true;
+          const combo = containerRef.current?.querySelector<HTMLSelectElement>(".goog-te-combo");
+          if (combo) {
+            combo.value = selectedLang;
+            combo.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        }
         return true;
       }
       return false;

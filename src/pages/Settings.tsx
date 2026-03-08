@@ -12,7 +12,6 @@ import { getUserRole } from "@/lib/supabase";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import AvatarUpload from "@/components/AvatarUpload";
-import LanguageSelector from "@/components/LanguageSelector";
 import { Globe } from "lucide-react";
 const Settings = () => {
   const navigate = useNavigate();
@@ -268,9 +267,8 @@ const Settings = () => {
                 <CardDescription>Translate the app into your preferred language</CardDescription>
               </CardHeader>
               <CardContent>
-                <LanguageSelector variant="full" />
-                <p className="text-sm text-muted-foreground mt-2">
-                  Select a language to translate the entire app. Powered by Google Translate.
+                <p className="text-sm text-muted-foreground">
+                  Use your browser's built-in translation feature to translate CleanGo into any language. In Chrome or Edge, right-click the page and select <strong>"Translate to…"</strong>.
                 </p>
               </CardContent>
             </Card>

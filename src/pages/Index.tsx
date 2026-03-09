@@ -28,7 +28,7 @@ const Index = () => {
               className="flex items-center gap-3 cursor-pointer"
               onClick={() => navigate("/")}
             >
-              <img src={logo} alt="CleanGo Logo" className="h-12 w-auto" />
+              <img src={logo} alt="CleanGo Logo" className="h-12 w-12 rounded-full object-contain bg-white p-1" />
             </div>
             <div className="flex items-center gap-3">
               

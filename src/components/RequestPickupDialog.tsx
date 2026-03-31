@@ -68,13 +68,24 @@ export function RequestPickupDialog() {
         finalNotes = `[PRIORITY PICKUP] ${finalNotes}`.trim();
       }
 
-      const { error } = await supabase.from("waste_pickups").insert({
+      const insertData: any = {
         user_id: user.id,
         scheduled_date: format(date, "yyyy-MM-dd"),
         location: location.trim(),
         notes: finalNotes || null,
         status: "pending",
-      });
+      };
+
+      if (latitude && longitude) {
+        const lat = parseFloat(latitude);
+        const lng = parseFloat(longitude);
+        if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+          insertData.latitude = lat;
+          insertData.longitude = lng;
+        }
+      }
+
+      const { error } = await supabase.from("waste_pickups").insert(insertData);
 
       if (error) throw error;
 

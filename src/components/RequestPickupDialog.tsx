@@ -228,6 +228,62 @@ export function RequestPickupDialog() {
               />
             </div>
             <div className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <Label>GPS Coordinates (Optional)</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  disabled={detectingLocation}
+                  onClick={() => {
+                    if (!navigator.geolocation) {
+                      toast.error("Geolocation is not supported by your browser");
+                      return;
+                    }
+                    setDetectingLocation(true);
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => {
+                        setLatitude(pos.coords.latitude.toFixed(6));
+                        setLongitude(pos.coords.longitude.toFixed(6));
+                        setDetectingLocation(false);
+                        toast.success("Location detected!");
+                      },
+                      () => {
+                        setDetectingLocation(false);
+                        toast.error("Unable to detect location");
+                      }
+                    );
+                  }}
+                >
+                  <Navigation className="h-3 w-3" />
+                  {detectingLocation ? "Detecting..." : "Use my location"}
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  placeholder="Latitude (e.g. 6.5244)"
+                  value={latitude}
+                  onChange={(e) => setLatitude(e.target.value)}
+                  type="number"
+                  step="any"
+                  min="-90"
+                  max="90"
+                />
+                <Input
+                  placeholder="Longitude (e.g. 3.3792)"
+                  value={longitude}
+                  onChange={(e) => setLongitude(e.target.value)}
+                  type="number"
+                  step="any"
+                  min="-180"
+                  max="180"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Adding coordinates helps collectors find your location on the map
+              </p>
+            <div className="grid gap-2">
               <Label htmlFor="notes">Notes (Optional)</Label>
               <Textarea
                 id="notes"

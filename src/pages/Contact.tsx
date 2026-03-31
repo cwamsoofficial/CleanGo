@@ -129,6 +129,7 @@ const Contact = () => {
                 Back
               </Button>
             </div>
+          </div>
         </div>
       </header>
 

@@ -121,7 +121,7 @@ export const InteractiveTour = ({ onComplete, onSkip, role = "citizen" }: Intera
   const [spotlightPos, setSpotlightPos] = useState<SpotlightPosition | null>(null);
   const [tooltipPos, setTooltipPos] = useState<TooltipPosition | null>(null);
   const [mounted, setMounted] = useState(false);
-  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+  const resizeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const steps = role === "collector" ? collectorTourSteps : citizenTourSteps;
   const step = steps[currentStep];

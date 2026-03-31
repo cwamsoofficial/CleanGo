@@ -118,7 +118,8 @@ const Contact = () => {
             >
               <img src={logo} alt="CleanGo Logo" className="h-12 w-12 rounded-full object-contain bg-white p-1 shadow-md ring-1 ring-border transition-transform duration-200 hover:scale-110" />
             </div>
-            <Button
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
               variant="ghost"
               onClick={() => navigate(-1)}
               className="gap-2"

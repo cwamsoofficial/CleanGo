@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Recycle, Users, TrendingUp, Shield, Clock, Leaf, UserPlus, CalendarCheck, Truck, Gift, ChevronRight } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import logo from "@/assets/cleango-logo.png";
 import wasteBinsHero from "@/assets/waste-bins-hero.jpg";
 

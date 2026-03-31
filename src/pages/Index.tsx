@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Recycle, Users, TrendingUp, Shield, Clock, Leaf, UserPlus, CalendarCheck, Truck, Gift, ChevronRight } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import logo from "@/assets/cleango-logo.png";
 import wasteBinsHero from "@/assets/waste-bins-hero.jpg";
 
@@ -31,6 +32,7 @@ const Index = () => {
               <img src={logo} alt="CleanGo Logo" className="h-12 w-12 rounded-full object-contain bg-white p-1 shadow-md ring-1 ring-border transition-transform duration-200 hover:scale-110" />
             </div>
             <div className="flex items-center gap-3">
+              <ThemeToggle />
               
               <Button onClick={() => navigate("/auth")} size="lg" className="rounded-full px-8">
                 Login

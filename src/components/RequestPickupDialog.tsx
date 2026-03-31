@@ -19,7 +19,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, Plus, Zap, Crown, Lock } from "lucide-react";
+import { CalendarIcon, Plus, Zap, Crown, Lock, Navigation } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -30,8 +30,11 @@ export function RequestPickupDialog() {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date>();
   const [location, setLocation] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
   const [notes, setNotes] = useState("");
   const [isPriority, setIsPriority] = useState(false);
+  const [detectingLocation, setDetectingLocation] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,13 +68,24 @@ export function RequestPickupDialog() {
         finalNotes = `[PRIORITY PICKUP] ${finalNotes}`.trim();
       }
 
-      const { error } = await supabase.from("waste_pickups").insert({
+      const insertData: any = {
         user_id: user.id,
         scheduled_date: format(date, "yyyy-MM-dd"),
         location: location.trim(),
         notes: finalNotes || null,
         status: "pending",
-      });
+      };
+
+      if (latitude && longitude) {
+        const lat = parseFloat(latitude);
+        const lng = parseFloat(longitude);
+        if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+          insertData.latitude = lat;
+          insertData.longitude = lng;
+        }
+      }
+
+      const { error } = await supabase.from("waste_pickups").insert(insertData);
 
       if (error) throw error;
 
@@ -83,6 +97,8 @@ export function RequestPickupDialog() {
       setOpen(false);
       setDate(undefined);
       setLocation("");
+      setLatitude("");
+      setLongitude("");
       setNotes("");
       setIsPriority(false);
       
@@ -210,6 +226,63 @@ export function RequestPickupDialog() {
                 onChange={(e) => setLocation(e.target.value)}
                 required
               />
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <Label>GPS Coordinates (Optional)</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  disabled={detectingLocation}
+                  onClick={() => {
+                    if (!navigator.geolocation) {
+                      toast.error("Geolocation is not supported by your browser");
+                      return;
+                    }
+                    setDetectingLocation(true);
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => {
+                        setLatitude(pos.coords.latitude.toFixed(6));
+                        setLongitude(pos.coords.longitude.toFixed(6));
+                        setDetectingLocation(false);
+                        toast.success("Location detected!");
+                      },
+                      () => {
+                        setDetectingLocation(false);
+                        toast.error("Unable to detect location");
+                      }
+                    );
+                  }}
+                >
+                  <Navigation className="h-3 w-3" />
+                  {detectingLocation ? "Detecting..." : "Use my location"}
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  placeholder="Latitude (e.g. 6.5244)"
+                  value={latitude}
+                  onChange={(e) => setLatitude(e.target.value)}
+                  type="number"
+                  step="any"
+                  min="-90"
+                  max="90"
+                />
+                <Input
+                  placeholder="Longitude (e.g. 3.3792)"
+                  value={longitude}
+                  onChange={(e) => setLongitude(e.target.value)}
+                  type="number"
+                  step="any"
+                  min="-180"
+                  max="180"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Adding coordinates helps collectors find your location on the map
+              </p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="notes">Notes (Optional)</Label>

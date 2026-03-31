@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User, ClipboardList, Loader2 } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, Clock, XCircle, Package, User, ClipboardList, Loader2, Map } from "lucide-react";
+import { PickupMap } from "@/components/PickupMap";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { RequestPickupDialog } from "@/components/RequestPickupDialog";
@@ -24,6 +25,8 @@ interface Pickup {
   collector_name?: string;
   user_id: string;
   user_name?: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 const Pickups = () => {
@@ -317,6 +320,10 @@ const Pickups = () => {
           Completed
           <Badge variant="outline" className="ml-1">{completedPickups.length}</Badge>
         </TabsTrigger>
+        <TabsTrigger value="map" className="flex items-center gap-2">
+          <Map className="w-4 h-4" />
+          Map View
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="assigned" className="mt-6">
@@ -474,6 +481,34 @@ const Pickups = () => {
                 </TableBody>
               </Table>
             )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="map" className="mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Pickup Locations</CardTitle>
+            <CardDescription>All pickups with GPS coordinates shown on the map</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PickupMap
+              pickups={[...assignedPickups, ...unassignedPickups, ...completedPickups]
+                .filter(p => p.latitude != null && p.longitude != null)
+                .map(p => ({
+                  id: p.id,
+                  latitude: p.latitude!,
+                  longitude: p.longitude!,
+                  status: p.status,
+                  location: p.location,
+                  scheduled_date: p.scheduled_date,
+                  user_name: p.user_name,
+                  notes: p.notes,
+                }))}
+              onAccept={handleAcceptPickup}
+              onComplete={(id) => handleUpdateStatus(id, "collected")}
+              acceptingId={acceptingPickup}
+            />
           </CardContent>
         </Card>
       </TabsContent>

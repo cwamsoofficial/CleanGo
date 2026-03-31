@@ -359,7 +359,9 @@ export type Database = {
           completed_at: string | null
           created_at: string
           id: string
+          latitude: number | null
           location: string | null
+          longitude: number | null
           notes: string | null
           proof_image_url: string | null
           scheduled_date: string | null
@@ -372,7 +374,9 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           notes?: string | null
           proof_image_url?: string | null
           scheduled_date?: string | null
@@ -385,7 +389,9 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           notes?: string | null
           proof_image_url?: string | null
           scheduled_date?: string | null

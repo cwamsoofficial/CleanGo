@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Mail, MapPin, Phone, Send } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { z } from "zod";
 import logo from "@/assets/cleango-logo.png";
 import { supabase } from "@/integrations/supabase/client";

@@ -318,6 +318,10 @@ const Pickups = () => {
           Completed
           <Badge variant="outline" className="ml-1">{completedPickups.length}</Badge>
         </TabsTrigger>
+        <TabsTrigger value="map" className="flex items-center gap-2">
+          <Map className="w-4 h-4" />
+          Map View
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="assigned" className="mt-6">

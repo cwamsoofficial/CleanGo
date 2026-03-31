@@ -30,8 +30,11 @@ export function RequestPickupDialog() {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date>();
   const [location, setLocation] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
   const [notes, setNotes] = useState("");
   const [isPriority, setIsPriority] = useState(false);
+  const [detectingLocation, setDetectingLocation] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {

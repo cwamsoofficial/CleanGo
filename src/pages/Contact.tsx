@@ -116,7 +116,7 @@ const Contact = () => {
               className="flex items-center gap-3 cursor-pointer"
               onClick={() => navigate("/")}
             >
-              <img src={logo} alt="CleanGo Logo" className="h-12 w-12 rounded-full object-contain bg-white p-1 shadow-md ring-1 ring-border" />
+              <img src={logo} alt="CleanGo Logo" className="h-12 w-12 rounded-full object-contain bg-white p-1 shadow-md ring-1 ring-border transition-transform duration-200 hover:scale-110" />
             </div>
             <Button
               variant="ghost"
@@ -314,7 +314,7 @@ const Contact = () => {
       <footer className="bg-card border-t border-border py-8 mt-12">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <img src={logo} alt="CleanGo Logo" className="h-10 w-10 rounded-full object-contain bg-white p-1 shadow-md ring-1 ring-border" />
+            <img src={logo} alt="CleanGo Logo" className="h-10 w-10 rounded-full object-contain bg-white p-1 shadow-md ring-1 ring-border transition-transform duration-200 hover:scale-110" />
           </div>
           <p className="text-muted-foreground">
             © 2026 CleanGo. All rights reserved.

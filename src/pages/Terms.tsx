@@ -9,7 +9,7 @@ const Terms = () => {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="CleanGo Logo" className="h-10 w-10 rounded-full object-contain bg-white p-1 shadow-md ring-1 ring-border" />
+            <img src={logo} alt="CleanGo Logo" className="h-10 w-10 rounded-full object-contain bg-white p-1 shadow-md ring-1 ring-border transition-transform duration-200 hover:scale-110" />
           </Link>
           <Button variant="ghost" asChild>
             <Link to="/auth">

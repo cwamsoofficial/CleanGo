@@ -120,14 +120,15 @@ const Contact = () => {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              variant="ghost"
-              onClick={() => navigate(-1)}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          </div>
+              <Button
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            </div>
         </div>
       </header>
 

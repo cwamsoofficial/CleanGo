@@ -12,12 +12,15 @@ const Terms = () => {
           <Link to="/" className="flex items-center gap-2">
             <img src={logo} alt="CleanGo Logo" className="h-10 w-10 rounded-full object-contain bg-white p-1 shadow-md ring-1 ring-border transition-transform duration-200 hover:scale-110" />
           </Link>
-          <Button variant="ghost" asChild>
-            <Link to="/auth">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Login
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button variant="ghost" asChild>
+              <Link to="/auth">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Login
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 

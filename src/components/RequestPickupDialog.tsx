@@ -283,6 +283,7 @@ export function RequestPickupDialog() {
               <p className="text-xs text-muted-foreground">
                 Adding coordinates helps collectors find your location on the map
               </p>
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="notes">Notes (Optional)</Label>
               <Textarea

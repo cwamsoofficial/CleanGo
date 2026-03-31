@@ -25,6 +25,8 @@ interface Pickup {
   collector_name?: string;
   user_id: string;
   user_name?: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 const Pickups = () => {

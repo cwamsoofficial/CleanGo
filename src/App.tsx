@@ -28,6 +28,7 @@ import Billing from "./pages/Billing";
 import ActivityHistory from "./pages/ActivityHistory";
 import Subscriptions from "./pages/Subscriptions";
 import NotFound from "./pages/NotFound";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 

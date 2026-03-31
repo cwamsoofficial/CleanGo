@@ -484,6 +484,34 @@ const Pickups = () => {
           </CardContent>
         </Card>
       </TabsContent>
+
+      <TabsContent value="map" className="mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Pickup Locations</CardTitle>
+            <CardDescription>All pickups with GPS coordinates shown on the map</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PickupMap
+              pickups={[...assignedPickups, ...unassignedPickups, ...completedPickups]
+                .filter(p => p.latitude != null && p.longitude != null)
+                .map(p => ({
+                  id: p.id,
+                  latitude: p.latitude!,
+                  longitude: p.longitude!,
+                  status: p.status,
+                  location: p.location,
+                  scheduled_date: p.scheduled_date,
+                  user_name: p.user_name,
+                  notes: p.notes,
+                }))}
+              onAccept={handleAcceptPickup}
+              onComplete={(id) => handleUpdateStatus(id, "collected")}
+              acceptingId={acceptingPickup}
+            />
+          </CardContent>
+        </Card>
+      </TabsContent>
     </Tabs>
   );
 

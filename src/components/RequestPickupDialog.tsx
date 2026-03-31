@@ -97,6 +97,8 @@ export function RequestPickupDialog() {
       setOpen(false);
       setDate(undefined);
       setLocation("");
+      setLatitude("");
+      setLongitude("");
       setNotes("");
       setIsPriority(false);
       

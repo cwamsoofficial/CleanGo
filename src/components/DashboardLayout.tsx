@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationBell } from "@/components/NotificationBell";
 import logo from "@/assets/cleango-logo.png";
 
 interface DashboardLayoutProps {
@@ -244,7 +245,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 {userProfile.name ? `Welcome, ${userProfile.name}` : "Dashboard"}
               </h1>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              {role === "collector" && <NotificationBell />}
+              <ThemeToggle />
+            </div>
           </header>
           <div className="flex-1 p-6 bg-background overflow-auto">{children}</div>
         </main>

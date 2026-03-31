@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationBell } from "@/components/NotificationBell";
 import logo from "@/assets/cleango-logo.png";
 
 interface DashboardLayoutProps {

@@ -275,17 +275,26 @@ export const useOnboarding = () => {
 
         userIdRef.current = user.id;
         const key = `cleango_onboarding_completed_${user.id}`;
-        // Also check legacy key for backwards compat
-        const completed = localStorage.getItem(key) || localStorage.getItem("cleango_onboarding_completed");
+        const completed = localStorage.getItem(key);
         
-        if (!completed) {
+        if (completed === "true") {
+          // Already completed or skipped — don't show
+          setShowOnboarding(false);
+        } else if (completed === "reset") {
+          // Explicitly reset — show the tour
           setShowOnboarding(true);
         } else {
-          // Migrate legacy key to per-user key
-          if (!localStorage.getItem(key)) {
+          // No record — only show for new accounts (created within last 5 minutes)
+          const createdAt = new Date(user.created_at).getTime();
+          const now = Date.now();
+          const fiveMinutes = 5 * 60 * 1000;
+          if (now - createdAt < fiveMinutes) {
+            setShowOnboarding(true);
+          } else {
+            // Existing account, mark as completed so we never check again
             localStorage.setItem(key, "true");
+            setShowOnboarding(false);
           }
-          setShowOnboarding(false);
         }
         setHasChecked(true);
       } catch {

@@ -324,9 +324,8 @@ export const useOnboarding = () => {
 
   const resetOnboarding = useCallback(() => {
     if (userIdRef.current) {
-      localStorage.removeItem(`cleango_onboarding_completed_${userIdRef.current}`);
+      localStorage.setItem(`cleango_onboarding_completed_${userIdRef.current}`, "reset");
     }
-    localStorage.removeItem("cleango_onboarding_completed");
     setShowOnboarding(true);
   }, []);
 

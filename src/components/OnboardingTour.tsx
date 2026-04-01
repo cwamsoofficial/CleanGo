@@ -310,7 +310,6 @@ export const useOnboarding = () => {
     if (userIdRef.current) {
       localStorage.setItem(`cleango_onboarding_completed_${userIdRef.current}`, "true");
     }
-    localStorage.setItem("cleango_onboarding_completed", "true");
     setShowOnboarding(false);
   }, []);
 
@@ -318,7 +317,6 @@ export const useOnboarding = () => {
     if (userIdRef.current) {
       localStorage.setItem(`cleango_onboarding_completed_${userIdRef.current}`, "true");
     }
-    localStorage.setItem("cleango_onboarding_completed", "true");
     setShowOnboarding(false);
   }, []);
 

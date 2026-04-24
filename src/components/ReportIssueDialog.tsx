@@ -197,13 +197,12 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Issue Title *</Label>
+            <Label htmlFor="title">Issue Title <span className="text-muted-foreground text-xs">(optional)</span></Label>
             <Input
               id="title"
               name="title"
               placeholder="e.g., Overflowing bin on Main Street"
               maxLength={200}
-              required
             />
             {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
           </div>

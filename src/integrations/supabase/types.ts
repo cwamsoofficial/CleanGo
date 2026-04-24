@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_email: string | null
+          admin_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+        }
+        Insert: {
+          action: string
+          admin_email?: string | null
+          admin_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          admin_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -275,6 +302,27 @@ export type Database = {
         }
         Relationships: []
       }
+      system_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       user_referrals: {
         Row: {
           completed_at: string | null
@@ -415,6 +463,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_reset_all_pickups: { Args: never; Returns: undefined }
+      admin_reset_all_rewards: { Args: never; Returns: undefined }
+      admin_set_rewards_enabled: {
+        Args: { _enabled: boolean }
+        Returns: undefined
+      }
       award_points: {
         Args: { _description: string; _points: number; _user_id: string }
         Returns: undefined
@@ -501,6 +555,10 @@ export type Database = {
         Returns: boolean
       }
       is_account_locked: { Args: { user_email: string }; Returns: boolean }
+      log_admin_action: {
+        Args: { _action: string; _details?: Json }
+        Returns: undefined
+      }
       redeem_points: {
         Args: { _description: string; _points: number; _user_id: string }
         Returns: undefined

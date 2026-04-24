@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   AlertDialog,
@@ -17,7 +19,107 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Award, RotateCcw, Trash2, ShieldCheck, ShieldOff, History } from "lucide-react";
+import { Award, RotateCcw, Trash2, ShieldCheck, ShieldOff, History, AlertTriangle } from "lucide-react";
+
+const CONFIRM_COOLDOWN_SECONDS = 5;
+
+interface DangerConfirmDialogProps {
+  trigger: React.ReactNode;
+  title: string;
+  description: string;
+  confirmPhrase: string;
+  confirmButtonLabel: string;
+  onConfirm: () => Promise<void> | void;
+  disabled?: boolean;
+}
+
+const DangerConfirmDialog = ({
+  trigger,
+  title,
+  description,
+  confirmPhrase,
+  confirmButtonLabel,
+  onConfirm,
+  disabled,
+}: DangerConfirmDialogProps) => {
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [cooldown, setCooldown] = useState(CONFIRM_COOLDOWN_SECONDS);
+  const intervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setTyped("");
+      setCooldown(CONFIRM_COOLDOWN_SECONDS);
+      intervalRef.current = window.setInterval(() => {
+        setCooldown((c) => {
+          if (c <= 1) {
+            if (intervalRef.current) window.clearInterval(intervalRef.current);
+            return 0;
+          }
+          return c - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (intervalRef.current) window.clearInterval(intervalRef.current);
+    };
+  }, [open]);
+
+  const phraseOk = typed.trim().toUpperCase() === confirmPhrase.toUpperCase();
+  const ready = phraseOk && cooldown === 0;
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild disabled={disabled}>{trigger}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-destructive" />
+            {title}
+          </AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <div className="space-y-3 py-2">
+          <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
+            This action is <span className="font-semibold">irreversible</span>. To proceed,
+            type <span className="font-mono font-semibold">{confirmPhrase}</span> below.
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="confirm-phrase">Confirmation</Label>
+            <Input
+              id="confirm-phrase"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder={confirmPhrase}
+              autoComplete="off"
+              autoFocus
+            />
+          </div>
+        </div>
+
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={!ready}
+            onClick={async (e) => {
+              if (!ready) {
+                e.preventDefault();
+                return;
+              }
+              await onConfirm();
+              setOpen(false);
+            }}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {cooldown > 0 ? `${confirmButtonLabel} (${cooldown}s)` : confirmButtonLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 interface AuditEntry {
   id: string;
@@ -205,45 +307,33 @@ const RewardsControlPanel = () => {
               )}
             </div>
             <div className="rounded-lg border p-4 flex flex-wrap gap-2">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+              <DangerConfirmDialog
+                trigger={
                   <Button variant="destructive" size="sm" disabled={acting}>
                     <RotateCcw className="w-4 h-4 mr-2" /> Reset Rewards
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Reset all reward data?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will set all users' points to zero, clear streaks, and delete all reward transactions. This cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleResetRewards}>Reset Rewards</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                }
+                title="Reset all reward data?"
+                description="This will set every user's points to zero, clear streaks, revert referrals, and delete all reward transactions across the entire platform."
+                confirmPhrase="RESET REWARDS"
+                confirmButtonLabel="Reset Rewards"
+                onConfirm={handleResetRewards}
+                disabled={acting}
+              />
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+              <DangerConfirmDialog
+                trigger={
                   <Button variant="outline" size="sm" disabled={acting}>
                     <Trash2 className="w-4 h-4 mr-2" /> Reset Pickups
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete all pickups?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will permanently delete every pickup record in the system. This cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleResetPickups}>Delete Pickups</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                }
+                title="Delete all pickups?"
+                description="This will permanently delete every pickup record in the system for all users. History cannot be recovered."
+                confirmPhrase="DELETE PICKUPS"
+                confirmButtonLabel="Delete Pickups"
+                onConfirm={handleResetPickups}
+                disabled={acting}
+              />
             </div>
           </div>
         </CardContent>

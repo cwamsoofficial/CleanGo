@@ -34,7 +34,7 @@ const CATEGORIES = [
 ] as const;
 
 const reportSchema = z.object({
-  title: z.string().trim().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+  title: z.string().trim().max(200, "Title must be less than 200 characters").optional(),
   description: z
     .string()
     .trim()

@@ -34,7 +34,7 @@ const CATEGORIES = [
 ] as const;
 
 const reportSchema = z.object({
-  title: z.string().trim().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+  title: z.string().trim().max(200, "Title must be less than 200 characters").optional(),
   description: z
     .string()
     .trim()
@@ -149,9 +149,13 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
         }
       }
 
+      const finalTitle = title?.trim()
+        ? title.trim()
+        : description.trim().split(/\s+/).slice(0, 8).join(" ").slice(0, 200) || "Untitled issue";
+
       const { error } = await supabase.from("issue_reports").insert({
         reporter_id: user.id,
-        title,
+        title: finalTitle,
         description,
         location,
         category: cat,
@@ -193,13 +197,12 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Issue Title *</Label>
+            <Label htmlFor="title">Issue Title <span className="text-muted-foreground text-xs">(optional)</span></Label>
             <Input
               id="title"
               name="title"
               placeholder="e.g., Overflowing bin on Main Street"
               maxLength={200}
-              required
             />
             {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
           </div>

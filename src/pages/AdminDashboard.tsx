@@ -15,6 +15,7 @@ import SecurityDashboard from "@/components/SecurityDashboard";
 import UserManagement from "@/components/UserManagement";
 import AdminAssignments from "@/components/AdminAssignments";
 import ContactSubmissions from "@/components/ContactSubmissions";
+import RewardsControlPanel from "@/components/RewardsControlPanel";
 
 interface User {
   id: string;
@@ -184,6 +185,10 @@ const AdminDashboard = () => {
               Messages
             </TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
+            <TabsTrigger value="rewards" className="flex items-center gap-2">
+              <Award className="w-4 h-4" />
+              Rewards
+            </TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
           </TabsList>
 
@@ -298,6 +303,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="users" className="space-y-8 mt-6">
             <UserManagement />
+          </TabsContent>
+
+          <TabsContent value="rewards" className="space-y-8 mt-6">
+            <RewardsControlPanel />
           </TabsContent>
 
           <TabsContent value="security" className="space-y-8 mt-6">

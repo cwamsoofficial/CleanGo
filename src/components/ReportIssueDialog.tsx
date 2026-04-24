@@ -6,6 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -14,23 +21,40 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Upload, Plus } from "lucide-react";
+import { Loader2, Upload, Plus, MapPin } from "lucide-react";
 
-// Validation schema for issue reports
+const CATEGORIES = [
+  { value: "overflowing_bin", label: "Overflowing Bin" },
+  { value: "illegal_dumping", label: "Illegal Dumping" },
+  { value: "missed_pickup", label: "Missed Pickup" },
+  { value: "hazardous_waste", label: "Hazardous Waste" },
+  { value: "recycling", label: "Recycling Issue" },
+  { value: "street_litter", label: "Street Litter" },
+  { value: "other", label: "Other" },
+] as const;
+
 const reportSchema = z.object({
-  title: z.string()
-    .trim()
-    .min(1, "Title is required")
-    .max(200, "Title must be less than 200 characters"),
-  description: z.string()
+  title: z.string().trim().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+  description: z
+    .string()
     .trim()
     .min(10, "Description must be at least 10 characters")
     .max(2000, "Description must be less than 2000 characters"),
-  location: z.string()
+  category: z.enum([
+    "overflowing_bin",
+    "illegal_dumping",
+    "missed_pickup",
+    "hazardous_waste",
+    "recycling",
+    "street_litter",
+    "other",
+  ]),
+  location: z
+    .string()
     .trim()
     .max(500, "Location must be less than 500 characters")
     .optional()
-    .transform(val => val || null)
+    .transform((val) => val || null),
 });
 
 interface ReportIssueDialogProps {
@@ -41,7 +65,35 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [errors, setErrors] = useState<{ title?: string; description?: string; location?: string }>({});
+  const [category, setCategory] = useState<string>("");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [errors, setErrors] = useState<{
+    title?: string;
+    description?: string;
+    location?: string;
+    category?: string;
+  }>({});
+
+  const captureLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+        toast.success("Location captured for the Waste Map");
+      },
+      (err) => {
+        setLocating(false);
+        toast.error(err.message || "Could not get your location");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,16 +105,15 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
       location: formData.get("location") as string,
+      category,
     };
 
-    // Validate input with zod
     const validationResult = reportSchema.safeParse(rawData);
-    
     if (!validationResult.success) {
-      const fieldErrors: { title?: string; description?: string; location?: string } = {};
+      const fieldErrors: typeof errors = {};
       validationResult.error.errors.forEach((err) => {
-        const field = err.path[0] as string;
-        fieldErrors[field as keyof typeof fieldErrors] = err.message;
+        const field = err.path[0] as keyof typeof fieldErrors;
+        fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
       setLoading(false);
@@ -70,7 +121,7 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
       return;
     }
 
-    const { title, description, location } = validationResult.data;
+    const { title, description, location, category: cat } = validationResult.data;
 
     try {
       const {
@@ -78,56 +129,44 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      let imageUrl = null;
-
-      // Upload image if provided
+      let imageUrl: string | null = null;
       if (imageFile) {
-        try {
-          // Validate file size (max 5MB)
-          if (imageFile.size > 5 * 1024 * 1024) {
-            toast.error("Image file too large. Maximum size is 5MB.");
-            setLoading(false);
-            return;
-          }
-
-          const fileExt = imageFile.name.split(".").pop()?.toLowerCase();
-          const fileName = `${Date.now()}.${fileExt}`;
-          const filePath = `${user.id}/${fileName}`;
-
-          const { error: uploadError, data: uploadData } = await supabase.storage
-            .from("issue-images")
-            .upload(filePath, imageFile);
-
-          if (uploadError) {
-            console.error("Image upload error:", uploadError);
-            toast.error(`Failed to upload image: ${uploadError.message}`);
-          } else {
-            console.log("Image uploaded successfully:", uploadData);
-            imageUrl = filePath;
-            toast.success("Image uploaded successfully");
-          }
-        } catch (uploadError: any) {
-          console.error("Image upload exception:", uploadError);
-          toast.error(`Upload failed: ${uploadError.message || 'Unknown error'}`);
+        if (imageFile.size > 5 * 1024 * 1024) {
+          toast.error("Image file too large. Maximum size is 5MB.");
+          setLoading(false);
+          return;
+        }
+        const fileExt = imageFile.name.split(".").pop()?.toLowerCase();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+        const { error: uploadError } = await supabase.storage
+          .from("issue-images")
+          .upload(filePath, imageFile);
+        if (uploadError) {
+          toast.error(`Failed to upload image: ${uploadError.message}`);
+        } else {
+          imageUrl = filePath;
         }
       }
 
-      // Insert issue report with validated data
       const { error } = await supabase.from("issue_reports").insert({
         reporter_id: user.id,
         title,
         description,
         location,
+        category: cat,
+        latitude: coords?.lat ?? null,
+        longitude: coords?.lng ?? null,
         image_url: imageUrl,
         status: "pending",
       });
 
       if (error) throw error;
 
-      // Points are automatically awarded by database trigger (on_issue_report_created)
-
       toast.success("Issue reported successfully!");
       setImageFile(null);
+      setCategory("");
+      setCoords(null);
       setOpen(false);
       onSuccess?.();
     } catch (error: any) {
@@ -162,9 +201,24 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
               maxLength={200}
               required
             />
-            {errors.title && (
-              <p className="text-sm text-destructive">{errors.title}</p>
-            )}
+            {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="category">Category *</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger id="category">
+                <SelectValue placeholder="Select a waste category" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((c) => (
+                  <SelectItem key={c.value} value={c.value}>
+                    {c.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
           </div>
 
           <div className="space-y-2">
@@ -190,9 +244,29 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
               placeholder="e.g., 123 Main Street, City Center"
               maxLength={500}
             />
-            {errors.location && (
-              <p className="text-sm text-destructive">{errors.location}</p>
-            )}
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={captureLocation}
+                disabled={locating}
+                className="gap-2"
+              >
+                {locating ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <MapPin className="h-3 w-3" />
+                )}
+                {coords ? "Update GPS" : "Use my location"}
+              </Button>
+              {coords && (
+                <span className="text-xs text-muted-foreground">
+                  📍 {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
+                </span>
+              )}
+            </div>
+            {errors.location && <p className="text-sm text-destructive">{errors.location}</p>}
           </div>
 
           <div className="space-y-2">

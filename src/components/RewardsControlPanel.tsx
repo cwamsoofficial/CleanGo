@@ -334,7 +334,7 @@ const RewardsControlPanel = () => {
                 onConfirm={handleResetPickups}
                 disabled={acting}
               />
-
+            </div>
           </div>
         </CardContent>
       </Card>

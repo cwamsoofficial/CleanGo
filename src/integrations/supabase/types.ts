@@ -50,11 +50,14 @@ export type Database = {
       issue_reports: {
         Row: {
           assigned_collector_id: string | null
+          category: string | null
           created_at: string
           description: string
           id: string
           image_url: string | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           rating: number | null
           reporter_id: string
           resolved_at: string | null
@@ -64,11 +67,14 @@ export type Database = {
         }
         Insert: {
           assigned_collector_id?: string | null
+          category?: string | null
           created_at?: string
           description: string
           id?: string
           image_url?: string | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           rating?: number | null
           reporter_id: string
           resolved_at?: string | null
@@ -78,11 +84,14 @@ export type Database = {
         }
         Update: {
           assigned_collector_id?: string | null
+          category?: string | null
           created_at?: string
           description?: string
           id?: string
           image_url?: string | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           rating?: number | null
           reporter_id?: string
           resolved_at?: string | null
@@ -457,6 +466,19 @@ export type Database = {
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      get_waste_dashboard_stats: { Args: never; Returns: Json }
+      get_waste_map_data: {
+        Args: never
+        Returns: {
+          category: string
+          created_at: string
+          id: string
+          latitude: number
+          location: string
+          longitude: number
+          status: Database["public"]["Enums"]["issue_status"]
+        }[]
       }
       handle_failed_login: {
         Args: {

@@ -307,46 +307,34 @@ const RewardsControlPanel = () => {
               )}
             </div>
             <div className="rounded-lg border p-4 flex flex-wrap gap-2">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+              <DangerConfirmDialog
+                trigger={
                   <Button variant="destructive" size="sm" disabled={acting}>
                     <RotateCcw className="w-4 h-4 mr-2" /> Reset Rewards
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Reset all reward data?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will set all users' points to zero, clear streaks, and delete all reward transactions. This cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleResetRewards}>Reset Rewards</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                }
+                title="Reset all reward data?"
+                description="This will set every user's points to zero, clear streaks, revert referrals, and delete all reward transactions across the entire platform."
+                confirmPhrase="RESET REWARDS"
+                confirmButtonLabel="Reset Rewards"
+                onConfirm={handleResetRewards}
+                disabled={acting}
+              />
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+              <DangerConfirmDialog
+                trigger={
                   <Button variant="outline" size="sm" disabled={acting}>
                     <Trash2 className="w-4 h-4 mr-2" /> Reset Pickups
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete all pickups?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will permanently delete every pickup record in the system. This cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleResetPickups}>Delete Pickups</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+                }
+                title="Delete all pickups?"
+                description="This will permanently delete every pickup record in the system for all users. History cannot be recovered."
+                confirmPhrase="DELETE PICKUPS"
+                confirmButtonLabel="Delete Pickups"
+                onConfirm={handleResetPickups}
+                disabled={acting}
+              />
+
           </div>
         </CardContent>
       </Card>

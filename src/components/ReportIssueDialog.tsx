@@ -149,9 +149,13 @@ export const ReportIssueDialog = ({ onSuccess }: ReportIssueDialogProps) => {
         }
       }
 
+      const finalTitle = title?.trim()
+        ? title.trim()
+        : description.trim().split(/\s+/).slice(0, 8).join(" ").slice(0, 200) || "Untitled issue";
+
       const { error } = await supabase.from("issue_reports").insert({
         reporter_id: user.id,
-        title,
+        title: finalTitle,
         description,
         location,
         category: cat,

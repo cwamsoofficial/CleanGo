@@ -250,7 +250,8 @@ const RewardsControlPanel = () => {
       const { error } = await supabase.rpc("admin_reset_all_rewards");
       if (error) throw error;
       toast.success("All reward points have been reset");
-      if (extraSafety) setPendingDoubleConfirm(true);
+      // Re-arm only if extra safety is on; otherwise clear.
+      setPendingDoubleConfirm(extraSafety);
       await load();
     } catch (err: any) {
       toast.error(err.message ?? "Failed to reset rewards");
@@ -265,7 +266,7 @@ const RewardsControlPanel = () => {
       const { error } = await supabase.rpc("admin_reset_all_pickups");
       if (error) throw error;
       toast.success("All pickups have been deleted");
-      if (extraSafety) setPendingDoubleConfirm(true);
+      setPendingDoubleConfirm(extraSafety);
       await load();
     } catch (err: any) {
       toast.error(err.message ?? "Failed to reset pickups");

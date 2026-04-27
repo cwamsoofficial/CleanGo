@@ -31,6 +31,8 @@ interface DangerConfirmDialogProps {
   confirmButtonLabel: string;
   onConfirm: () => Promise<void> | void;
   disabled?: boolean;
+  /** When true, requires an additional re-click after the first confirm before running. */
+  doubleConfirm?: boolean;
 }
 
 const DangerConfirmDialog = ({
@@ -41,15 +43,18 @@ const DangerConfirmDialog = ({
   confirmButtonLabel,
   onConfirm,
   disabled,
+  doubleConfirm,
 }: DangerConfirmDialogProps) => {
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
   const [cooldown, setCooldown] = useState(CONFIRM_COOLDOWN_SECONDS);
+  const [armed, setArmed] = useState(false); // for doubleConfirm second click
   const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (open) {
       setTyped("");
+      setArmed(false);
       setCooldown(CONFIRM_COOLDOWN_SECONDS);
       intervalRef.current = window.setInterval(() => {
         setCooldown((c) => {
@@ -69,6 +74,13 @@ const DangerConfirmDialog = ({
   const phraseOk = typed.trim().toUpperCase() === confirmPhrase.toUpperCase();
   const ready = phraseOk && cooldown === 0;
 
+  const buttonLabel = (() => {
+    if (cooldown > 0) return `${confirmButtonLabel} (${cooldown}s)`;
+    if (doubleConfirm && !armed) return `${confirmButtonLabel} — click again to confirm`;
+    if (doubleConfirm && armed) return `Click once more to ${confirmButtonLabel.toLowerCase()}`;
+    return confirmButtonLabel;
+  })();
+
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild disabled={disabled}>{trigger}</AlertDialogTrigger>
@@ -85,6 +97,11 @@ const DangerConfirmDialog = ({
           <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
             This action is <span className="font-semibold">irreversible</span>. To proceed,
             type <span className="font-mono font-semibold">{confirmPhrase}</span> below.
+            {doubleConfirm && (
+              <div className="mt-2 text-xs">
+                <span className="font-semibold">Extra safety enabled:</span> after the cooldown you'll need to click the confirm button <span className="font-semibold">twice</span>.
+              </div>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="confirm-phrase">Confirmation</Label>
@@ -108,12 +125,17 @@ const DangerConfirmDialog = ({
                 e.preventDefault();
                 return;
               }
+              if (doubleConfirm && !armed) {
+                e.preventDefault();
+                setArmed(true);
+                return;
+              }
               await onConfirm();
               setOpen(false);
             }}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {cooldown > 0 ? `${confirmButtonLabel} (${cooldown}s)` : confirmButtonLabel}
+            {buttonLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -149,6 +171,8 @@ const ACTION_LABEL: Record<string, { label: string; className: string }> = {
 const RewardsControlPanel = () => {
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
+  const [extraSafety, setExtraSafety] = useState(true);
+  const [pendingDoubleConfirm, setPendingDoubleConfirm] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalPoints: 0,
     totalEarned: 0,
@@ -226,6 +250,7 @@ const RewardsControlPanel = () => {
       const { error } = await supabase.rpc("admin_reset_all_rewards");
       if (error) throw error;
       toast.success("All reward points have been reset");
+      if (extraSafety) setPendingDoubleConfirm(true);
       await load();
     } catch (err: any) {
       toast.error(err.message ?? "Failed to reset rewards");
@@ -240,6 +265,7 @@ const RewardsControlPanel = () => {
       const { error } = await supabase.rpc("admin_reset_all_pickups");
       if (error) throw error;
       toast.success("All pickups have been deleted");
+      if (extraSafety) setPendingDoubleConfirm(true);
       await load();
     } catch (err: any) {
       toast.error(err.message ?? "Failed to reset pickups");
@@ -296,6 +322,26 @@ const RewardsControlPanel = () => {
             <StatCard label="Total Pickups" value={stats.totalPickups} />
           </div>
 
+          <div className="mt-6 rounded-lg border p-4 flex items-start justify-between gap-4 flex-wrap">
+            <div className="space-y-1">
+              <Label htmlFor="extra-safety" className="font-medium">Extra safety step</Label>
+              <p className="text-xs text-muted-foreground max-w-md">
+                After any successful reset, the next reset will require an additional re-click of the confirm button.
+                {pendingDoubleConfirm && extraSafety && (
+                  <span className="ml-1 font-semibold text-destructive">Armed: next reset needs double confirm.</span>
+                )}
+              </p>
+            </div>
+            <Switch
+              id="extra-safety"
+              checked={extraSafety}
+              onCheckedChange={(v) => {
+                setExtraSafety(v);
+                if (!v) setPendingDoubleConfirm(false);
+              }}
+            />
+          </div>
+
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border p-4">
               <p className="text-sm text-muted-foreground">Last reset</p>
@@ -319,6 +365,7 @@ const RewardsControlPanel = () => {
                 confirmButtonLabel="Reset Rewards"
                 onConfirm={handleResetRewards}
                 disabled={acting}
+                doubleConfirm={extraSafety && pendingDoubleConfirm}
               />
 
               <DangerConfirmDialog

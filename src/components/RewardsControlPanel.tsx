@@ -171,6 +171,8 @@ const ACTION_LABEL: Record<string, { label: string; className: string }> = {
 const RewardsControlPanel = () => {
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
+  const [extraSafety, setExtraSafety] = useState(true);
+  const [pendingDoubleConfirm, setPendingDoubleConfirm] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalPoints: 0,
     totalEarned: 0,

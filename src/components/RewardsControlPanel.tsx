@@ -76,8 +76,8 @@ const DangerConfirmDialog = ({
 
   const buttonLabel = (() => {
     if (cooldown > 0) return `${confirmButtonLabel} (${cooldown}s)`;
-    if (doubleConfirm && !armed) return `${confirmButtonLabel} — click again to confirm`;
-    if (doubleConfirm && armed) return `Click once more to ${confirmButtonLabel.toLowerCase()}`;
+    if (doubleConfirm && !armed) return `${confirmButtonLabel} — click to arm`;
+    if (doubleConfirm && armed) return `Click again to ${confirmButtonLabel.toLowerCase()}`;
     return confirmButtonLabel;
   })();
 

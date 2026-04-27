@@ -322,6 +322,26 @@ const RewardsControlPanel = () => {
             <StatCard label="Total Pickups" value={stats.totalPickups} />
           </div>
 
+          <div className="mt-6 rounded-lg border p-4 flex items-start justify-between gap-4 flex-wrap">
+            <div className="space-y-1">
+              <Label htmlFor="extra-safety" className="font-medium">Extra safety step</Label>
+              <p className="text-xs text-muted-foreground max-w-md">
+                After any successful reset, the next reset will require an additional re-click of the confirm button.
+                {pendingDoubleConfirm && extraSafety && (
+                  <span className="ml-1 font-semibold text-destructive">Armed: next reset needs double confirm.</span>
+                )}
+              </p>
+            </div>
+            <Switch
+              id="extra-safety"
+              checked={extraSafety}
+              onCheckedChange={(v) => {
+                setExtraSafety(v);
+                if (!v) setPendingDoubleConfirm(false);
+              }}
+            />
+          </div>
+
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border p-4">
               <p className="text-sm text-muted-foreground">Last reset</p>
@@ -345,6 +365,7 @@ const RewardsControlPanel = () => {
                 confirmButtonLabel="Reset Rewards"
                 onConfirm={handleResetRewards}
                 disabled={acting}
+                doubleConfirm={extraSafety && pendingDoubleConfirm}
               />
 
               <DangerConfirmDialog

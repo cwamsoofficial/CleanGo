@@ -55,10 +55,9 @@ const AdminLogin = () => {
         if (result?.locked) {
           // Generic message - don't reveal specific details
           setError(result.message || "Too many failed login attempts. Please try again later.");
-        } else if (result?.remaining_attempts) {
-          setError(`Invalid email or password. ${result.remaining_attempts} attempts remaining.`);
         } else {
-          setError("Invalid email or password");
+          // Generic error - never reveal whether account exists or remaining attempts
+          setError("Invalid email or password. Please try again.");
         }
         setLoading(false);
         return;

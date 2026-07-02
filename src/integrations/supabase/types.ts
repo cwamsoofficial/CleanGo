@@ -469,6 +469,10 @@ export type Database = {
         Args: { _enabled: boolean }
         Returns: undefined
       }
+      admin_update_security_settings: {
+        Args: { _settings: Json }
+        Returns: Json
+      }
       award_points: {
         Args: { _description: string; _points: number; _user_id: string }
         Returns: undefined
@@ -517,6 +521,7 @@ export type Database = {
           name: string
         }[]
       }
+      get_security_settings: { Args: never; Returns: Json }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]

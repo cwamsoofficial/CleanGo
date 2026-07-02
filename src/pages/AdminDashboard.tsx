@@ -317,6 +317,10 @@ const AdminDashboard = () => {
           <TabsContent value="security" className="space-y-8 mt-6">
             <SecurityDashboard />
           </TabsContent>
+
+          <TabsContent value="security-settings" className="space-y-8 mt-6">
+            <SecuritySettings />
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>

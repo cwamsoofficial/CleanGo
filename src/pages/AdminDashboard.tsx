@@ -191,6 +191,10 @@ const AdminDashboard = () => {
               Rewards
             </TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="security-settings" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Security Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 mt-6">

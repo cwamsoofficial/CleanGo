@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Users, Trash2, AlertCircle, Award, ClipboardList, Mail } from "lucide-react";
+import { Users, Trash2, AlertCircle, Award, ClipboardList, Mail, Shield } from "lucide-react";
 import SecurityDashboard from "@/components/SecurityDashboard";
+import SecuritySettings from "@/components/SecuritySettings";
 import UserManagement from "@/components/UserManagement";
 import AdminAssignments from "@/components/AdminAssignments";
 import ContactSubmissions from "@/components/ContactSubmissions";
@@ -190,6 +191,10 @@ const AdminDashboard = () => {
               Rewards
             </TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="security-settings" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Security Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 mt-6">
@@ -311,6 +316,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="security" className="space-y-8 mt-6">
             <SecurityDashboard />
+          </TabsContent>
+
+          <TabsContent value="security-settings" className="space-y-8 mt-6">
+            <SecuritySettings />
           </TabsContent>
         </Tabs>
       </div>

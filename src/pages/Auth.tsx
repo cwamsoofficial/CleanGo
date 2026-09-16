@@ -82,25 +82,40 @@ const Auth = () => {
   };
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/dashboard");
-      }
-    });
+    // Detect a password-recovery link (hash or query params) before doing anything else
+    const hash = window.location.hash || "";
+    const search = window.location.search || "";
+    const isRecoveryLink =
+      hash.includes("type=recovery") ||
+      search.includes("type=recovery") ||
+      search.includes("code=");
+
+    if (isRecoveryLink) {
+      setIsPasswordRecovery(true);
+    }
+
+    // Check if user is already logged in (but never bounce away from a recovery flow)
+    if (!isRecoveryLink) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          navigate("/dashboard");
+        }
+      });
+    }
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        navigate("/dashboard");
-      } else if (event === "PASSWORD_RECOVERY") {
+      if (event === "PASSWORD_RECOVERY") {
         setIsPasswordRecovery(true);
+      } else if (event === "SIGNED_IN" && session && !isRecoveryLink) {
+        navigate("/dashboard");
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

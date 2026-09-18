@@ -41,7 +41,7 @@ serve(async (req) => {
     if (!planCode && !amount) throw new Error("Plan code or amount is required");
     logStep("Request received", { planCode, amount });
 
-    const origin = req.headers.get("origin") || "https://cwamso.lovable.app";
+    const origin = req.headers.get("origin") || "https://cleango.lovable.app";
 
     // Build Paystack transaction initialization payload
     const payload: Record<string, unknown> = {

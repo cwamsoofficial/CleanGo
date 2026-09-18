@@ -41,7 +41,7 @@ serve(async (req) => {
     if (!amount) throw new Error("Amount is required");
     logStep("Payment details received", { amount, plan });
 
-    const origin = req.headers.get("origin") || "https://cwamso.lovable.app";
+    const origin = req.headers.get("origin") || "https://cleango.lovable.app";
 
     // Initialize Paystack transaction
     const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
